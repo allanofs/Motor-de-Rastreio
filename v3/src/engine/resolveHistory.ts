@@ -1,13 +1,14 @@
 import type { ExamRecord, Patient } from "../model/patient";
 import type { QualifyingEventSpec } from "../model/content";
 import { temporalRelation } from "../model/dates";
+export type DomainHistory = {
+  knowledge: "known" | "never_performed" | "unknown" | "not_asked";
+  events: ExamRecord[];
+};
 export function resolveDomainHistory(
   patient: Patient,
   topicId: string,
-): {
-  knowledge: "known" | "never_performed" | "unknown" | "not_asked";
-  events: ExamRecord[];
-} {
+): DomainHistory {
   return {
     knowledge: patient.historyKnowledge[topicId] ?? "not_asked",
     events: patient.examHistory.filter((e) => e.topicId === topicId),

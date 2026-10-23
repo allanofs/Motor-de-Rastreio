@@ -48,19 +48,30 @@ export function composeStates(
 export function composeActions(
   rules: RuleDefinition[],
   careSetting: CareSettingContext,
+  scope: { topicId: string; trackId: string },
 ): { actions: EvaluatedAction[]; conflict: boolean } {
   const map = new Map<string, EvaluatedAction>();
   for (const rule of rules)
     for (const a of rule.actions) {
       const existing = map.get(a.actionId);
       if (existing !== undefined) {
-        const { ruleIds: _ids, operational: _op, ...definition } = existing;
+        const {
+          ruleIds: _ids,
+          operational: _op,
+          topicId: _topic,
+          trackId: _track,
+          ...definition
+        } = existing;
         if (JSON.stringify(definition) !== JSON.stringify(a))
           return { actions: [], conflict: true };
         existing.ruleIds = unique([...existing.ruleIds, rule.ruleId]);
         continue;
       }
-      const action: EvaluatedAction = { ...a, ruleIds: [rule.ruleId] };
+      const action: EvaluatedAction = {
+        ...a,
+        ...scope,
+        ruleIds: [rule.ruleId],
+      };
       if (a.resourceId !== undefined) {
         const availability = resourceAvailability(careSetting, a.resourceId);
         action.operational = {

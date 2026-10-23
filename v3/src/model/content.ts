@@ -21,10 +21,28 @@ export const SourceSchema = z.strictObject({
   supersededBy: IdSchema.optional(),
 });
 export type Source = z.infer<typeof SourceSchema>;
+export const EvidenceMetadataSchema = z.strictObject({
+  gradingSystem: z.string().min(1),
+  recommendationStrength: z.string().min(1).optional(),
+  evidenceCertainty: z.string().min(1).optional(),
+  rawGrade: z.string().min(1).optional(),
+  gradeVerified: z.boolean().default(false),
+});
+export type EvidenceMetadata = z.infer<typeof EvidenceMetadataSchema>;
+export const DecisionSupportDefinitionSchema = z.strictObject({
+  considerationId: IdSchema,
+  text: z.string().min(1),
+});
+export const ClinicalReviewSchema = z.strictObject({
+  reviewer: z.string().min(1),
+  reviewedAt: CalendarDateSchema,
+});
 export const SourceRefSchema = z.strictObject({
   sourceId: IdSchema,
   locator: z.string().min(1),
+  evidence: EvidenceMetadataSchema.optional(),
 });
+export type SourceRef = z.infer<typeof SourceRefSchema>;
 export const CriteriaSchema = z
   .strictObject({
     minAge: z.number().int().min(0).max(150).optional(),
@@ -71,6 +89,7 @@ export const RuleDefinitionSchema = z
   .strictObject({
     ruleId: IdSchema,
     topicId: IdSchema,
+    trackId: IdSchema,
     strategyGroupId: IdSchema.optional(),
     lifecycleStatus: z.enum(["draft", "active", "deprecated", "withdrawn"]),
     reviewStatus: z.enum([
@@ -85,6 +104,8 @@ export const RuleDefinitionSchema = z
       "follow_up",
       "prevention",
       "technical",
+      "monitoring",
+      "surveillance",
     ]),
     stance: z.enum([
       "recommend",
@@ -113,6 +134,14 @@ export const RuleDefinitionSchema = z
     ]),
     qualifyingEventSpec: QualifyingEventSpecSchema.optional(),
     scheduleSpec: CalendarDurationSchema.optional(),
+    noQualifyingEventBehavior: z
+      .strictObject({
+        neverPerformed: z
+          .enum(["indeterminate", "due"])
+          .default("indeterminate"),
+      })
+      .optional(),
+    decisionSupport: z.array(DecisionSupportDefinitionSchema).default([]),
     supersedes: z.array(IdSchema),
     excludes: z.array(IdSchema),
     compositionPolicy: z
@@ -129,9 +158,44 @@ export const RuleDefinitionSchema = z
     governance: z.strictObject({
       author: z.string().min(1),
       rationale: z.string().min(1),
+      reviews: z.array(ClinicalReviewSchema).default([]),
     }),
   })
   .superRefine((r, ctx) => {
+    const reviewers = new Set(
+      r.governance.reviews.map((review) => review.reviewer),
+    );
+    if (
+      r.lifecycleStatus === "active" &&
+      !["reviewed_by_1", "reviewed_by_2"].includes(r.reviewStatus)
+    )
+      ctx.addIssue({
+        code: "custom",
+        message:
+          "Active rules require clinical interpretation review, not only source verification",
+      });
+    if (
+      (r.reviewStatus === "reviewed_by_1" && reviewers.size < 1) ||
+      (r.reviewStatus === "reviewed_by_2" && reviewers.size < 2)
+    )
+      ctx.addIssue({
+        code: "custom",
+        message: "Review status requires distinct reviewer records with dates",
+      });
+    if (reviewers.size !== r.governance.reviews.length)
+      ctx.addIssue({
+        code: "custom",
+        message: "Duplicate reviewer cannot count as multiple reviews",
+      });
+    if (
+      r.noQualifyingEventBehavior !== undefined &&
+      (r.scheduleSpec === undefined || r.qualifyingEventSpec === undefined)
+    )
+      ctx.addIssue({
+        code: "custom",
+        message:
+          "No-qualifier behavior requires a declared history-dependent schedule",
+      });
     if (r.scheduleSpec !== undefined && r.outcome !== "Due")
       ctx.addIssue({
         code: "custom",
@@ -175,7 +239,14 @@ export const PolicySchema = z.strictObject({
   family: z.enum(["sus_oficial", "br_ampliado", "internacional", "technical"]),
   topicIds: z.array(IdSchema).min(1),
   ruleIds: z.array(IdSchema),
-  primaryStrategies: z.record(IdSchema, IdSchema),
+  primaryStrategies: z.array(
+    z.strictObject({
+      topicId: IdSchema,
+      trackId: IdSchema,
+      strategyGroupId: IdSchema,
+      ruleId: IdSchema,
+    }),
+  ),
 });
 export type Policy = z.infer<typeof PolicySchema>;
 export const CareSettingContextSchema = z.strictObject({

@@ -1,12 +1,12 @@
 import type { RuleDefinition } from "../model/content";
-import type { ExamRecord } from "../model/patient";
+import type { DomainHistory } from "./resolveHistory";
 import type { CalendarDate } from "../model/dates";
 import { dueWindow, scheduleStatus, temporalRelation } from "../model/dates";
 import type { PathwayState, ScheduleInformation } from "../model/evaluation";
 import { qualifyingEvents } from "./resolveHistory";
 export function calculateSchedule(
   rule: RuleDefinition,
-  events: ExamRecord[],
+  history: DomainHistory,
   asOf: CalendarDate,
 ): { state: PathwayState; schedule: ScheduleInformation[]; missing: string[] } {
   if (rule.computability !== "computable")
@@ -22,7 +22,16 @@ export function calculateSchedule(
     rule.scheduleSpec !== undefined &&
     rule.qualifyingEventSpec !== undefined
   ) {
-    const qualifying = qualifyingEvents(events, rule.qualifyingEventSpec);
+    const qualifying = qualifyingEvents(
+      history.events,
+      rule.qualifyingEventSpec,
+    );
+    if (
+      qualifying.length === 0 &&
+      history.knowledge === "never_performed" &&
+      rule.noQualifyingEventBehavior?.neverPerformed === "due"
+    )
+      return { state: { status: "Due" }, schedule: [], missing: [] };
     if (qualifying.length === 0)
       return {
         state: {

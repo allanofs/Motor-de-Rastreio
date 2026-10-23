@@ -5,8 +5,10 @@ export function buildConsultationPlan(
   return {
     topics,
     actions: topics.flatMap((t) => t.actions),
-    requiresAttention: topics.some(
-      (t) => !["Current", "NotApplicable"].includes(t.pathwayState.status),
+    requiresAttention: topics.some((t) =>
+      t.tracks.some(
+        (track) => !["Current", "NotApplicable"].includes(track.state.status),
+      ),
     ),
   };
 }

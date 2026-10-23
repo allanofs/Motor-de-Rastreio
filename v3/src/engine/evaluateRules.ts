@@ -1,5 +1,6 @@
 import type { Criteria, RuleDefinition } from "../model/content";
 import type { Patient } from "../model/patient";
+import { factAppliesToTopic } from "./facts";
 import { unique } from "../model/common";
 export function criteriaMatch(
   criteria: Criteria,
@@ -18,7 +19,8 @@ export function criteriaMatch(
   }
   for (const required of criteria.facts) {
     const facts = patient.facts.filter(
-      (f) => f.topicId === topicId && f.conceptId === required.conceptId,
+      (f) =>
+        factAppliesToTopic(f, topicId) && f.conceptId === required.conceptId,
     );
     if (facts.length === 0) {
       missing = true;
@@ -74,7 +76,9 @@ export function evaluateApplicableRules(
     ]);
     factsUsed.push(
       ...patient.facts
-        .filter((f) => f.topicId === rule.topicId && used.has(f.conceptId))
+        .filter(
+          (f) => factAppliesToTopic(f, rule.topicId) && used.has(f.conceptId),
+        )
         .map((f) => f.id),
     );
     const population = criteriaMatch(rule.population, patient, rule.topicId);
@@ -93,7 +97,7 @@ export function evaluateApplicableRules(
       (concept) =>
         !patient.facts.some(
           (f) =>
-            f.topicId === rule.topicId &&
+            factAppliesToTopic(f, rule.topicId) &&
             f.conceptId === concept &&
             f.presence !== "unknown",
         ),

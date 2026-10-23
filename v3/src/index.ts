@@ -16,3 +16,6 @@ export * from "./engine/trace";
 export * from "./engine/buildPlan";
 export * from "./engine/safeEvaluate";
 export * from "./engine/evaluatePatient";
+
+export * from "./engine/facts";
+export * from "./engine/extensions";

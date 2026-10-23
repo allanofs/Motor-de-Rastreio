@@ -30,10 +30,15 @@ export function resolveStrategies(
   );
   for (const group of groups) {
     const candidates = active.filter((r) => r.strategyGroupId === group);
-    const selected = policy.primaryStrategies[group];
+    const selected = policy.primaryStrategies.find(
+      (s) =>
+        s.topicId === candidates[0]?.topicId &&
+        s.trackId === candidates[0]?.trackId &&
+        s.strategyGroupId === group,
+    )?.ruleId;
     if (selected !== undefined) {
       if (!candidates.some((r) => r.ruleId === selected)) {
-        conflicts.push(...candidates.map((r) => r.ruleId));
+        conflicts.push(selected, ...candidates.map((r) => r.ruleId));
         continue;
       }
       active = active.filter((r) => {

@@ -21,8 +21,9 @@ export const source = SourceSchema.parse({
 export const rule = RuleDefinitionSchema.parse({
   ruleId: "r1",
   topicId: "technical-a",
+  trackId: "primary",
   lifecycleStatus: "active",
-  reviewStatus: "source_verified",
+  reviewStatus: "reviewed_by_1",
   clinicalRole: "technical",
   stance: "recommend",
   computability: "computable",
@@ -37,7 +38,16 @@ export const rule = RuleDefinitionSchema.parse({
   excludes: [],
   guardrails: [],
   sourceRefs: [{ sourceId: source.sourceId, locator: "technical assertion 1" }],
-  governance: { author: "technical-tests", rationale: "Not a clinical rule" },
+  governance: {
+    author: "technical-tests",
+    rationale: "Not a clinical rule",
+    reviews: [
+      {
+        reviewer: "fictional-test-reviewer (not a medical review)",
+        reviewedAt: day("2026-01-01"),
+      },
+    ],
+  },
 });
 export const policy = PolicySchema.parse({
   policyId: "technical-only",
@@ -45,10 +55,10 @@ export const policy = PolicySchema.parse({
   family: "technical",
   topicIds: ["technical-a"],
   ruleIds: ["r1"],
-  primaryStrategies: {},
+  primaryStrategies: [],
 });
 export const bundle = RulesetSchema.parse({
-  rulesetVersion: "technical-fixture-1",
+  rulesetVersion: "technical-fixture-2",
   rules: [rule],
   sources: [source],
   policies: [policy],

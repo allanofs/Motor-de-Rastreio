@@ -1,6 +1,10 @@
 import { z } from "zod";
 import { IdSchema } from "./common";
-import { ActionDefinitionSchema } from "./content";
+import {
+  ActionDefinitionSchema,
+  SourceRefSchema,
+  DecisionSupportDefinitionSchema,
+} from "./content";
 import { CalendarDateSchema, DateIntervalSchema } from "./dates";
 export const PathwayStateSchema = z.discriminatedUnion("status", [
   z.strictObject({
@@ -50,14 +54,21 @@ export const DecisionTraceSchema = z.strictObject({
   ),
   outputs: z.array(z.string()),
   sourceIds: z.array(IdSchema),
-  sourceRefs: z.array(
-    z.strictObject({ sourceId: IdSchema, locator: z.string() }),
+  sourceRefs: z.array(SourceRefSchema),
+  extensions: z.array(
+    z.strictObject({
+      resolverId: IdSchema,
+      version: z.string().min(1),
+      trackId: IdSchema,
+    }),
   ),
   stages: z.array(z.string()),
   issues: z.array(z.string()),
 });
 export type DecisionTrace = z.infer<typeof DecisionTraceSchema>;
 export const EvaluatedActionSchema = ActionDefinitionSchema.extend({
+  topicId: IdSchema,
+  trackId: IdSchema,
   ruleIds: z.array(IdSchema).min(1),
   operational: z
     .strictObject({
@@ -79,13 +90,82 @@ export const ScheduleInformationSchema = z.strictObject({
   status: z.enum(["Current", "Due", "Indeterminate"]),
 });
 export type ScheduleInformation = z.infer<typeof ScheduleInformationSchema>;
+export const EvaluatedDecisionSupportSchema =
+  DecisionSupportDefinitionSchema.extend({ ruleIds: z.array(IdSchema).min(1) });
+export type EvaluatedDecisionSupport = z.infer<
+  typeof EvaluatedDecisionSupportSchema
+>;
+export const TrackEvaluationSchema = z
+  .strictObject({
+    trackId: IdSchema,
+    completeness: z.enum(["complete", "incomplete"]),
+    state: PathwayStateSchema,
+    activeRuleIds: z.array(IdSchema),
+    primaryStrategyRuleId: IdSchema.optional(),
+    actions: z.array(EvaluatedActionSchema),
+    decisionSupport: z.array(EvaluatedDecisionSupportSchema),
+    missingData: z.array(z.string()),
+    guardrails: z.array(z.string()),
+    scheduleInformation: z.array(ScheduleInformationSchema),
+    suppressedRules: z.array(
+      z.strictObject({ ruleId: IdSchema, reason: z.string() }),
+    ),
+    trace: DecisionTraceSchema,
+  })
+  .superRefine((t, ctx) => {
+    const state = t.state;
+    if (
+      state.status === "Current" &&
+      (!t.activeRuleIds.includes(state.ruleId) ||
+        !t.scheduleInformation.some(
+          (s) =>
+            s.status === "Current" &&
+            s.anchorEventId === state.anchorEventId &&
+            s.ruleId === state.ruleId,
+        ))
+    )
+      ctx.addIssue({
+        code: "custom",
+        message:
+          "Current requires active rule and positive scheduling evidence",
+      });
+    if (
+      [
+        "ComputationError",
+        "Conflict",
+        "NotApplicable",
+        "ClinicalReviewRequired",
+        "Indeterminate",
+        "Current",
+      ].includes(state.status) &&
+      t.actions.length > 0
+    )
+      ctx.addIssue({
+        code: "custom",
+        message: "Abstention/current status cannot emit automatic actions",
+      });
+    if (
+      t.actions.some(
+        (a) =>
+          a.trackId !== t.trackId ||
+          a.ruleIds.some((id) => !t.activeRuleIds.includes(id)),
+      ) ||
+      t.decisionSupport.some((s) =>
+        s.ruleIds.some((id) => !t.activeRuleIds.includes(id)),
+      )
+    )
+      ctx.addIssue({
+        code: "custom",
+        message: "Inactive or foreign-track rule emitted output",
+      });
+  });
+export type TrackEvaluation = z.infer<typeof TrackEvaluationSchema>;
 export const TopicEvaluationSchema = z
   .strictObject({
     topicId: IdSchema,
+    tracks: z.array(TrackEvaluationSchema).min(1),
     completeness: z.enum(["complete", "incomplete"]),
-    pathwayState: PathwayStateSchema,
     activeRuleIds: z.array(IdSchema),
-    primaryStrategyRuleId: IdSchema.optional(),
     actions: z.array(EvaluatedActionSchema),
     missingData: z.array(z.string()),
     guardrails: z.array(z.string()),
@@ -96,41 +176,28 @@ export const TopicEvaluationSchema = z
     trace: DecisionTraceSchema,
   })
   .superRefine((t, ctx) => {
-    const state = t.pathwayState;
     if (
-      state.status === "Current" &&
-      !t.scheduleInformation.some(
-        (s) =>
-          s.status === "Current" &&
-          s.anchorEventId === state.anchorEventId &&
-          s.ruleId === state.ruleId,
-      )
+      new Set(t.tracks.map((track) => track.trackId)).size !== t.tracks.length
+    )
+      ctx.addIssue({ code: "custom", message: "Duplicate track identity" });
+    if (
+      JSON.stringify(t.actions) !==
+        JSON.stringify(t.tracks.flatMap((track) => track.actions)) ||
+      t.actions.some((a) => a.topicId !== t.topicId)
     )
       ctx.addIssue({
         code: "custom",
-        message: "Current requires positive scheduling evidence",
+        message: "Topic actions must be derived from its tracks",
       });
-    if (
-      [
-        "ComputationError",
-        "Conflict",
-        "NotApplicable",
-        "ClinicalReviewRequired",
-      ].includes(t.pathwayState.status) &&
-      t.actions.length > 0
+    const completeness = t.tracks.some(
+      (track) => track.completeness === "incomplete",
     )
+      ? "incomplete"
+      : "complete";
+    if (t.completeness !== completeness)
       ctx.addIssue({
         code: "custom",
-        message: "Abstention cannot emit automatic actions",
-      });
-    if (
-      t.actions.some((a) =>
-        a.ruleIds.some((id) => !t.activeRuleIds.includes(id)),
-      )
-    )
-      ctx.addIssue({
-        code: "custom",
-        message: "Inactive rule emitted an action",
+        message: "Topic completeness must be derived from tracks",
       });
   });
 export type TopicEvaluation = z.infer<typeof TopicEvaluationSchema>;

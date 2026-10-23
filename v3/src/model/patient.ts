@@ -4,7 +4,7 @@ import { PartialCalendarDateSchema } from "./dates";
 const factBase = {
   id: IdSchema,
   conceptId: IdSchema,
-  topicId: IdSchema,
+  topicId: IdSchema.optional(),
   category: z.enum([
     "condition",
     "symptom",

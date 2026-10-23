@@ -8,7 +8,10 @@ import { isCertainlyAfter } from "../src/engine/resolveHistory";
 import { PatientSchema, ExamRecordSchema } from "../src/model/patient";
 import { RulesetSchema } from "../src/model/content";
 import type { RuleDefinition, Ruleset } from "../src/model/content";
-import { TopicEvaluationSchema } from "../src/model/evaluation";
+import {
+  TopicEvaluationSchema,
+  TrackEvaluationSchema,
+} from "../src/model/evaluation";
 import {
   parseCalendarDate as day,
   parsePartialDate as partial,
@@ -27,8 +30,8 @@ const run = (
     asOf: date,
     careSetting: { resources },
   });
-const topic = (p: unknown = patient, b: Ruleset = bundle, date = asOf) =>
-  run(p, b, date).plan.topics[0]!;
+const track = (p: unknown = patient, b: Ruleset = bundle, date = asOf) =>
+  run(p, b, date).plan.topics[0]!.tracks[0]!;
 const fact = (id: string, presence: "yes" | "no" | "unknown" = "yes") => ({
   id,
   topicId: "technical-a",
@@ -145,12 +148,11 @@ describe("input and missingness invariants", () => {
       },
     ]);
     expect(
-      topic({ ...patient, facts: [{ ...fact("risk", "unknown") }] }, b)
-        .pathwayState.status,
+      track({ ...patient, facts: [{ ...fact("risk", "unknown") }] }, b).state
+        .status,
     ).toBe("Indeterminate");
     expect(
-      topic({ ...patient, facts: [{ ...fact("risk", "no") }] }, b).pathwayState
-        .status,
+      track({ ...patient, facts: [{ ...fact("risk", "no") }] }, b).state.status,
     ).toBe("Due");
   });
   it("distinguishes missing history knowledge from explicit unknown and never", () => {
@@ -168,44 +170,44 @@ describe("input and missingness invariants", () => {
   });
   it("refuses contradictory history", () =>
     expect(
-      topic({
+      track({
         ...patient,
         historyKnowledge: { "technical-a": "never_performed" },
         examHistory: [event("e")],
-      }).pathwayState.status,
+      }).state.status,
     ).toBe("Indeterminate"));
   it.each([-1, 3.2, 151, Infinity, "40"])(
     "invalid age %s never emits recommendations",
     (age) => {
-      const t = topic({ ...patient, context: { ageYears: age } });
-      expect(t.pathwayState.status).toBe("ComputationError");
+      const t = track({ ...patient, context: { ageYears: age } });
+      expect(t.state.status).toBe("ComputationError");
       expect(t.actions).toEqual([]);
     },
   );
   it("detects duplicate stable IDs", () =>
     expect(
-      topic({ ...patient, facts: [fact("same")], examHistory: [event("same")] })
+      track({ ...patient, facts: [fact("same")], examHistory: [event("same")] })
         .missingData,
     ).toContain("duplicate_patient_event_id"));
   it("rejects contradictory facts without picking the last typed observation", () =>
     expect(
-      topic({
+      track({
         ...patient,
         facts: [fact("x"), { ...fact("x", "no"), id: "other", conceptId: "x" }],
-      }).pathwayState.status,
+      }).state.status,
     ).toBe("Indeterminate"));
   it("derives age only from complete birth dates and checks inconsistency", () => {
     const b = withRules([{ ...rule, population: { facts: [], minAge: 26 } }]);
     expect(
-      topic({ ...patient, context: { birthDate: partial("2000-10-23") } }, b)
-        .pathwayState.status,
+      track({ ...patient, context: { birthDate: partial("2000-10-23") } }, b)
+        .state.status,
     ).toBe("Due");
     expect(
-      topic({ ...patient, context: { birthDate: partial("2000") } }, b)
-        .pathwayState.status,
+      track({ ...patient, context: { birthDate: partial("2000") } }, b).state
+        .status,
     ).toBe("Indeterminate");
     expect(
-      topic(
+      track(
         {
           ...patient,
           context: { birthDate: partial("2000-10-23"), ageYears: 40 },
@@ -218,13 +220,13 @@ describe("input and missingness invariants", () => {
 
 describe("temporal evidence and scheduling", () => {
   it("never emits Current without a qualifying event", () => {
-    const t = topic(patient, scheduleBundle);
-    expect(t.pathwayState.status).toBe("Indeterminate");
+    const t = track(patient, scheduleBundle);
+    expect(t.state.status).toBe("Indeterminate");
     expect(t.actions).toEqual([]);
   });
   it("emits Current with a positive anchor and source locator", () => {
-    const t = topic({ ...patient, examHistory: [event("e")] }, scheduleBundle);
-    expect(t.pathwayState).toEqual({
+    const t = track({ ...patient, examHistory: [event("e")] }, scheduleBundle);
+    expect(t.state).toEqual({
       status: "Current",
       anchorEventId: "e",
       ruleId: "r1",
@@ -236,13 +238,13 @@ describe("temporal evidence and scheduling", () => {
     "future or partly future %s never qualifies",
     (date) =>
       expect(
-        topic({ ...patient, examHistory: [event("e", date)] }, scheduleBundle)
-          .pathwayState.status,
+        track({ ...patient, examHistory: [event("e", date)] }, scheduleBundle)
+          .state.status,
       ).toBe("Indeterminate"),
   );
   it("rejects events before birth", () =>
     expect(
-      topic(
+      track(
         {
           ...patient,
           context: { birthDate: partial("2000-01-01") },
@@ -253,56 +255,56 @@ describe("temporal evidence and scheduling", () => {
     ).toContain("e:before_birth"));
   it.each(["inadequate", "unknown"] as const)("rejects %s quality", (quality) =>
     expect(
-      topic(
+      track(
         { ...patient, examHistory: [{ ...event("e"), quality }] },
         scheduleBundle,
-      ).pathwayState.status,
+      ).state.status,
     ).toBe("Indeterminate"),
   );
   it("rejects incomplete or unknown completeness", () => {
     for (const completeness of ["incomplete", "unknown"])
       expect(
-        topic(
+        track(
           { ...patient, examHistory: [{ ...event("e"), completeness }] },
           scheduleBundle,
-        ).pathwayState.status,
+        ).state.status,
       ).toBe("Indeterminate");
   });
   it("rejects an unaccepted result", () =>
     expect(
-      topic(
+      track(
         { ...patient, examHistory: [event("e", "2026-01-01", "unaccepted")] },
         scheduleBundle,
-      ).pathwayState.status,
+      ).state.status,
     ).toBe("Indeterminate"));
   it("rejects pending results as qualifying evidence", () =>
     expect(
-      topic(
+      track(
         {
           ...patient,
           examHistory: [{ ...event("e"), result: { status: "pending" } }],
         },
         scheduleBundle,
-      ).pathwayState.status,
+      ).state.status,
     ).toBe("Indeterminate"));
   it("holds partial date boundary as indeterminate", () =>
     expect(
-      topic({ ...patient, examHistory: [event("e", "2025")] }, scheduleBundle)
-        .pathwayState.status,
+      track({ ...patient, examHistory: [event("e", "2025")] }, scheduleBundle)
+        .state.status,
     ).toBe("Indeterminate"));
   it("selects latest dated event rather than last input", () =>
     expect(
-      topic(
+      track(
         {
           ...patient,
           examHistory: [event("new", "2026-01-01"), event("old", "2024-01-01")],
         },
         scheduleBundle,
-      ).pathwayState,
+      ).state,
     ).toEqual({ status: "Current", anchorEventId: "new", ruleId: "r1" }));
   it("does not infer latest order from overlapping partial dates", () =>
     expect(
-      topic(
+      track(
         {
           ...patient,
           examHistory: [event("a", "2025"), event("b", "2025-07")],
@@ -314,17 +316,17 @@ describe("temporal evidence and scheduling", () => {
     const e = event("e");
     if (e.status === "performed") delete e.date;
     expect(
-      topic({ ...patient, examHistory: [e] }, scheduleBundle).missingData,
+      track({ ...patient, examHistory: [e] }, scheduleBundle).missingData,
     ).toContain("event_date:r1");
   });
   it("changes state solely through explicit asOf", () => {
     const p = { ...patient, examHistory: [event("e")] };
-    expect(
-      topic(p, scheduleBundle, day("2026-12-31")).pathwayState.status,
-    ).toBe("Current");
-    expect(
-      topic(p, scheduleBundle, day("2027-01-01")).pathwayState.status,
-    ).toBe("Due");
+    expect(track(p, scheduleBundle, day("2026-12-31")).state.status).toBe(
+      "Current",
+    );
+    expect(track(p, scheduleBundle, day("2027-01-01")).state.status).toBe(
+      "Due",
+    );
   });
   it("distinguishes later, earlier, same-day and uncertain event order", () => {
     expect(
@@ -354,7 +356,7 @@ describe("selection and action composition", () => {
         ],
       },
     ]);
-    expect(topic(patient, b).actions).toHaveLength(2);
+    expect(track(patient, b).actions).toHaveLength(2);
   });
   it("suppressed rule never emits active action", () => {
     const b = withRules([
@@ -366,7 +368,7 @@ describe("selection and action composition", () => {
         actions: [{ actionId: "a2", kind: "information", text: "Replacement" }],
       },
     ]);
-    const t = topic(patient, b);
+    const t = track(patient, b);
     expect(t.activeRuleIds).toEqual(["r2"]);
     expect(t.actions.map((a) => a.actionId)).toEqual(["a2"]);
     expect(t.suppressedRules).toContainEqual({
@@ -376,7 +378,7 @@ describe("selection and action composition", () => {
   });
   it("does not let inapplicable superseder suppress a rule", () =>
     expect(
-      topic(
+      track(
         patient,
         withRules([
           rule,
@@ -390,18 +392,18 @@ describe("selection and action composition", () => {
       ).activeRuleIds,
     ).toEqual(["r1"]));
   it("does not silently choose exclusive strategies", () => {
-    const t = topic(
+    const t = track(
       patient,
       withRules([
         { ...rule, strategyGroupId: "g" },
         { ...rule, ruleId: "r2", strategyGroupId: "g" },
       ]),
     );
-    expect(t.pathwayState.status).toBe("Conflict");
+    expect(t.state.status).toBe("Conflict");
     expect(t.actions).toEqual([]);
   });
   it("uses policy-curated strategy and leaves compatible rules active", () => {
-    const t = topic(
+    const t = track(
       patient,
       withRules(
         [
@@ -415,7 +417,16 @@ describe("selection and action composition", () => {
             ],
           },
         ],
-        { primaryStrategies: { g: "r2" } },
+        {
+          primaryStrategies: [
+            {
+              topicId: "technical-a",
+              trackId: "primary",
+              strategyGroupId: "g",
+              ruleId: "r2",
+            },
+          ],
+        },
       ),
     );
     expect(t.activeRuleIds).toEqual(["r2", "r3"]);
@@ -424,37 +435,37 @@ describe("selection and action composition", () => {
   });
   it("reports broken exclusion invariant as a conflict", () =>
     expect(
-      topic(
+      track(
         patient,
         withRules([
           { ...rule, excludes: ["r2"] },
           { ...rule, ruleId: "r2" },
         ]),
-      ).pathwayState.status,
+      ).state.status,
     ).toBe("Conflict"));
   it("does not pick a more intense interval without domain semantics", () =>
     expect(
-      topic(
+      track(
         patient,
         withRules([{ ...rule, compositionPolicy: "choose_shorter_interval" }]),
-      ).pathwayState.status,
+      ).state.status,
     ).toBe("ClinicalReviewRequired"));
   it("does not pick incompatible domain states", () => {
-    const t = topic(
+    const t = track(
       patient,
       withRules([rule, { ...rule, ruleId: "r2", outcome: "InFollowUp" }]),
     );
-    expect(t.pathwayState.status).toBe("Conflict");
+    expect(t.state.status).toBe("Conflict");
     expect(t.actions).toEqual([]);
   });
   it("deduplicates identical actions with all supporting rule IDs", () =>
     expect(
-      topic(patient, withRules([rule, { ...rule, ruleId: "r2" }])).actions[0]
+      track(patient, withRules([rule, { ...rule, ruleId: "r2" }])).actions[0]
         ?.ruleIds,
     ).toEqual(["r1", "r2"]));
   it("abstains on contradicting definitions for the same action ID", () =>
     expect(
-      topic(
+      track(
         patient,
         withRules([
           rule,
@@ -466,14 +477,14 @@ describe("selection and action composition", () => {
             ],
           },
         ]),
-      ).pathwayState.status,
+      ).state.status,
     ).toBe("Conflict"));
   it("keeps clinical judgment distinct from missing information and error", () => {
-    const t = topic(
+    const t = track(
       patient,
       withRules([{ ...rule, computability: "clinician_judgment_required" }]),
     );
-    expect(t.pathwayState.status).toBe("ClinicalReviewRequired");
+    expect(t.state.status).toBe("ClinicalReviewRequired");
     expect(t.missingData).toEqual([]);
     expect(t.actions).toEqual([]);
   });
@@ -520,7 +531,7 @@ describe("safe failure and determinism", () => {
         throw new Error("sensitive details");
       },
     );
-    expect(result.pathwayState.status).toBe("ComputationError");
+    expect(result.tracks[0]!.state.status).toBe("ComputationError");
     expect(JSON.stringify(result)).not.toContain("sensitive details");
     expect(result.actions).toEqual([]);
   });
@@ -530,7 +541,7 @@ describe("safe failure and determinism", () => {
       { ...rule, topicId: "technical-b", ruleId: "r2" },
     ]);
     const result = run({ ...patient, examHistory: [event("e")] }, b);
-    expect(result.plan.topics.map((t) => t.pathwayState.status)).toEqual([
+    expect(result.plan.topics.map((t) => t.tracks[0]!.state.status)).toEqual([
       "ComputationError",
       "Due",
     ]);
@@ -545,15 +556,15 @@ describe("safe failure and determinism", () => {
       run(
         { ...patient, examHistory: [event("future", "2027")] },
         b,
-      ).plan.topics.map((t) => t.pathwayState.status),
+      ).plan.topics.map((t) => t.tracks[0]!.state.status),
     ).toEqual(["Indeterminate", "Due"]);
   });
   it("rejects inactive source before any action", () => {
-    const t = topic(patient, {
+    const t = track(patient, {
       ...bundle,
       sources: bundle.sources.map((s) => ({ ...s, documentStatus: "draft" })),
     });
-    expect(t.pathwayState.status).toBe("ComputationError");
+    expect(t.state.status).toBe("ComputationError");
     expect(t.actions).toEqual([]);
   });
   it("refuses unknown policy without implicit fallback", () =>
@@ -636,18 +647,20 @@ describe("safe failure and determinism", () => {
     ).toEqual(run(patient, b));
   });
   it("validates final topic output and records all pipeline stages", () => {
-    const t = topic();
-    expect(TopicEvaluationSchema.safeParse(t).success).toBe(true);
+    const t = track();
+    expect(TopicEvaluationSchema.safeParse(run().plan.topics[0]).success).toBe(
+      true,
+    );
     expect(t.trace.stages).toHaveLength(13);
     expect(t.trace.engineVersion).not.toBe(t.trace.rulesetVersion);
   });
   it("does not label an empty policy as all clear", () => {
-    const t = topic(patient, {
+    const t = track(patient, {
       ...bundle,
       rules: [],
       policies: [{ ...policy, ruleIds: [] }],
     });
-    expect(t.pathwayState.status).toBe("ClinicalReviewRequired");
+    expect(t.state.status).toBe("ClinicalReviewRequired");
     expect(
       run(patient, {
         ...bundle,
@@ -665,11 +678,11 @@ describe("safe failure and determinism", () => {
       spy.mockRestore();
     }
   });
-  it("cannot construct a Current topic without scheduling evidence", () =>
+  it("cannot construct a Current track without scheduling evidence", () =>
     expect(
-      TopicEvaluationSchema.safeParse({
-        ...topic(),
-        pathwayState: {
+      TrackEvaluationSchema.safeParse({
+        ...track(),
+        state: {
           status: "Current",
           anchorEventId: "invented",
           ruleId: "r1",
@@ -686,7 +699,7 @@ describe("schema isolation and input boundaries", () => {
     ]);
     const t = run({ ...patient, facts: [{ ...fact("f"), presence: false }] }, b)
       .plan.topics;
-    expect(t.map((x) => x.pathwayState.status)).toEqual([
+    expect(t.map((x) => x.tracks[0]!.state.status)).toEqual([
       "ComputationError",
       "Due",
     ]);
@@ -702,21 +715,21 @@ describe("schema isolation and input boundaries", () => {
       policyId: policy.policyId,
       ruleset: { ...b, rules: [{ ...rule, stance: "invalid" }, b.rules[1]] },
     });
-    expect(result.plan.topics.map((t) => t.pathwayState.status)).toEqual([
+    expect(result.plan.topics.map((t) => t.tracks[0]!.state.status)).toEqual([
       "ComputationError",
       "Due",
     ]);
   });
   it("refuses ghost-field UI metadata with an ambiguous truthy value", () =>
     expect(
-      topic({
+      track({
         ...patient,
         facts: [{ ...fact("f"), _ui: { enabled: "false" } }],
-      }).pathwayState.status,
+      }).state.status,
     ).toBe("ComputationError"));
   it("keeps missing criterion values indeterminate", () =>
     expect(
-      topic(
+      track(
         { ...patient, facts: [fact("f")] },
         withRules([
           {
@@ -726,12 +739,12 @@ describe("schema isolation and input boundaries", () => {
             },
           },
         ]),
-      ).pathwayState.status,
+      ).state.status,
     ).toBe("Indeterminate"));
   it("does not call inactive-only content NotApplicable", () =>
     expect(
-      topic(patient, withRules([{ ...rule, lifecycleStatus: "draft" }]))
-        .pathwayState.status,
+      track(patient, withRules([{ ...rule, lifecycleStatus: "draft" }])).state
+        .status,
     ).toBe("ClinicalReviewRequired"));
   it.each([
     [39, "NotApplicable"],
@@ -739,10 +752,10 @@ describe("schema isolation and input boundaries", () => {
     [41, "Due"],
   ] as const)("synthetic lower age boundary %s -> %s", (age, status) =>
     expect(
-      topic(
+      track(
         { ...patient, context: { ageYears: age } },
         withRules([{ ...rule, population: { facts: [], minAge: 40 } }]),
-      ).pathwayState.status,
+      ).state.status,
     ).toBe(status),
   );
   it("isolates missing source content to the referencing topic", () => {
@@ -756,7 +769,7 @@ describe("schema isolation and input boundaries", () => {
       },
     ]);
     expect(
-      run(patient, b).plan.topics.map((t) => t.pathwayState.status),
+      run(patient, b).plan.topics.map((t) => t.tracks[0]!.state.status),
     ).toEqual(["Due", "ComputationError"]);
   });
 });

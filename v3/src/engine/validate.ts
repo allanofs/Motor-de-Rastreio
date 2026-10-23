@@ -1,3 +1,4 @@
+import { factAppliesToTopic } from "./facts";
 import type { Patient } from "../model/patient";
 import { PatientSchema } from "../model/patient";
 import type { CalendarDate } from "../model/dates";
@@ -30,7 +31,7 @@ export function semanticIssues(
     )
       issues.push("age_birth_date_mismatch");
   }
-  for (const f of patient.facts.filter((f) => f.topicId === topicId))
+  for (const f of patient.facts.filter((f) => factAppliesToTopic(f, topicId)))
     if (f.effectiveDate !== undefined)
       issues.push(
         ...validateHistoricalDate(f.effectiveDate, asOf, birth).map(
@@ -52,7 +53,7 @@ export function semanticIssues(
     issues.push("contradictory_history_knowledge");
   // No clinical recency rule exists yet to resolve contradictory observations of one concept.
   const groups = new Map<string, Set<string>>();
-  for (const f of patient.facts.filter((f) => f.topicId === topicId)) {
+  for (const f of patient.facts.filter((f) => factAppliesToTopic(f, topicId))) {
     const values = groups.get(f.conceptId) ?? new Set<string>();
     values.add(JSON.stringify([f.presence, "value" in f ? f.value : null]));
     groups.set(f.conceptId, values);

@@ -1,6 +1,6 @@
 import type { CalendarDate } from "../model/dates";
 import type { DecisionTrace } from "../model/evaluation";
-export const ENGINE_VERSION = "3.0.0-alpha.1";
+export const ENGINE_VERSION = "3.0.0-alpha.2";
 export const PIPELINE_STAGES = [
   "sanitize_prune",
   "schema_validation",
@@ -33,6 +33,7 @@ export function createTrace(
     outputs: [],
     sourceIds: [],
     sourceRefs: [],
+    extensions: [],
     stages: [],
     issues: [],
   };

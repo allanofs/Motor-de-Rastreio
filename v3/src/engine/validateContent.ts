@@ -38,7 +38,10 @@ export function contentIssues(
       "action_id",
     );
     for (const id of [...r.supersedes, ...r.excludes]) {
-      if (byId.get(id)?.topicId !== topicId)
+      if (
+        byId.get(id)?.topicId !== topicId ||
+        byId.get(id)?.trackId !== r.trackId
+      )
         issues.push(`invalid_rule_reference:${r.ruleId}:${id}`);
       if (id === r.ruleId) issues.push(`self_reference:${id}`);
     }
@@ -51,6 +54,13 @@ export function contentIssues(
       )
         issues.push(`non_final_source:${ref.sourceId}`);
     }
+    if (
+      r.lifecycleStatus === "active" &&
+      (!["reviewed_by_1", "reviewed_by_2"].includes(r.reviewStatus) ||
+        new Set(r.governance.reviews.map((review) => review.reviewer)).size <
+          (r.reviewStatus === "reviewed_by_2" ? 2 : 1))
+    )
+      issues.push(`insufficient_clinical_review:${r.ruleId}`);
     if (r.lifecycleStatus === "active" && r.reviewStatus === "unreviewed")
       issues.push(`unreviewed_active_rule:${r.ruleId}`);
     if (r.compositionPolicy === "replace" && r.supersedes.length === 0)
@@ -70,11 +80,20 @@ export function contentIssues(
     done.add(id);
   };
   for (const r of rules) visit(r.ruleId);
-  for (const [group, id] of Object.entries(policy.primaryStrategies)) {
+  const selectionKeys = policy.primaryStrategies.map((s) =>
+    JSON.stringify([s.topicId, s.trackId, s.strategyGroupId]),
+  );
+  duplicate(selectionKeys, "strategy_selection");
+  for (const selection of policy.primaryStrategies) {
+    const { ruleId: id, strategyGroupId: group } = selection;
+    if (selection.topicId !== topicId) continue;
     const r = byId.get(id);
-    if (r === undefined && ruleTopics.has(id) && ruleTopics.get(id) !== topicId)
-      continue;
-    if (r?.strategyGroupId !== group || !policy.ruleIds.includes(id))
+    if (
+      r?.strategyGroupId !== group ||
+      r.trackId !== selection.trackId ||
+      r.topicId !== selection.topicId ||
+      !policy.ruleIds.includes(id)
+    )
       issues.push(`invalid_primary_strategy:${group}`);
   }
   for (const id of policy.ruleIds)
