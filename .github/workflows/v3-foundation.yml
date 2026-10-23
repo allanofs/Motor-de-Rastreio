@@ -1,0 +1,26 @@
+name: V3 foundation
+on:
+  pull_request:
+    paths: ['v3/**', 'docs/v3/**', '.github/workflows/v3-foundation.yml']
+  push:
+    branches: ['v3-*']
+    paths: ['v3/**', 'docs/v3/**', '.github/workflows/v3-foundation.yml']
+permissions:
+  contents: read
+jobs:
+  foundation:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: v3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: v3/package-lock.json
+      - run: npm ci
+      - run: npm run check
+      - name: Preserve V2 byte for byte
+        run: test "$(git hash-object ../index.html)" = e40c75c5c877c00a94c932cdbe5bd33a5afa71b9
