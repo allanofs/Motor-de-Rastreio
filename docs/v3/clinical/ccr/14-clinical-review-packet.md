@@ -176,7 +176,7 @@ Exemplos críticos para validar diretamente na fonte: FIT+→FIT− mantém segu
 
 ## O. Foundation gaps e limites
 
-Inspeção somente leitura em 8c 63356:
+Inspeção somente leitura em 8c63356:
 - **FG01, candidato:** histórico por tópico versus “nunca FIT, mas fez colonoscopia”; fatos adicionais existentes/revisão podem bastar.
 - **FG02, candidato:** coordenação entre rotina e follow-up e Current longitudinal; resolver não cria Current nem ignora Conflict. Precisa prova de representabilidade futura com conteúdo seguro.
 - **FG03, limitação confirmada:** semanticIssues por domínio pode bloquear todo CCR por dado inválido de outro track; granularidade continua adiada.

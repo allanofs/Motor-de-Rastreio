@@ -289,7 +289,7 @@ Corte 23/10/2026. Todas **awaiting_clinical_review**. P0: resolver antes de codi
 
 Não concluir “não existe” a partir de acesso/busca negativa. Um bloco de pesquisa pode ser fechado com pendência explícita; conteúdo clínico correspondente não será promovido automaticamente.
 
-## FOUNDATION GAP CANDIDATES — inspeção em 8c 63356
+## FOUNDATION GAP CANDIDATES — inspeção em 8c63356
 
 ### FG01 — histórico de modalidade
 

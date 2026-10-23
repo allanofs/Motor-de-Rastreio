@@ -30,4 +30,4 @@ AUTOMATE, AUTOMATE_WITH_MISSING_DATA_GUARD, DECISION_SUPPORT_ONLY, HAND_OFF e DO
 
 ## Limite do trabalho
 
-Branch nova baseada em 8c 63356 da Foundation, PR empilhada para v3-foundation-technical. Apenas este diretório é alterado. PR#1, Foundation e V2 permanecem congeladas. Nenhuma regra, resolver clínico, golden test executável, UI, backend ou persistência. Sem merge/publicação. A fase termina com este pacote documental e as decisões pendentes.
+Branch local `v3-ccr-clinical-spec`, baseada em `8c63356` da Foundation. O envio ao GitHub e a criação da PR empilhada estão bloqueados pela revisão automática, conforme REPORT.md; nenhuma nova branch remota ou PR foi criada. Apenas este diretório é alterado. PR #1, Foundation e V2 permanecem congeladas. Nenhuma regra, resolver clínico, golden test executável, UI, backend ou persistência. Sem merge/publicação. A fase termina com este pacote documental e as decisões pendentes.

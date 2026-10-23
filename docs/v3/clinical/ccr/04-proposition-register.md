@@ -1435,7 +1435,7 @@ AUTOMATE e demais rótulos são recomendações para revisão **futura**, nunca 
 | O que suprime | Somente a rotina/estratégia incompatível no mesmo contexto; não apagar investigação diagnóstica necessária. Ver exceções no pathway. |
 | O que não resolve | Ausência de relato, recurso indisponível, resultado pendente/inválido e registro cronologicamente anterior não comprovam resolução de FIT+. |
 | Source IDs | [B12](https://www.gov.br/saude/pt-br/composicao/saes/agora-tem-especialistas/publicacoes/protocolo-de-acesso-as-ofertas-de-cuidados-integrados-em-oncologia.pdf/@@download/file); [I04](https://www.asge.org/docs/default-source/education/practice_guidelines/fecal_immunochemical_testing.pdf) |
-| Locator | Fluxo diagnóstico; inspeção Foundation 8c 63356, schedule/evaluatePatient/extensions |
+| Locator | Fluxo diagnóstico; inspeção Foundation 8c63356, schedule/evaluatePatient/extensions |
 | Grade original / sistema | Mapeamento do Work, sem grade clínica |
 | Status das fontes | B12: FINAL_TECHNICAL; operational scope; I04: FINAL; PRIMARY_ACCESS_PARTIAL |
 | Confiança na interpretação | médio, condicionado à pendência descrita |

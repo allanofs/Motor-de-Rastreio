@@ -1,6 +1,6 @@
 # Relatório final — Fase 5 documental de CCR
 
-Data de corte e verificação: 23/10/2026. Base congelada: `8c6335602868d29f4dd43d5a6d8e06ad10e01f21`. Branch: v3-ccr-clinical-spec, criada a partir do HEAD remoto de v3-foundation-technical. PR pretendida: rascunho empilhado para essa mesma branch base, sem modificar PR#1.
+Data de corte e verificação: 23/10/2026. Base congelada: `8c6335602868d29f4dd43d5a6d8e06ad10e01f21`. Branch **local**: `v3-ccr-clinical-spec`, criada a partir do HEAD remoto de `v3-foundation-technical`. O envio externo e a nova PR estão bloqueados; a PR #1 permanece inalterada.
 
 ## Resultado
 
@@ -55,8 +55,27 @@ Não automatizar surveillance completa, genética, benefício individual, repeti
 
 ## Preservação e verificação
 
-Base local sincronizada por leitura/fetch antes de criar a branch nova; a branch Foundation não recebeucommit ou atualização nesta fase. Todas as mudanças da nova branch devem estar exclusivamente neste diretório. Verificações da entrega: contagem e integridade de IDs/referências/links internos; somente Markdowndocumental; diff contra 8c 63356; blob V2 inalterado; PRnova emdraft e base Foundation; PR#1 inalterada.
+Base local sincronizada por leitura/fetch antes de criar a branch nova; a branch Foundation não recebeucommit ou atualização nesta fase. Todas as mudanças da nova branch devem estar exclusivamente neste diretório. Verificações da entrega: contagem e integridade de IDs/referências/links internos; somente Markdowndocumental; diff contra 8c63356; blob V2 inalterado; PRnova emdraft e base Foundation; PR#1 inalterada.
 
-O CI existente pode executar os 242 testes da Foundation na nova PR, sem modificação dos testes. Resultados de execução remota e identificadores dos commits/PR são conferidos e entregues na mensagem final; o arquivo não se declara aprovado por antecipação. Nenhum teste clínico foi criado e teste técnico verde não equivale a revisão clínica.
+Execução local concluída: `npm ci` e `npm run check` passaram, incluindo typecheck, schema checks (62 casos), suíte completa (242/242) e build ES de 170,21 kB (gzip 42,27 kB). O blob V2 permanece `e40c75c5c877c00a94c932cdbe5bd33a5afa71b9`. IDs, campos obrigatórios das 45 proposições, 60 casos, links internos e escopo do diff foram conferidos. Nenhum teste clínico foi criado; teste técnico verde não equivale a revisão clínica.
+
+## Bloqueio do envio externo e estado exato
+
+A revisão automática rejeitou a ação combinada de commit/envio dos documentos para nova branch pública. Motivo declarado: as instruções anteriores na conversa proibiam nova branch/publicação, e a autorização posterior estava apenas no anexo, classificado pelo revisor como contexto não confiável. Não foi tentado contornar a rejeição por outro canal.
+
+O commit documental local `a939dca7413042dbb37ff224b49ef007472f9f11` foi criado antes do bloqueio do envio. A conferência somente leitura com `git ls-remote` mostrou **ausência de v3-ccr-clinical-spec no remoto**, Foundation em `8c6335602868d29f4dd43d5a6d8e06ad10e01f21` e main em `7a6555373c05fa02f26f594bb8666364130ef2f2`. A PR #1 continua aberta, draft, não mesclada, com mesmo HEAD/título. **Não há nova PR nem CI remoto desta Fase 5.** Os arquivos completos estão disponíveis localmente para revisão.
+
+Para concluir o envio e abrir a PR, é necessária autorização explícita na conversa para superar a rejeição; isso não equivale a aprovação clínica das proposições. O título e escopo já estão preparados:
+
+| Campo da PR proposta | Conteúdo |
+|---|---|
+| Título | docs(v3): especificação clínica de CCR para revisão humana — Fase 5 |
+| Head | v3-ccr-clinical-spec |
+| Base | v3-foundation-technical |
+| Estado | draft |
+| Mudanças | Somente os 16 documentos deste diretório; Foundation/V2/PR #1 inalteradas |
+| Descrição preparada | Pesquisa com corte23/10/2026:27 fontes candidatas,32 perguntas,45 proposições awaiting_clinical_review e60 casos documentais. Curadorias SUS/BA/Internacional propostas,14P0 e4 gaps/limites; bloqueios de fonte explícitos. Nenhum código clínico, teste novo, merge ou deploy. Revisar primeiro14-clinical-review-packet.md. Checks locais242/242; CI remoto a executar após envio autorizado. |
+
+Além do bloqueio operacional do GitHub, persistem as questões clínicas/documentais P0 descritas no pacote. A preparação da documentação foi concluída; a entrega externa por PR está pendente de autorização.
 
 **Parada obrigatória: Fase 5 documental. Sem implementação clínica, merge ou publicação.**
