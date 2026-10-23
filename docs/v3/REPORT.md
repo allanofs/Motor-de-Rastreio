@@ -1,165 +1,132 @@
-# Relatório — V3 Foundation, Fase 4.1
+# Relatório — V3 Foundation, Fase 4.2 final
 
-Data: 23/10/2026. Branch: `v3-foundation-technical`. [PR #1](https://github.com/allanofs/Motor-de-Rastreio/pull/1) existente, em rascunho, sem merge. Engine/pacote: `3.0.0-alpha.2`.
+Data: 23/10/2026. Branch existente: `v3-foundation-technical`. [PR #1](https://github.com/allanofs/Motor-de-Rastreio/pull/1) existente, em rascunho. Engine/pacote: `3.0.0-alpha.3`. Base desta rodada: `084e00e5167d8a6262c08793a83796a24b409775` (Fase 4.1). O relatório anterior permanece no histórico desse commit.
 
-## 1. Escopo e resultado
+## 1. Resultado e limite
 
-Esta rodada implementa exclusivamente o anexo “Fase 4.1 — correções arquiteturais antes do piloto CCR”. A foundation anterior está no commit base `826f849f218e5441eacd13a5278e84110614fb58`. Nenhuma nova branch foi criada nesta execução; todas as alterações continuam na mesma PR.
+Esta rodada corrige exclusivamente isolamento runtime entre políticas e precisão da evidência no DecisionTrace. Nenhuma branch foi criada; não houve merge, publicação, pesquisa de CCR, conteúdo clínico, backend ou persistência. Encerramento obrigatório na Fase 4.2; Fase 5 não iniciada.
 
-A arquitetura agora permite fatos globais do paciente, tracks independentes dentro de um tópico, conhecimento do histórico no scheduler, extensão longitudinal tipada, evidência por proposição, revisão mínima da interpretação e apoio estruturado para regras parcialmente computáveis. O núcleo genérico continua sem conteúdo clínico.
+Conteúdo inválido de política não selecionada não contamina runtime da política ativa, embora possa continuar sendo detectado pela validação global/CI.
 
-Não foram iniciadas pesquisa de CCR, regras/políticas clínicas, FIT ou colonoscopia clínicos, fontes médicas, golden patients clínicos, UI, outros domínios reais, backend ou persistência. Não houve merge nem deploy.
+Fatos globais, tracks independentes, historyKnowledge, noQualifyingEventBehavior, estratégias, supersedes, DomainResolver, stance, computability, evidence metadata, governança, decisionSupport, CareSettingContext, calendário e safe failure mantêm os contratos da Fase 4.1. As fixtures SUS/internacional são aliases técnicos fictícios, sem diretrizes ou políticas médicas.
 
-## 2. Correções implementadas
+## 2. Isolamento e validação global
 
-| Solicitação | Implementação | Evidência técnica |
-|---|---|---|
-| Fato transversal | ClinicalFact.topicId tornou-se opcional; ausência significa fato global do paciente. Regras selecionadas consultam conceptId; escopo local continua explícito quando necessário | Um único shared-risk=yes satisfaz dois tópicos sem duplicação e com o mesmo ID no trace |
-| Isolamento de fato global inválido | Roteamento identifica conceito e consumidores antes da validação local; dependências de regras ativas selecionadas e resolvers usados são explícitas | Malformação afeta consumidores A/B e preserva C; conceito irrecuperável falha explicitamente |
-| historyKnowledge no scheduler | calculateSchedule recebe DomainHistory completo, incluindo knowledge e events | never_performed, unknown, not_asked e known sem qualificador têm casos separados |
-| Ausência de qualificador | RuleDefinition.noQualifyingEventBehavior.neverPerformed autoriza due somente por declaração; comportamento ausente/indeterminate mantém abstensão | never_performed só gera Due com autorização; unknown/not_asked nunca geram Due pela ausência de eventos |
-| Tracks independentes | RuleDefinition.trackId; TopicEvaluation.tracks[]; TrackEvaluation.state é union discriminada única por decisão | Current+Due e revisão+Due preservam ambos, com ação do track devido |
-| Estratégias no escopo correto | Policy.primaryStrategies[] declara tópico/track/grupo/regra; seleção, supersedes e composição são locais ao track | Mesmo nome de grupo pode ter escolhas independentes; substituição cruzada é erro de conteúdo |
-| Extensão longitudinal | DomainResolverRegistry explícito e opcional; inputs tipados clonados/congelados; resultado validado; identidade/versão no trace | Resolver técnico resolve sequência, é determinístico e sua exceção não apaga irmão ou outro domínio |
-| Metadados de evidência | SourceRef.evidence preserva gradingSystem, recommendationStrength, evidenceCertainty, rawGrade e gradeVerified | Sistemas fictícios distintos e grau bruto mantidos sem conversão; stance continua explícito |
-| Governança ativa | Active exige reviewed_by_1/2 e ao menos 1/2 revisores distintos com reviewedAt | source_verified active é rejeitado; source_verified draft é permitido; revisão alegada sem registros é rejeitada |
-| clinicalRole | monitoring e surveillance acrescentados, preservando os papéis anteriores | Testes apenas de representabilidade em schema; nenhuma regra clínica desses papéis |
-| Suporte parcial | decisionSupport[] contém considerações com IDs de regras, separado de actions/guardrails | Track parcial mantém ClinicalReviewRequired, sem ação automática; outro track pode emitir sua ação |
-| Conservadorismo temporal/composição | Comparadores de menor intervalo/maior gravidade continuam em revisão; primitivas temporais não mudaram | Mesmo dia, sobreposição de datas e fronteira ambígua continuam em abstensão |
-
-## 3. Modelo atual
-
-| Estrutura | Responsabilidade |
+| Camada | Responsabilidade |
 |---|---|
-| Patient | Contexto, fatos do paciente, exames e conhecimento explícito de histórico por tópico |
-| ClinicalFact | conceptId global reutilizável; topicId opcional para restringir um fato local; nenhuma duplicação obrigatória |
-| ExamRecord | Mantém tópico obrigatório, múltiplos eventos, status, data parcial, resultado e qualidade |
-| RuleDefinition | trackId obrigatório; critérios, postura, computabilidade, qualificação, agenda, comportamento declarativo sem qualificador e considerações |
-| Policy | Seleções de estratégia em lista com escopo explícito, sem chaves concatenadas ambíguas |
-| TrackEvaluation | Um state discriminado, ações, regras, dados ausentes, decisionSupport, guardrails, agenda, completude e trace |
-| TopicEvaluation | Tracks e agregados derivados. Não há pathwayState único ou summaryState clínico prioritário |
-| ConsultationPlan | Agrega ações com identidade tópico/track e deriva requiresAttention sem ordenar gravidade |
-| SourceRef.evidence | Grau original e metadados da proposição, independentes de stance e sem escala comum |
-| governance.reviews | Registros mínimos de revisão alegada, com revisor distinto e data; não equivalem a verificação humana automática |
-| DomainResolver | Função síncrona pura, versão, tópico, track e conceitos adicionais explicitamente declarados |
+| parseContent | Recupera ruleId/topicId antes de validar o corpo; seleciona política ativa e policy.ruleIds; projeta fontes referenciadas por essas regras |
+| contentIssues | Integridade das regras selecionadas no tópico corrente: fontes, revisão, estratégias, referências participantes e grafo |
+| validateBundle(unknown) | Auditoria global de schemas, duplicatas e referências, inclusive regras órfãs, draft e políticas não selecionadas |
+| assertValidBundle(unknown) | Rejeita qualquer issue global e retorna Ruleset validado; ponto de integração do futuro pipeline de conteúdo |
+| schema:check / CI | Exercita schemas e contrato global com fixtures técnicas; não existe bundle clínico nesta entrega |
 
-O input do paciente permanece intacto: “projeção para consumidores” ocorre apenas nas estruturas em memória da avaliação, não por replicação dos fatos enviados ou persistência. Um mesmo ID global projetado em dois domínios não é contado como duplicata de sessão.
+Regra com ID recuperável não selecionado é descartada antes de validar seu corpo. Fonte com ID conhecido e sem consumidores selecionados também é descartada. Política estrangeira com ID recuperável não é validada no runtime da política ativa.
 
-## 4. Pipeline e falhas seguras
+Se ruleId não puder ser recuperado, tópico comprovadamente externo permite demonstrar irrelevância. Identidade insuficiente para essa demonstração invalida os tópicos consumidores possíveis, sem fallback. Fonte anônima invalida seus consumidores possíveis. Identidade de política irrecuperável ou duplicata da política ativa produz erro explícito da API; não se escolhe uma definição arbitrária.
 
-1. Podar registros ocultos e valores condicionais obsoletos; identificar escopo/conceito.
-2. Validar o envelope compartilhado e projetar fatos para os domínios consumidores.
-3. Validar schemas e semântica temporal/contradições por domínio.
-4. Normalizar calendário e derivar contexto sem relógio global.
-5. Resolver histórico incluindo knowledge e events.
-6. Avaliar critérios e exclusões por track.
-7. Resolver estratégias e supersedes no mesmo track; verificar DAG e integridade de conteúdo.
-8. Compor ações compatíveis do track e calcular agenda com âncora positiva.
-9. Quando explicitamente registrado e permitido, invocar resolver longitudinal puro.
-10. Validar TrackEvaluation; falha técnica retorna ComputationError naquele track.
-11. Agregar tracks em TopicEvaluation sem apagar ações independentes.
-12. Agregar o plano e gerar trace com versões, fontes/locators/evidência e identidade da extensão.
+Fontes inválidas selecionadas continuam produzindo ComputationError no domínio correspondente. Dentro da política ativa, fonte inválida de tópico B não contamina tópico A. IDs ativos duplicados continuam inválidos. Duplicatas exclusivamente estrangeiras são detectadas globalmente, sem contaminar runtime.
 
-Falha de entrada/conteúdo identificável por domínio continua explícita e pode bloquear aquele domínio. Falha de avaliação/resolver pode ser isolada ainda mais, ao track. Erro de envelope irrecuperável, política desconhecida ou registry ambíguo é erro da API, sem fallback. Não há lista vazia interpretável como “nada a fazer” em lugar de um erro.
+Declarações supersedes/excludes com alvo não selecionado não participam da composição runtime. Referências selecionadas preservam validação de tópico/track e DAG. A auditoria global continua detectando referências quebradas e ciclos, inclusive em conteúdo não selecionado.
 
-Trace por track preserva ordem das etapas; trace do tópico agrega etapas na ordem do pipeline, sem inventar uma prioridade clínica entre estados. As saídas são identificadas por track.
+## 3. Pipeline runtime
 
-## 5. Contrato da extensão longitudinal
+1. Validar envelope compartilhado e identificar a política ativa sem fallback.
+2. Recuperar identidade mínima e projetar regras/fontes da política.
+3. Podar ghosts, projetar fatos globais por consumidores e validar paciente/domínio.
+4. Validar integridade de conteúdo relevante ao tópico.
+5. Normalizar calendário, derivar contexto e resolver histórico com knowledge/events.
+6. Avaliar critérios por track, registrando somente os fatos realmente consultados.
+7. Resolver estratégias/supersedes e compor ações preservando a semântica anterior.
+8. Calcular agenda; distinguir eventos considerados de âncoras usadas.
+9. Invocar extensão registrada quando permitida; validar estado, ações e evidência declarada.
+10. Aplicar safe failure por track/domínio e agregar plano/trace deterministicamente.
 
-O registro informa resolverId, version, topicId, trackId, requiredConceptIds e resolve(). Não há importação de módulo clínico pela engine, if por nome de doença, mini-CQL ou execução de texto de regras.
+Falhas de envelope/identidade sem contexto confiável continuam explícitas na API. Falhas de conteúdo localizadas impedem o domínio; falhas de saída do resolver impedem somente seu track. Nenhuma falha vira resultado vazio indistinguível de “nada a fazer”.
 
-A função recebe paciente normalizado, histórico, regras, política, asOf e resultado genérico em estruturas tipadas, clonadas e profundamente congeladas. O snapshot não contém disponibilidade operacional do serviço. Deve ser determinística, sem DOM, rede, storage, relógio global ou estado externo. A ausência do registro mantém a avaliação genérica.
+## 4. Nova semântica do trace e contrato do resolver
 
-O resultado passa por schema. Pode selecionar apenas IDs de ações e considerações declaradas pelas regras ativas. Não ultrapassa critérios obrigatórios ausentes, Conflict, ClinicalReviewRequired ou comparadores em abstensão. Não fabrica Current: essa conclusão só pode preservar uma âncora já sustentada pela qualificação/agenda genérica. Exceções não expõem mensagens originais, stack ou dados sensíveis.
+| Campo | Significado |
+|---|---|
+| factsUsed[] | Fatos efetivamente consultados por population, exclusões e requiredKnownFacts; respeita short-circuit, inclui consultas que sustentam supressão/abstenção |
+| recordsUsed[] | Evidência de registros usada na conclusão: âncoras de agenda genérica ou IDs declarados explicitamente pelo resolver |
+| recordsConsidered[] | Eventos inspecionados por cálculo dependente de histórico, sem alegar que todos foram causais |
+| DomainResolution.evidenceRecordIds[] | Declaração explícita do resolver; omissão normalizada para [] |
 
-Essa interface é para código confiável e revisado do aplicativo. TypeScript e freeze não demonstram pureza de uma função arbitrária nem oferecem sandbox de efeitos colaterais. O callback não é fornecido por formulário, paciente ou conteúdo JSON. Revisão, testes e versionamento do código da extensão continuam obrigatórios. Nesta entrega, apenas o resolver fictício de teste existe; nenhum resolver clínico foi criado ou registrado em produção.
+Ter eventos disponíveis no histórico não os adiciona a factsUsed nem, por si só, a recordsUsed. Cálculo genérico que usa somente B como âncora declara B; A e C podem permanecer apenas considerados. Regra independente de histórico não infla nenhuma das coleções de registros.
 
-## 6. Testes e adaptação semântica
+Cada evidenceRecordId deve existir entre os fatos e eventos do snapshot entregue ao resolver. Registro na entrada bruta, porém fora desse snapshot, é rejeitado. IDs inexistentes produzem ComputationError do track, sem ações e sem recordsUsed residuais.
 
-Os 139 testes anteriores permanecem semanticamente cobertos e passando. Não houve remoção de caso ou rebaixamento de expected para acomodar falha.
+Se o resolver substituir a conclusão genérica, recordsUsed passa a refletir sua declaração explícita; não herda causalidade de âncora abandonada. Se preservar Current, a âncora genérica validada permanece obrigatoriamente em recordsUsed, mesmo sem declaração redundante. factsUsed continua registrando as consultas genéricas que realmente ocorreram.
 
-Adaptações deliberadas:
+Listas são únicas e ordenadas. O tópico agrega os traces dos tracks. A validação demonstra existência/pertença ao snapshot; não prova causalidade clínica nem completude da declaração de código arbitrário. Resolver continua sendo código confiável, sujeito a revisão, versionamento e contrato de pureza; freeze não é sandbox.
 
-- Assertions antigas de um único estado passam a observar o track correspondente; o teste de Current sem evidência permanece no TrackEvaluation.
-- Teste de saída completa valida também o TopicEvaluation agregado.
-- Fixtures declaram trackId, seleção de estratégia com escopo e revisão explicitamente fictícia. Isso não registra revisão médica real.
-- O antigo conflito entre estados diferentes permanece testado dentro do mesmo track; novos casos cobrem a coexistência entre tracks independentes.
-- Regras apenas source_verified continuam representáveis como draft; novos testes rejeitam sua ativação. Essa é uma mudança solicitada de governança, não uma promoção silenciosa de conteúdo.
-- Bundle técnico das fixtures passou para technical-fixture-2. Engine/pacote passaram a 3.0.0-alpha.2; não houve alteração de versão de dependências ou criação de policyVersion.
+## 5. Testes e resultados
 
-| Arquivo / categoria | Total | Passaram | Falharam |
-|---|---:|---:|---:|
-| dates.test.ts — calendário preservado | 32 | 32 | 0 |
-| schemas.test.ts — schemas anteriores | 24 | 24 | 0 |
-| content.test.ts — integridade anterior | 10 | 10 | 0 |
-| engine.test.ts — invariantes anteriores adaptados aos tracks | 70 | 70 | 0 |
-| architecture.test.ts — fronteiras e dependências | 3 | 3 | 0 |
-| foundation41.test.ts — novos requisitos e regressões | 64 | 64 | 0 |
-| **Total** | **203** | **203** | **0** |
+| Suíte | Testes |
+|---|---:|
+| dates.test.ts | 32 |
+| schemas.test.ts | 24 |
+| content.test.ts | 10 |
+| engine.test.ts | 70 |
+| architecture.test.ts | 3 |
+| foundation41.test.ts | 64 |
+| policyIsolation.test.ts (nova) | 28 |
+| traceEvidence.test.ts (nova) | 11 |
+| **Total** | **242** |
 
-Comandos finais exigidos: `cd v3 && npm ci && npm run check`. Check executa typecheck, schema checks, suíte completa e build Vite. Instalação limpa concluída: npm ci e todas as etapas do check passaram localmente, com 203 testes e build ES de 165,52 kB (41,12 kB gzip). O CI remoto é conferido antes da entrega; os [checks da PR #1](https://github.com/allanofs/Motor-de-Rastreio/pull/1/checks) são a referência do último commit.
+Os 203 casos anteriores permanecem semanticamente cobertos e passando; 39 casos foram adicionados. Nenhum teste anterior foi removido. Dois testes de integridade de bundle (ciclo e referência quebrada) passaram de contentIssues para validateBundle: a mesma violação continua rejeitada pela auditoria global, mas não deve contaminar uma política que não seleciona aquelas regras. Não houve relaxamento de expected. O resolver técnico anterior passou a declarar explicitamente a evidência da sequência fictícia.
 
-Os novos testes cobrem: fato global compartilhado e isolado por conceito, unknown e ghosts, duplicatas reais versus projeção única, conhecimento do histórico no scheduler, ausência de Current sem evidência, tracks em estados distintos, estratégia curada inelegível sem fallback, grupos homônimos em tracks diferentes, callbacks com input imutável, sequência fictícia determinística, erros isolados, ação inventada rejeitada, metadados originais de evidência, revisão mínima e suporte parcial sem autoação.
+| Obrigatório | Resultado verificado |
+|---|---|
+| POL-01 | Regra internacional estruturalmente inválida não altera SUS |
+| POL-02 | Selecionar essa mesma regra produz ComputationError |
+| POL-03 | Fonte inválida exclusivamente estrangeira não altera SUS |
+| POL-04 | Fonte inválida selecionada produz ComputationError |
+| POL-05 | Draft/experimental não selecionada não altera output |
+| POL-06 | Adição/remoção de regras não selecionadas preserva output completo normalizado, incluindo traces |
+| TRACE-01 | A/B/C disponíveis; só B é evidência de âncora |
+| TRACE-02 | Resolver declara A+C; trace registra A+C como usados |
+| TRACE-03 | Evidência inexistente provoca ComputationError do track |
+| TRACE-04 | Todas as seis permutações de A/B/C preservam output/trace; agenda genérica também é testada |
 
-## 7. Invariantes preservadas
+Coberturas adicionais: quatro categorias de contentIssues estrangeiras, identidade mínima/malformada, duplicatas ativas versus estrangeiras, políticas inválidas estrangeiras, isolamento entre tópicos, auditoria de órfãs/draft, registro fora do snapshot, deduplicação, Current preservado, substituição da conclusão genérica e short-circuit de fatos.
 
-- V2 byte a byte: blob `e40c75c5c877c00a94c932cdbe5bd33a5afa71b9`, 122.933 bytes; main permanece na base V2 `7a6555373c05fa02f26f594bb8666364130ef2f2`.
-- /v3 independente; TypeScript strict, Zod, Vite e Vitest preservados.
-- asOf obrigatório; sem Date/relógio global dentro da engine.
-- Datas parciais, bissextos, intervalos, clamp e aniversários preservados; nenhuma heurística nova para ambiguidades.
-- unknown nunca se converte em no; not_asked não vira relato de desconhecimento.
-- Nenhum Current sem evento qualificador e evidência positiva. Resolver não contorna essa invariante.
-- Nenhuma ação de regra suprimida ou de track em abstensão é emitida.
-- Comparadores não definidos permanecem em revisão; não existe mergeMostRestrictive.
-- Fonte draft/preliminary/withdrawn/superseded não sustenta regra ativa.
-- Revisão clínica não é inferida de fonte verificada nem de testes verdes.
-- Nenhuma equivalência entre sistemas de evidência e nenhuma inferência numérica de stance.
-- Dados de pacientes, plano e trace permanecem apenas em memória; sem logs clínicos, rede, armazenamento, URL clínica ou analytics de produto.
+## 6. Execução e CI
 
-INV-03/04 do contrato mestre, relativos a FIT positivo clínico, continuam adiados por determinação expressa. Ordem estrita genérica de eventos está testada; isso não equivale à validação de um pathway médico.
+O ambiente de terminal desta execução não iniciou (exec-server indisponível). Por isso, não se afirma execução local. Código, commits e revisão foram realizados na branch existente; a instalação limpa e os checks foram executados pelo GitHub Actions.
 
-## 8. Documentação e arquivos
+Primeira verificação remota do commit de código `f134fe1ae111ea3612798b42b71e50145c78b48d`: [run 39989932730](https://github.com/allanofs/Motor-de-Rastreio/actions/runs/39989932730), sucesso. Logs confirmam npm ci, typecheck, schema:check (62 casos), suíte completa (242/242), build Vite e hash da V2. Build ES: 170,21 kB / gzip 42,27 kB; instalação reportou zero vulnerabilidades.
 
-Inventário integral e arquivos alterados nesta rodada: [FILES.md](FILES.md). O código novo está em `v3/src/engine/facts.ts`, `extensions.ts` e `v3/tests/foundation41.test.ts`.
+O workflow agora executa literalmente `npm ci` e `npm run check` (typecheck → schema:check → testes → build), sem duplicar as etapas. Mantém Node 24, contents:read e comparação byte a byte da V2. Não há job de deploy. A confirmação do último commit é feita antes da entrega; [checks da PR #1](https://github.com/allanofs/Motor-de-Rastreio/pull/1/checks) são a referência corrente.
 
-ADRs 004, 005 e 007 foram substituídos por suas decisões atuais. ADR-008 foi atualizado para registrar o limite da Fase 4.1 na mesma branch/PR. ADR-009 foi acrescentado porque o registry longitudinal introduz um contrato novo de execução e confiança que precisa ser registrado separadamente. ADRs temporais e inspeção original permanecem válidos. README apresenta a API atual e a migração deliberada dos fixtures.
+## 7. Arquivos, commits e ADRs
 
-A mudança de forma de saída e das seleções de estratégia é incompatível com a API alpha anterior, mas não afeta a V2: não há migração silenciosa de dados ou conteúdo clínico a preservar no V3.
+[FILES.md](FILES.md) contém inventário completo e os 20 arquivos desta rodada (18 modificados, 2 novos). Mudanças principais: input/validateContent, evaluateRules/evaluatePatient, extensions, trace/safeEvaluate, schema de avaliação e duas suítes novas. Pacote/engine passaram a alpha.3; versões das dependências foram preservadas.
 
-## 9. P0, decisões e desvios
+Commit de implementação: `f134fe1ae111ea3612798b42b71e50145c78b48d`. A documentação/CI é entregue em commit posterior na mesma branch, identificável no histórico da PR e no relatório final; não há SHA autorreferente neste arquivo.
 
-| Mudança | Base de autorização | Impacto |
-|---|---|---|
-| Fatos do paciente com escopo local opcional | Anexo Fase 4.1, §2 | Corrige duplicação transversal; sem mudar fato do paciente no input |
-| Tracks independentes em lugar de estado único | Anexo Fase 4.1, §4 | Corrige a objeção à P0 registrada na primeira rodada; não é redesenho silencioso |
-| Estratégias com escopo tópico/track | Necessário para cumprir §4 | Não há vencedor global nem conflito entre tracks independentes |
-| Extensão longitudinal formal | Anexo Fase 4.1, §5 | Interface pura registrada, sem medicina ou mini-linguagem |
-| Evidência e revisão mínima | Anexo Fase 4.1, §§6–7 | Proposição preserva grau original; source_verified deixa de autorizar active |
-| Suporte parcial e novos papéis | Anexo Fase 4.1, §§8–9 | Representabilidade e considerações estruturadas, sem criar regras clínicas |
+Somente ADRs pertinentes foram atualizados:
+- ADR-005: projeção runtime de política versus auditoria global; referências participantes.
+- ADR-009: evidência explícita do resolver, pertença ao snapshot e semântica das coleções do trace.
 
-Nenhum desvio não autorizado da P0 foi introduzido. Os pontos da P0 explicitamente corrigidos nesta rodada substituem as decisões antigas nos ADRs. Não houve expansão para a Fase 5.
+Não foi criado ADR adicional. README documenta API e responsabilidade do futuro pipeline de conteúdo.
 
-## 10. Blockers e limites restantes
+## 8. Preservação, P0 e limites
 
-| Ponto | Situação / impacto | Encaminhamento |
-|---|---|---|
-| choose_shorter_interval / choose_higher_acuity | Permanecem em ClinicalReviewRequired; não bloqueiam a foundation | Só habilitar com semântica clínica específica, fonte e revisão futura |
-| Mesmo dia, datas sobrepostas e fronteira ambígua | Abstensão preservada, inclusive no resolver técnico | Não inferir ordem ou precisão; esclarecer/revisar quando necessário |
-| Revisores reais e fontes clínicas | Nenhum conteúdo clínico foi ativado; fixtures são explicitamente fictícias | Verificação documental e humana será necessária antes de medicina real |
-| Pureza de extensions | Contrato para código confiável, não sandbox de JavaScript arbitrário | Revisão/testes/versionamento antes de registrar extensão clínica; nada de código de usuário |
-| historyKnowledge é por tópico | never_performed é uma declaração sobre o domínio inteiro, não apenas uma modalidade/track | Se granularidade maior se tornar necessária, modelá-la explicitamente com evidência; não inferir nesta rodada |
-| Current longitudinal sem agenda genérica | Extensão atual não pode fabricar evidência ou novo Current | Preservar garantia de qualificação; qualquer ampliação futura deve declarar evidência verificável |
-| Configuração administrativa de Pages | Não obtida na inspeção anterior; publicação não foi alterada | Confirmar origem administrativa somente antes de um futuro deploy autorizado |
-| UI futura e erros de envelope | UI não implementada; API lança erro explícito quando não há contexto confiável | Capturar e invalidar resultado antigo ao implementar interface, sem fallback silencioso |
+V2 permanece no blob `e40c75c5c877c00a94c932cdbe5bd33a5afa71b9`; a base main é `7a6555373c05fa02f26f594bb8666364130ef2f2`. Não houve modificação de main, merge, publicação ou persistência de pacientes. O build gera uma biblioteca ES isolada em /v3.
 
-Não há blocker técnico aberto para os requisitos da Fase 4.1; as limitações acima restringem conteúdos e capacidades futuras, que não foram antecipados.
+Não foi introduzido redesenho não autorizado da P0. As únicas mudanças de contrato são as solicitadas na Fase 4.2: separação da validação global/runtime e evidência explícita no trace/resolver. O schema de trace agora exige recordsUsed/recordsConsidered; consumidores alpha precisam incorporar os campos. A omissão de evidenceRecordIds é compatível com callbacks anteriores, normalizada para [].
 
-## 11. Dependências, CI e privacidade
+| Limite / revisão humana futura | Situação |
+|---|---|
+| semanticIssues por track | Não alterado; granularidade atual por domínio preservada |
+| historyKnowledge por modalidade | Não alterado; permanece por tópico |
+| Mesmo dia, datas sobrepostas e precisão ambígua | Abstensão/calendário preservados; nenhuma ordenação clínica nova |
+| choose_shorter_interval / choose_higher_acuity | Continuam em ClinicalReviewRequired |
+| Pureza/completude da declaração de evidência do resolver | Contrato de código confiável; exige revisão humana e testes antes de uso clínico |
+| Bundle clínico e processo real de release | Inexistentes nesta entrega; futuro CI de conteúdo deve chamar assertValidBundle sobre os bundles reais |
+| UI, clinical diff, CCR, PWA, persistência | Fora do escopo; não iniciados |
 
-Dependências preservadas: zod 4.6.7; typescript 7.0.2; vite 8.3.5; vitest 5.0.5; @types/node 26.6.5. Apenas a versão do pacote/engine mudou. Única dependência de runtime: Zod. Nenhum framework, biblioteca temporal, armazenamento, backend ou sistema de persistência foi adicionado.
+Não há blocker técnico identificado nos requisitos da Fase 4.2 após a suíte remota aprovada. A indisponibilidade do terminal impediu checks locais, compensados pela execução remota verificável; não foi ocultada nem tratada como teste executado.
 
-Workflow existente da V3 foi preservado: Node 24, npm ci, typecheck, schema checks, testes, build e comparação do blob da V2. Sem deploy e com contents:read. Resultados finais remoto/local e commits novos são entregues junto com este relatório e constam no histórico da PR; um workflow configurado não é confundido com um workflow aprovado.
-
-Os registros de reviewers e as referências de evidência usados em teste são sintéticos. Nenhum nome real foi apresentado como revisor médico. Não existe aprovação clínica inferida de metadados ou CI. As únicas alterações externas autorizadas são commits na branch existente e atualização da PR #1 em rascunho.
-
-**Encerramento obrigatório: Fase 4.1. Sem Fase 5, merge ou publicação.**
+**Parada: Fase 4.2. Sem Fase 5, merge ou publicação.**

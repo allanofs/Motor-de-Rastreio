@@ -21,9 +21,6 @@ jobs:
           cache: npm
           cache-dependency-path: v3/package-lock.json
       - run: npm ci
-      - run: npm run typecheck
-      - run: npm run schema:check
-      - run: npm test
-      - run: npm run build
+      - run: npm run check
       - name: Preserve V2 byte for byte
         run: test "$(git hash-object ../index.html)" = e40c75c5c877c00a94c932cdbe5bd33a5afa71b9

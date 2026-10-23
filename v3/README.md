@@ -1,6 +1,6 @@
-# V3 Foundation — Fase 4.1
+# V3 Foundation — Fase 4.2
 
-Biblioteca técnica experimental `3.0.0-alpha.2`, sem conteúdo clínico. A V2 permanece no `index.html` da raiz e não é importada pelo V3.
+Biblioteca técnica experimental `3.0.0-alpha.3`, sem conteúdo clínico. A V2 permanece no `index.html` da raiz e não é importada pelo V3.
 
 ```sh
 cd v3
@@ -19,6 +19,14 @@ O chamador fornece regras, fontes, políticas e terminologia; nenhum bundle clí
 A saída contém `plan.topics[].tracks[]`, `plan.actions[]` e `traces[]`. Cada track tem um único `state` discriminado, actions[], decisionSupport[], agenda, dados ausentes e trace. Tópico não possui pathwayState: agrega resultados, e requiresAttention deriva dos estados sem priorizar gravidade.
 
 Erro local de avaliação gera ComputationError no track e preserva irmãos. Dados inválidos de entrada/conteúdo podem impedir o domínio correspondente. Envelope de controle ou identidade de conteúdo irrecuperáveis, asOf inválido e política inexistente lançam erro explícito da API, sem fallback. A futura UI precisa invalidar resultados antigos nesses casos.
+
+## Isolamento de políticas e validação global
+
+Conteúdo inválido de política não selecionada não contamina runtime da política ativa, embora possa continuar sendo detectado pela validação global/CI.
+
+Runtime valida a política ativa, suas regras selecionadas e as fontes consumidas, no tópico avaliado. Uma regra estrangeira com ID recuperável é descartada antes da validação completa. Conteúdo sem identidade suficiente para provar irrelevância falha explicitamente nos consumidores possíveis; identidades ativas duplicadas não têm fallback. Referências supersedes/excludes para regras não selecionadas não participam da composição runtime.
+
+`validateBundle(input: unknown): string[]` audita schemas e integridade do bundle completo, inclusive conteúdo não selecionado/órfão. `assertValidBundle(input: unknown): Ruleset` rejeita qualquer issue; deve ser usado pelo futuro pipeline de conteúdo antes de release clínico. O schema check do CI exercita essas funções com fixtures sintéticas; não há bundle clínico para validar ou liberar.
 
 ## Fatos do paciente e estados ocultos
 
@@ -52,6 +60,14 @@ Cada regra declara trackId. Current em A e Due em B, ou revisão em A e Due em B
 
 Saída é validada e seleciona IDs de ações/considerações já declaradas. Não pode ultrapassar conflito/revisão obrigatória nem inventar Current sem a evidência genérica existente. Callbacks são código confiável sujeito a revisão; a API não é um sandbox nem executa código recebido em formulários. Registro ausente mantém o comportamento genérico. Trace inclui resolverId/version/trackId.
 
+## Semântica do DecisionTrace
+
+- `factsUsed[]`: IDs de fatos realmente consultados pelos critérios, exclusões e requiredKnownFacts, incluindo consultas que levam a supressão/abstenção.
+- `recordsUsed[]`: âncoras de scheduling e evidência explicitamente declarada pelo resolver para sua conclusão.
+- `recordsConsidered[]`: eventos inspecionados pelo cálculo dependente de histórico, sem afirmar que todos sustentaram o resultado.
+
+Apenas disponibilizar histórico não o transforma em evidência usada. Listas são únicas e ordenadas; trace do tópico agrega os tracks. O resolver pode retornar `evidenceRecordIds[]` (default []). IDs inexistentes ou fora de seu snapshot causam ComputationError do track. Ao mudar a conclusão, a declaração substitui a evidência genérica; preservar Current sempre preserva sua âncora validada. Falha técnica não conserva recordsUsed residuais.
+
 ## Evidência e revisão
 
 SourceRef.evidence preserva gradingSystem, recommendationStrength, evidenceCertainty, rawGrade e gradeVerified (false por padrão), sem equivalências entre sistemas e sem inferir stance de grau.
@@ -66,6 +82,8 @@ Datas parciais usam precisão year/month/day e intervalos inclusivos; nenhum dia
 
 ## Migração deliberada dos testes e revisão
 
-Os 139 casos anteriores permanecem cobertos. Fixtures agora declaram trackId e revisão explicitamente fictícia; assertions antigas de estado passam a observar o track. A seleção de estratégia ganha escopo explícito. Expected de segurança não foi rebaixado para fazer a suíte passar.
+Os 203 casos anteriores permanecem semanticamente cobertos; a suíte tem 242 testes. Dois testes de integridade (ciclo e referência quebrada no bundle) passaram para validateBundle, porque auditoria global e avaliação da política têm responsabilidades distintas. Os demais expected não foram relaxados.
+
+Na Fase 4.1, os 139 casos anteriores já haviam sido adaptados aos tracks. Fixtures agora declaram trackId e revisão explicitamente fictícia; assertions antigas de estado passam a observar o track. A seleção de estratégia ganha escopo explícito. Expected de segurança não foi rebaixado para fazer a suíte passar.
 
 Veja `../docs/v3/REPORT.md`, `FILES.md` e ADRs 004, 005, 007–009. Esta é correção da foundation; a Fase 5 não foi iniciada.
