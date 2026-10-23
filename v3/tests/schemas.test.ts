@@ -128,3 +128,28 @@ it.each(["javascript:alert(1)", "file:///etc/passwd", "ftp://example.invalid"])(
   (url) =>
     expect(SourceSchema.safeParse({ ...source, url }).success).toBe(false),
 );
+
+import {
+  CalendarDateSchema,
+  PartialCalendarDateSchema,
+} from "../src/model/dates";
+it("invalid calendar components return schema failures without throwing", () => {
+  for (const d of [
+    { year: 0, month: 1, day: 1 },
+    { year: 2026, month: 13, day: 1 },
+    { year: 2026, month: 0, day: 1 },
+    { year: 10000, month: 1, day: 1 },
+  ]) {
+    expect(CalendarDateSchema.safeParse(d).success).toBe(false);
+    expect(
+      PartialCalendarDateSchema.safeParse({ ...d, precision: "day" }).success,
+    ).toBe(false);
+  }
+});
+it("malformed source verification dates are validation failures", () =>
+  expect(
+    SourceSchema.safeParse({
+      ...source,
+      lastVerifiedAt: { year: 2026, month: 13, day: 1 },
+    }).success,
+  ).toBe(false));

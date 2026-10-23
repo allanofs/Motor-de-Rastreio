@@ -17,6 +17,23 @@ export function daysInMonth(y: number, m: number): number {
   if (m === 2) return isLeapYear(y) ? 29 : 28;
   return [4, 6, 9, 11].includes(m) ? 30 : 31;
 }
+function isValidCalendarDay(d: {
+  year: number;
+  month: number;
+  day: number;
+}): boolean {
+  return (
+    Number.isInteger(d.year) &&
+    d.year >= 1 &&
+    d.year <= 9999 &&
+    Number.isInteger(d.month) &&
+    d.month >= 1 &&
+    d.month <= 12 &&
+    Number.isInteger(d.day) &&
+    d.day >= 1 &&
+    d.day <= daysInMonth(d.year, d.month)
+  );
+}
 const dayShape = {
   year,
   month: z.number().int().min(1).max(12),
@@ -24,7 +41,7 @@ const dayShape = {
 };
 export const CalendarDateSchema = z
   .strictObject(dayShape)
-  .refine((d) => d.day <= daysInMonth(d.year, d.month), "Invalid calendar day");
+  .refine(isValidCalendarDay, "Invalid calendar day");
 export type CalendarDate = z.infer<typeof CalendarDateSchema>;
 export const PartialCalendarDateSchema = z.discriminatedUnion("precision", [
   z.strictObject({ precision: z.literal("year"), year }),
@@ -35,10 +52,7 @@ export const PartialCalendarDateSchema = z.discriminatedUnion("precision", [
   }),
   z
     .strictObject({ precision: z.literal("day"), ...dayShape })
-    .refine(
-      (d) => d.day <= daysInMonth(d.year, d.month),
-      "Invalid calendar day",
-    ),
+    .refine(isValidCalendarDay, "Invalid calendar day"),
 ]);
 export type PartialCalendarDate = z.infer<typeof PartialCalendarDateSchema>;
 export const DateIntervalSchema = z

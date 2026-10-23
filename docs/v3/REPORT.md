@@ -20,7 +20,7 @@ A V2 foi preservada byte a byte. A implementação foi interrompida no limite da
 | Comparadores clínicos de composição | PARCIAL, deliberadamente em abstensão | Menor intervalo/maior gravidade dependem de semântica não definida pela P0 |
 | CCR | FORA DO ESCOPO DESTA RODADA | Nenhuma fonte, regra, política ou golden patient clínico |
 | UI | FORA DO ESCOPO DESTA RODADA | Vite gera biblioteca; nenhum formulário clínico |
-| Testes | COMPLETO | 137 passaram; zero falhas finais |
+| Testes | COMPLETO | 139 passaram; zero falhas finais |
 | CI | PASSOU local e remoto no commit de código | Run 39973266172; último commit nos checks da PR |
 | PR | COMPLETO | #1 aberta em rascunho; sem merge |
 
@@ -34,7 +34,8 @@ Branch remota: `v3-foundation-technical`, baseada em `7a6555373c05fa02f26f594bb8
 |---|---|
 | `e71fca22dfb8b10b6a595e8c86312932c93cd0a2` | Foundation isolada, calendário, schemas e verificações de conteúdo |
 | `e8d4bd630af2dbc1851d4eed04592e011f0b2960` | Engine determinística, isolamento, invariantes e documentação de uso |
-| Commit documental posterior, no histórico da PR | Este relatório, inspeção, inventário e oito ADRs |
+| `05c500d46f667fefeeb70ecb5c7ab19e6b5bc6e2` | Relatório, inspeção, inventário e oito ADRs |
+| Correção técnica posterior, no histórico da PR | Regressão de safeParse e atualização para 139 testes |
 
 O terminal permitiu clone/fetch, mas não push autenticado. Os dois commits foram enviados pela conexão GitHub. O checkout local foi alinhado à branch remota após verificar igualdade exata das árvores. Os checkpoints locais originais foram preservados na branch local `v3-foundation-technical-local`; não são os SHAs da PR.
 
@@ -117,19 +118,19 @@ Verificação reprodutível: `cd v3 && npm ci && npm run check`.
 | Categoria / arquivo | Total | Passaram | Falharam |
 |---|---:|---:|---:|
 | Calendário — dates.test.ts | 32 | 32 | 0 |
-| Schemas — schemas.test.ts | 22 | 22 | 0 |
+| Schemas — schemas.test.ts | 24 | 24 | 0 |
 | Integridade de conteúdo — content.test.ts | 10 | 10 | 0 |
 | Engine e invariantes — engine.test.ts | 70 | 70 | 0 |
 | Fronteiras de arquitetura — architecture.test.ts | 3 | 3 | 0 |
-| **Total** | **137** | **137** | **0** |
+| **Total** | **139** | **139** | **0** |
 
-Typecheck strict: passou. Schema check: 32 testes passaram (subconjunto do total, não testes adicionais). Build Vite: passou, biblioteca ES de aproximadamente 154,65 kB (38,70 kB gzip). `git diff --check`: passou. Não foi produzido pacote clínico publicável.
+Typecheck strict: passou. Schema check: 34 testes passaram (subconjunto do total, não testes adicionais). Build Vite: passou, biblioteca ES de aproximadamente 154,81 kB (38,75 kB gzip). `git diff --check`: passou. Não foi produzido pacote clínico publicável.
 
 Os testes incluem datas impossíveis, bissextos, mês/ano, datas futuras, pré-nascimento, limites de calendário, um dia antes/no dia/depois do vencimento, limite etário puramente sintético, múltiplos eventos e ordenação incerta. A aritmética de meses é exercitada em todos os meses entre 1990 e 2090.
 
 Propriedades são verificadas por permutações exaustivas pequenas, normalização idempotente e repetição com relógio global alterado. Não foi adicionada dependência de property testing. Há testes de inputs imutáveis, ghosts, unknown, Current sem âncora, qualificação por resultado/qualidade/completude, DAG, fontes não finais, incompatibilidade de ações, disponibilidade, falha controlada e preservação de domínios saudáveis.
 
-Falhas encontradas durante desenvolvimento foram corrigidas: projeção da data de nascimento para cálculo de idade; isolamento de referência a regra malformada; critério com valor ausente tratado como informação insuficiente. Um teste de fronteira inicialmente confundia variável local `window` com o navegador e foi corrigido para verificar acesso à API. Não houve mudança de expected clínico, pois não há testes clínicos.
+Falhas encontradas durante desenvolvimento foram corrigidas: projeção da data de nascimento para cálculo de idade; isolamento de referência a regra malformada; critério com valor ausente tratado como informação insuficiente. Um teste de fronteira inicialmente confundia variável local `window` com o navegador e foi corrigido para verificar acesso à API. A revisão final também corrigiu refinamentos de calendário para que safeParse de componentes inválidos retorne falha, sem lançar exceção; dois testes adicionais cobrem a regressão, inclusive em Source. Não houve mudança de expected clínico, pois não há testes clínicos.
 
 ## I. Invariantes do contrato
 
