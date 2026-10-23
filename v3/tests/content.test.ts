@@ -1,5 +1,5 @@
 import { expect, it } from "vitest";
-import { contentIssues } from "../src/engine/validateContent";
+import { contentIssues, validateBundle } from "../src/engine/validateContent";
 import { bundle, policy, rule, source } from "./fixtures";
 it("accepts coherent synthetic bundle", () =>
   expect(contentIssues(bundle, policy, "technical-a")).toEqual([]));
@@ -14,28 +14,18 @@ it.each(["draft", "preliminary", "withdrawn", "superseded"] as const)(
       ),
     ).toContain("non_final_source:technical-source"),
 );
-it("rejects supersedes cycles", () =>
-  expect(
-    contentIssues(
-      {
-        ...bundle,
-        rules: [
-          { ...rule, supersedes: ["r2"] },
-          { ...rule, ruleId: "r2", supersedes: ["r1"] },
-        ],
-      },
-      policy,
-      "technical-a",
-    ),
-  ).toContain("supersedes_cycle"));
-it("rejects dangling references", () =>
-  expect(
-    contentIssues(
-      { ...bundle, rules: [{ ...rule, supersedes: ["absent"] }] },
-      policy,
-      "technical-a",
-    ),
-  ).toContain("invalid_rule_reference:r1:absent"));
+it("rejects supersedes cycles in global bundle validation", () =>
+  expect(validateBundle({
+    ...bundle,
+    rules: [
+      { ...rule, supersedes: ["r2"] },
+      { ...rule, ruleId: "r2", supersedes: ["r1"] },
+    ],
+  })).toContain("supersedes_cycle"));
+it("rejects dangling references in global bundle validation", () =>
+  expect(validateBundle({
+    ...bundle, rules: [{ ...rule, supersedes: ["absent"] }],
+  })).toContain("invalid_rule_reference:r1:absent"));
 it("rejects duplicate rule identities", () =>
   expect(
     contentIssues({ ...bundle, rules: [rule, rule] }, policy, "technical-a"),

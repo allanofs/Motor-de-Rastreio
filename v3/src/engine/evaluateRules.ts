@@ -6,6 +6,7 @@ export function criteriaMatch(
   criteria: Criteria,
   patient: Patient,
   topicId: string,
+  onFactConsulted: (id: string) => void = () => {},
 ): "match" | "no_match" | "missing" {
   const age = patient.context.ageYears;
   let missing = false;
@@ -27,22 +28,20 @@ export function criteriaMatch(
       continue;
     }
     if (
-      facts.some(
-        (f) =>
-          f.presence === required.presence &&
-          (required.value === undefined ||
-            ("value" in f && f.value === required.value)),
-      )
+      facts.some((f) => {
+        onFactConsulted(f.id);
+        return f.presence === required.presence &&
+          (required.value === undefined || ("value" in f && f.value === required.value));
+      })
     )
       continue;
     if (
-      facts.some(
-        (f) =>
-          f.presence === "unknown" ||
-          (f.presence === required.presence &&
-            required.value !== undefined &&
-            (!("value" in f) || f.value === undefined)),
-      )
+      facts.some((f) => {
+        onFactConsulted(f.id);
+        return f.presence === "unknown" ||
+          (f.presence === required.presence && required.value !== undefined &&
+            (!("value" in f) || f.value === undefined));
+      })
     ) {
       missing = true;
       continue;
@@ -69,25 +68,14 @@ export function evaluateApplicableRules(
       suppressed.push({ ruleId: rule.ruleId, reason: "inactive_lifecycle" });
       continue;
     }
-    const used = new Set([
-      ...rule.requiredKnownFacts,
-      ...rule.population.facts.map((f) => f.conceptId),
-      ...rule.exclusions.flatMap((e) => e.facts.map((f) => f.conceptId)),
-    ]);
-    factsUsed.push(
-      ...patient.facts
-        .filter(
-          (f) => factAppliesToTopic(f, rule.topicId) && used.has(f.conceptId),
-        )
-        .map((f) => f.id),
-    );
-    const population = criteriaMatch(rule.population, patient, rule.topicId);
+    const consulted = (id: string): void => { factsUsed.push(id); };
+    const population = criteriaMatch(rule.population, patient, rule.topicId, consulted);
     if (population === "no_match") {
       suppressed.push({ ruleId: rule.ruleId, reason: "outside_population" });
       continue;
     }
     const exclusions = rule.exclusions.map((e) =>
-      criteriaMatch(e, patient, rule.topicId),
+      criteriaMatch(e, patient, rule.topicId, consulted),
     );
     if (exclusions.includes("match")) {
       suppressed.push({ ruleId: rule.ruleId, reason: "excluded_population" });
@@ -95,12 +83,11 @@ export function evaluateApplicableRules(
     }
     const absent = rule.requiredKnownFacts.filter(
       (concept) =>
-        !patient.facts.some(
-          (f) =>
-            factAppliesToTopic(f, rule.topicId) &&
-            f.conceptId === concept &&
-            f.presence !== "unknown",
-        ),
+        !patient.facts.some((f) => {
+          if (!factAppliesToTopic(f, rule.topicId) || f.conceptId !== concept) return false;
+          consulted(f.id);
+          return f.presence !== "unknown";
+        }),
     );
     if (
       population === "missing" ||

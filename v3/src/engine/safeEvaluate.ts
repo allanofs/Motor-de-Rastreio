@@ -56,6 +56,8 @@ export function assembleTopic(
     trace: {
       ...baseTrace,
       factsUsed: unique(tracks.flatMap((t) => t.trace.factsUsed)),
+      recordsUsed: unique(tracks.flatMap((t) => t.trace.recordsUsed)),
+      recordsConsidered: unique(tracks.flatMap((t) => t.trace.recordsConsidered)),
       rulesEvaluated: unique(tracks.flatMap((t) => t.trace.rulesEvaluated)),
       rulesActivated: unique(tracks.flatMap((t) => t.activeRuleIds)),
       rulesSuppressed: suppressed,
@@ -88,6 +90,7 @@ export function failedTrack(
     ],
     trace: {
       ...trace,
+      recordsUsed: [],
       outputs: ["ComputationError"],
       issues: [...trace.issues, code],
     },

@@ -26,10 +26,11 @@ export const DomainResolutionSchema = z.strictObject({
   state: PathwayStateSchema,
   actionIds: z.array(IdSchema),
   decisionSupportIds: z.array(IdSchema).default([]),
+  evidenceRecordIds: z.array(IdSchema).default([]),
   missingData: z.array(z.string()).default([]),
   guardrails: z.array(z.string()).default([]),
 });
-export type DomainResolution = z.infer<typeof DomainResolutionSchema>;
+export type DomainResolution = z.input<typeof DomainResolutionSchema>;
 /** Trusted, reviewed pure functions. Metadata explicitly declares every additional concept dependency. */
 export type DomainResolver = {
   resolverId: string;

@@ -85,10 +85,7 @@ function evaluateTrack(
     .sort((a, b) => a.ruleId.localeCompare(b.ruleId, "en"));
   trace.rulesEvaluated = rules.map((r) => r.ruleId);
   const evaluated = evaluateApplicableRules(rules, normalized);
-  trace.factsUsed = unique([
-    ...evaluated.factsUsed,
-    ...history.events.map((e) => e.id),
-  ]);
+  trace.factsUsed = evaluated.factsUsed;
   const strategies = resolveStrategies(evaluated.active, policy);
   const active = strategies.active;
   const suppressed = [...evaluated.suppressed, ...strategies.suppressed].sort(
@@ -123,6 +120,10 @@ function evaluateTrack(
     };
   const composed = composeActions(active, care, { topicId, trackId });
   trace.stages.push("compose_actions");
+  // Considered means inspected by a history-dependent calculation, not merely available.
+  if (active.some(rule => rule.computability === "computable" &&
+      rule.scheduleSpec !== undefined && rule.qualifyingEventSpec !== undefined))
+    trace.recordsConsidered = unique(history.events.map(event => event.id));
   const calculated = active.map((r) => calculateSchedule(r, history, asOf));
   trace.stages.push("calculate_schedule");
   const missing = unique([
@@ -168,6 +169,9 @@ function evaluateTrack(
   ].includes(state.status);
   trace.stages.push(...PIPELINE_STAGES.slice(10));
   trace.outputs = [state.status];
+  if (["Current", "Due", "Indeterminate"].includes(state.status))
+    trace.recordsUsed = unique(calculated.flatMap(result =>
+      result.schedule.map(schedule => schedule.anchorEventId)));
   const selected = active.filter(
     (r) =>
       r.strategyGroupId !== undefined &&
@@ -210,20 +214,17 @@ function evaluateTrack(
     track.trace.extensions = [
       { resolverId: resolver.resolverId, version: resolver.version, trackId },
     ];
-    const resolution = DomainResolutionSchema.parse(
-      resolver.resolve(
-        immutableResolverInput({
-          topicId,
-          trackId,
-          patient: normalized,
-          history,
-          rules: active,
-          policy,
-          asOf,
-          genericTrack: track,
-        }),
-      ),
-    );
+    const snapshot = immutableResolverInput({
+      topicId, trackId, patient: normalized, history, rules: active,
+      policy, asOf, genericTrack: track,
+    });
+    const resolution = DomainResolutionSchema.parse(resolver.resolve(snapshot));
+    const availableRecords = new Set([
+      ...snapshot.patient.facts.map(fact => fact.id),
+      ...snapshot.history.events.map(event => event.id),
+    ]);
+    if (resolution.evidenceRecordIds.some(id => !availableRecords.has(id)))
+      throw new Error("Resolver evidence is not present in its snapshot");
     if (resolution.state.status === "Current") {
       const current = state;
       if (
@@ -281,7 +282,15 @@ function evaluateTrack(
       ),
       missingData: unique(resolution.missingData),
       guardrails: unique([...track.guardrails, ...resolution.guardrails]),
-      trace: { ...track.trace, outputs: [resolvedState.status] },
+      trace: {
+        ...track.trace,
+        recordsUsed: unique([
+          ...resolution.evidenceRecordIds,
+          ...(resolvedState.status === "Current" ? [resolvedState.anchorEventId] : []),
+        ]),
+        recordsConsidered: unique([...track.trace.recordsConsidered, ...resolution.evidenceRecordIds]),
+        outputs: [resolvedState.status],
+      },
     };
   }
   return track;

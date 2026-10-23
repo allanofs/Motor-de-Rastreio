@@ -47,6 +47,8 @@ export const DecisionTraceSchema = z.strictObject({
   policyId: IdSchema,
   asOf: CalendarDateSchema,
   factsUsed: z.array(IdSchema),
+  recordsUsed: z.array(IdSchema),
+  recordsConsidered: z.array(IdSchema),
   rulesEvaluated: z.array(IdSchema),
   rulesActivated: z.array(IdSchema),
   rulesSuppressed: z.array(

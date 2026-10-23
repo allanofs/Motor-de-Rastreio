@@ -1,31 +1,30 @@
+import { z } from "zod";
+import { IdSchema, unique } from "../model/common";
+import { PolicySchema, RuleDefinitionSchema, RulesetSchema, SourceSchema } from "../model/content";
 import type { Policy, Ruleset } from "../model/content";
 
-export function contentIssues(
+function collectContentIssues(
   bundle: Ruleset,
   policy: Policy,
   topicId: string,
-  ruleTopics: ReadonlyMap<string, string> = new Map(),
+  ruleTopics: ReadonlyMap<string, string>,
+  global: boolean,
 ): string[] {
   const issues: string[] = [];
   const duplicate = (ids: string[], label: string): void => {
     if (new Set(ids).size !== ids.length) issues.push(`duplicate_${label}`);
   };
-  duplicate(
-    bundle.rules.map((r) => r.ruleId),
-    "rule_id",
-  );
-  duplicate(
-    bundle.sources.map((s) => s.sourceId),
-    "source_id",
-  );
-  duplicate(
-    bundle.policies.map((p) => p.policyId),
-    "policy_id",
-  );
+  const selected = new Set(policy.ruleIds);
+  const candidates = global ? bundle.rules : bundle.rules.filter(rule => selected.has(rule.ruleId));
+  const rules = candidates.filter(rule => rule.topicId === topicId);
+  const relevantIds = new Set(rules.map(rule => rule.ruleId));
+  const relevantSources = new Set(rules.flatMap(rule => rule.sourceRefs.map(ref => ref.sourceId)));
+  duplicate(candidates.filter(rule => relevantIds.has(rule.ruleId)).map(rule => rule.ruleId), "rule_id");
+  duplicate(bundle.sources.filter(source => relevantSources.has(source.sourceId)).map(source => source.sourceId), "source_id");
+  duplicate(bundle.policies.filter(item => item.policyId === policy.policyId).map(item => item.policyId), "policy_id");
   duplicate(policy.ruleIds, "policy_rule");
   duplicate(policy.topicIds, "policy_topic");
-  const rules = bundle.rules.filter((r) => r.topicId === topicId),
-    byId = new Map(bundle.rules.map((r) => [r.ruleId, r]));
+  const byId = new Map(candidates.map(rule => [rule.ruleId, rule]));
   for (const id of policy.ruleIds)
     if (
       !byId.has(id) &&
@@ -38,6 +37,7 @@ export function contentIssues(
       "action_id",
     );
     for (const id of [...r.supersedes, ...r.excludes]) {
+      if (!global && !selected.has(id)) continue;
       if (
         byId.get(id)?.topicId !== topicId ||
         byId.get(id)?.trackId !== r.trackId
@@ -75,12 +75,13 @@ export function contentIssues(
     }
     if (done.has(id)) return;
     visiting.add(id);
-    for (const next of byId.get(id)?.supersedes ?? []) visit(next);
+    for (const next of byId.get(id)?.supersedes ?? [])
+      if ((global || selected.has(next)) && byId.get(next)?.topicId === topicId) visit(next);
     visiting.delete(id);
     done.add(id);
   };
   for (const r of rules) visit(r.ruleId);
-  const selectionKeys = policy.primaryStrategies.map((s) =>
+  const selectionKeys = policy.primaryStrategies.filter(selection => selection.topicId === topicId).map((s) =>
     JSON.stringify([s.topicId, s.trackId, s.strategyGroupId]),
   );
   duplicate(selectionKeys, "strategy_selection");
@@ -104,4 +105,73 @@ export function contentIssues(
     )
       issues.push(`unlisted_policy_topic:${id}`);
   return [...new Set(issues)].sort();
+}
+
+/** Runtime integrity is scoped to the active policy and evaluated topic. */
+export function contentIssues(
+  bundle: Ruleset, policy: Policy, topicId: string,
+  ruleTopics: ReadonlyMap<string, string> = new Map(),
+): string[] {
+  return collectContentIssues(bundle, policy, topicId, ruleTopics, false);
+}
+
+/** Full-bundle validation for CI/release: unrelated invalid content is still an error here. */
+export function validateBundle(input: unknown): string[] {
+  const issues: string[] = [];
+  const complete = RulesetSchema.safeParse(input);
+  if (!complete.success)
+    issues.push(...complete.error.issues.map(issue =>
+      `schema:${issue.path.map(String).join(".")}:${issue.code}`));
+  const envelope = z.strictObject({
+    rulesetVersion: z.string().min(1), rules: z.array(z.unknown()),
+    sources: z.array(z.unknown()), policies: z.array(z.unknown()),
+    terminology: z.array(IdSchema),
+  }).safeParse(input);
+  if (!envelope.success) return unique(issues);
+  const raw = envelope.data;
+  const readId = (item: unknown, key: string): string | undefined => {
+    if (item === null || typeof item !== "object") return undefined;
+    const result = IdSchema.safeParse(Reflect.get(item, key));
+    return result.success ? result.data : undefined;
+  };
+  for (const [items, key, label] of [
+    [raw.rules, "ruleId", "rule_id"],
+    [raw.sources, "sourceId", "source_id"],
+    [raw.policies, "policyId", "policy_id"],
+  ] as const) {
+    const ids = items.flatMap(item => { const id = readId(item, key); return id === undefined ? [] : [id]; });
+    if (new Set(ids).size !== ids.length) issues.push(`duplicate_${label}`);
+  }
+  const rules = raw.rules.flatMap(item => {
+    const parsed = RuleDefinitionSchema.safeParse(item);
+    return parsed.success ? [parsed.data] : [];
+  });
+  const sources = raw.sources.flatMap(item => {
+    const parsed = SourceSchema.safeParse(item);
+    return parsed.success ? [parsed.data] : [];
+  });
+  const policies = raw.policies.flatMap(item => {
+    const parsed = PolicySchema.safeParse(item);
+    return parsed.success ? [parsed.data] : [];
+  });
+  const bundle: Ruleset = { ...raw, rules, sources, policies };
+  const allTopics = unique(rules.map(rule => rule.topicId));
+  const auditPolicy: Policy = {
+    policyId: "bundle-validation", label: "Technical bundle validation",
+    family: "technical", topicIds: allTopics, ruleIds: rules.map(rule => rule.ruleId),
+    primaryStrategies: [],
+  };
+  for (const topic of allTopics)
+    issues.push(...collectContentIssues(bundle, auditPolicy, topic, new Map(), true));
+  for (const policy of policies) for (const topic of policy.topicIds)
+    issues.push(...collectContentIssues(bundle, policy, topic, new Map(), false));
+  for (const source of sources)
+    if (source.supersededBy !== undefined && !sources.some(other => other.sourceId === source.supersededBy))
+      issues.push(`invalid_source_reference:${source.sourceId}:${source.supersededBy}`);
+  return unique(issues);
+}
+export function assertValidBundle(input: unknown): Ruleset {
+  const issues = validateBundle(input);
+  if (issues.length > 0) throw new Error(`Invalid content bundle: ${issues.join("; ")}`);
+  return RulesetSchema.parse(input);
 }

@@ -434,6 +434,8 @@ const sequenceResolver: DomainResolver = {
             },
       actionIds: [],
       decisionSupportIds: [],
+      evidenceRecordIds: trigger !== undefined && resolution !== undefined &&
+        isCertainlyAfter(resolution, trigger) ? [trigger.id, resolution.id] : [],
       missingData: [],
       guardrails: [],
     };
