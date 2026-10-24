@@ -137,28 +137,20 @@ Contagem CCR específica após R1: **172 testes**.
 
 **Segunda revisão médica independente (`reviewed_by_2`).**
 
-Ela deve revisar a tradução clínica e não apenas confirmar que testes passam. Idealmente deve incluir ao menos:
+Ela deve revisar a tradução clínica e não apenas confirmar que testes passam.
 
-- faixa etária e intervalos das três policies;
-- FIT+ e resolução por colonoscopia;
-- hard exclusions;
-- história familiar ACG;
-- limites deliberados/abstenções;
-- divergências SUS × BA-A × Internacional;
-- golden cases críticos.
-
-A preparação desse gate foi iniciada em:
+A preparação desse gate está documentada em:
 
 - `24-phase6-r2-independent-audit.md` — auditoria independente pré-R2 e findings;
 - `25-phase6-r2-review-form.md` — formulário para o segundo médico;
 - `tests/ccr/r2Gate.test.ts` — impede `reviewed_by_2`/`active` acidental sem segunda identidade humana.
 
-A auditoria pré-R2 encontrou dois itens a resolver antes da assinatura R2 final:
+A auditoria pré-R2 encontrou dois ajustes de evidência/proveniência antes da assinatura R2:
 
-- **R2-01:** Grade USPSTF está atualmente replicado nas regras de modalidade; deve permanecer semanticamente ligado à recomendação populacional por faixa etária, enquanto FIT/colonoscopia mantêm apenas estratégia/intervalo;
-- **R2-02:** a proveniência/versionamento do documento `B12` precisa ser reconciliada, apesar de o comportamento SUS estar corroborado por comunicações oficiais MS/INCA 2026.
+- **R2-01:** Grade USPSTF está replicado nas regras específicas de FIT/colonoscopia. A/B devem permanecer semanticamente vinculados à recomendação populacional de rastrear por faixa etária; as regras de modalidade devem preservar apenas estratégia/intervalo e a referência à USPSTF.
+- **R2-02:** o antigo `B12` é um protocolo OCI diagnóstico, 2ª edição 2025, e não é a fonte adequada para afirmar FIT bienal 50–75. A auditoria identificou a **Portaria SAES/MS nº 5.215, de 22/10/2026 (DOU 23/10/2026)** como fonte normativa apropriada para esse comportamento; os sourceRefs SUS precisam ser migrados e `B12` precisa ser corrigido/restrito ao conteúdo que realmente sustenta.
 
-Esses findings não alteraram outputs clínicos, mas são relevantes para evidência e auditabilidade e bloqueiam a assinatura R2 limpa.
+Esses findings não mudaram os outputs clínicos aprovados, mas exigem nova tradução de evidência e reconfirmação R1 antes de R2.
 
 ### Gate técnico de preparação R2
 
@@ -171,9 +163,14 @@ Commit `4002daaa172272fef088e5a0ede55eb00ce0c6a0`: workflow `40120075597` **succ
 - typecheck/build: ✅;
 - V2 byte-for-byte: ✅.
 
-### Depois da segunda revisão
+### Depois das correções pré-R2
 
-Se aprovada, deve-se criar uma nova versão candidata/release, registrar reviewer/data distintos, executar novamente a suíte completa e somente então discutir `lifecycleStatus=active`, release público e merge.
+1. criar novo candidato ainda `reviewed_by_1`;
+2. provar ausência de mudança de outputs clínicos quando aplicável;
+3. reconfirmar R1 das alterações de evidência/proveniência;
+4. submeter ao segundo médico independente;
+5. se aprovado, registrar reviewer/data distintos e produzir `reviewed_by_2`;
+6. somente então discutir `active`, release e merge em decisão separada.
 
 ## 9. Estado final da Fase 6 / gate R2
 
@@ -188,7 +185,8 @@ Adversarial / goldens              ✅
 Trace / governance audit           ✅
 Primeira revisão da tradução       ✅ reviewed_by_1
 Auditoria independente pré-R2      ✅
-R2-01 / R2-02                      ⛔ bloqueiam assinatura R2 final
+R2-01                              ⛔ correção pendente
+R2-02                              🟡 solução normativa identificada; migração pendente
 Gate técnico R2                    ✅ 417/417
 Segunda revisão médica humana      ⏳ pendente
 Ativação clínica                   ❌ não autorizada
@@ -196,4 +194,4 @@ Release público                    ❌ não autorizado
 Merge PR #3                        ❌ não realizado
 ```
 
-**Conclusão:** a Fase 6 está tecnicamente fechada em R1 e o gate R2 está formalmente preparado. `reviewed_by_2` continua bloqueado até resolução dos findings e aprovação explícita de um segundo médico humano independente.
+**Conclusão:** a Fase 6 está tecnicamente fechada em R1 e o gate R2 está preparado. `reviewed_by_2` continua bloqueado até as correções de evidência/proveniência, reconfirmação R1 e aprovação explícita de um segundo médico humano independente.
