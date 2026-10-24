@@ -3,5 +3,7 @@ export * from "./sources";
 export * from "./actions";
 export * from "./decisionSupport";
 export * from "./rules/routine";
+export * from "./rules/strategies";
+export * from "./resolvers/strategyCoverage";
 export * from "./policies";
 export * from "./ruleset";

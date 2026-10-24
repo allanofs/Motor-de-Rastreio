@@ -4,8 +4,16 @@ import { CCR_IDS } from "./terminology";
 export const fitScreeningAction = ActionDefinitionSchema.parse({
   actionId: "crc-action-fit-screening",
   kind: "recommendation",
-  text: "Oferecer FIT de rastreamento conforme a política selecionada.",
+  text: "Oferecer FIT de rastreamento conforme a política e a estratégia selecionadas.",
   resourceId: CCR_IDS.resources.fit,
+  unavailableRoute: "clinical_review",
+});
+
+export const colonoscopyScreeningAction = ActionDefinitionSchema.parse({
+  actionId: "crc-action-colonoscopy-screening",
+  kind: "recommendation",
+  text: "Oferecer colonoscopia primária de rastreamento conforme a política e a estratégia selecionadas.",
+  resourceId: CCR_IDS.resources.colonoscopy,
   unavailableRoute: "clinical_review",
 });
 
@@ -13,7 +21,7 @@ export const offerScreeningStrategyAction = ActionDefinitionSchema.parse({
   actionId: "crc-action-offer-screening-strategy",
   kind: "recommendation",
   text:
-    "Oferecer rastreamento de câncer colorretal e selecionar uma estratégia elegível com o paciente.",
+    "Oferecer rastreamento de câncer colorretal e registrar explicitamente a estratégia escolhida com o paciente.",
 });
 
 export const sharedDecisionAction = ActionDefinitionSchema.parse({
@@ -46,6 +54,7 @@ export const avoidRoutineAfter85Action = ActionDefinitionSchema.parse({
 
 export const ccrActions = [
   fitScreeningAction,
+  colonoscopyScreeningAction,
   offerScreeningStrategyAction,
   sharedDecisionAction,
   clinicalReviewAction,

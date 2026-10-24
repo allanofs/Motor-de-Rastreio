@@ -1,14 +1,24 @@
 import { IdSchema } from "../../model/common";
 
+export const CCR_STRATEGY_VALUES = {
+  fit: "fit",
+  colonoscopy: "colonoscopy",
+} as const;
+
 export const CCR_IDS = {
   topic: "crc-screening",
   tracks: {
     routine: "crc-routine",
     population: "crc-population",
+    fitStrategy: "crc-strategy-fit",
+    colonoscopyStrategy: "crc-strategy-colonoscopy",
   },
   modalities: {
     fit: "crc-fit",
+    // Legacy generic modality kept for Phase 6.0 technical fixtures only.
     colonoscopy: "crc-colonoscopy",
+    colonoscopyScreening: "crc-colonoscopy-screening",
+    colonoscopyDiagnostic: "crc-colonoscopy-diagnostic",
   },
   results: {
     fitNegative: "negative",
@@ -23,6 +33,8 @@ export const CCR_IDS = {
     hereditarySyndrome: "crc-hereditary-syndrome",
     familyHistoryRelevant: "crc-family-history-relevant",
     familyHistoryUnknown: "crc-family-history-unknown",
+    screeningStrategySelection: "crc-screening-strategy-selection",
+    historySufficientForCurrentStatus: "crc-history-sufficient-current-status",
   },
   resources: {
     fit: "crc-resource-fit",
