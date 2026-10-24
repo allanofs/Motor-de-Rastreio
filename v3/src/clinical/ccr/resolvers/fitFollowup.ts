@@ -3,10 +3,7 @@ import type {
   DomainResolution,
   DomainResolverInput,
 } from "../../../engine/extensions";
-import {
-  diagnosticColonoscopyAfterPositiveFitAction,
-  offerScreeningStrategyAction,
-} from "../actions";
+import { diagnosticColonoscopyAfterPositiveFitAction } from "../actions";
 import {
   brazilPostFitClockDecisionSupport,
   inadequateColonoscopyDecisionSupport,
@@ -289,17 +286,16 @@ export const postFitRoutineResolver: DomainResolver = {
     }
 
     if (coverage.status === "Due")
-      return {
-        state: { status: "Due" },
-        actionIds: [offerScreeningStrategyAction.actionId],
-        decisionSupportIds: [],
-        evidenceRecordIds: coverage.evidenceRecordIds,
-        missingData: [],
-        guardrails: [
-          "Ten years after a qualifying normal high-quality post-FIT colonoscopy, identify a new screening round; do not choose the strategy automatically.",
-          ...resolutionTraceGuardrails(analysis),
-        ],
-      };
+      return noAction(
+        { status: "Due" },
+        coverage.evidenceRecordIds,
+        {
+          guardrails: [
+            "Ten years after a qualifying normal high-quality post-FIT colonoscopy, a new screening round is due; policy/strategy tracks determine the human-selected next action.",
+            ...resolutionTraceGuardrails(analysis),
+          ],
+        },
+      );
 
     return noAction(
       {
