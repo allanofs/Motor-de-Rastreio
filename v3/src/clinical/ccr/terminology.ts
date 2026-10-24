@@ -5,6 +5,24 @@ export const CCR_STRATEGY_VALUES = {
   colonoscopy: "colonoscopy",
 } as const;
 
+export const CCR_FAMILY_DETAIL_KEYS = {
+  affectedFdrCount: "affected-fdr-count",
+  affectedSdrCount: "affected-sdr-count",
+  youngestDiagnosisAgeBand: "youngest-diagnosis-age-band",
+  youngestDiagnosisAgeYears: "youngest-diagnosis-age-years",
+  findingType: "finding-type",
+} as const;
+
+export const CCR_FAMILY_VALUES = {
+  ageUnder60: "under-60",
+  age60OrOlder: "60-or-older",
+  ageUnknown: "unknown",
+  crc: "crc",
+  advancedPolyp: "advanced-polyp",
+  polypUnknownType: "polyp-unknown-type",
+  findingUnknown: "unknown",
+} as const;
+
 export const CCR_IDS = {
   topic: "crc-screening",
   tracks: {
@@ -14,6 +32,9 @@ export const CCR_IDS = {
     colonoscopyStrategy: "crc-strategy-colonoscopy",
     fitFollowup: "crc-fit-positive-followup",
     postFitRoutine: "crc-post-fit-routine",
+    familyStatus: "crc-family-status",
+    familyHighRisk: "crc-family-high-risk",
+    familyChoice: "crc-family-strategy-choice",
   },
   modalities: {
     fit: "crc-fit",
