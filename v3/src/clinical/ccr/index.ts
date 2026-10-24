@@ -6,6 +6,7 @@ export * from "./rules/routine";
 export * from "./rules/strategies";
 export * from "./rules/followup";
 export * from "./rules/family";
+export * from "./rules/specialRisk";
 export * from "./resolvers/strategyCoverage";
 export * from "./resolvers/fitEpisodes";
 export * from "./resolvers/fitFollowup";
