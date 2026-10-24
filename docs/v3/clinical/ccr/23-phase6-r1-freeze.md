@@ -147,11 +147,19 @@ Ela deve revisar a tradução clínica e não apenas confirmar que testes passam
 - divergências SUS × BA-A × Internacional;
 - golden cases críticos.
 
+A preparação desse gate foi iniciada em:
+
+- `24-phase6-r2-independent-audit.md` — auditoria independente pré-R2 e findings;
+- `25-phase6-r2-review-form.md` — formulário para o segundo médico;
+- `tests/ccr/r2Gate.test.ts` — impede `reviewed_by_2`/`active` acidental sem segunda identidade humana.
+
+A auditoria pré-R2 encontrou dois itens a resolver antes da assinatura R2 final: granularidade do Grade USPSTF nas regras de modalidade e reconciliação documental da proveniência `B12`. Esses findings não mudaram outputs clínicos, mas são relevantes para evidência/auditabilidade.
+
 ### Depois da segunda revisão
 
 Se aprovada, deve-se criar uma nova versão candidata/release, registrar reviewer/data distintos, executar novamente a suíte completa e somente então discutir `lifecycleStatus=active`, release público e merge.
 
-## 9. Estado final da Fase 6
+## 9. Estado final da Fase 6 / gate R2
 
 ```text
 Foundation representability        ✅
@@ -163,10 +171,12 @@ Hard exclusions                    ✅
 Adversarial / goldens              ✅
 Trace / governance audit           ✅
 Primeira revisão da tradução       ✅ reviewed_by_1
-Segunda revisão independente       ⏳ pendente
+Auditoria independente pré-R2      ✅
+R2-01 / R2-02                      ⏳ requerem resolução
+Segunda revisão médica humana      ⏳ pendente
 Ativação clínica                   ❌ não autorizada
 Release público                    ❌ não autorizado
 Merge PR #3                        ❌ não realizado
 ```
 
-**Conclusão:** a Fase 6 pode ser considerada tecnicamente fechada em R1. O próximo gate de governança é a segunda revisão médica independente; não há justificativa para continuar adicionando comportamento clínico ao piloto CCR antes dela.
+**Conclusão:** a Fase 6 está tecnicamente fechada em R1 e o gate R2 está formalmente preparado. `reviewed_by_2` continua bloqueado até resolução dos findings e aprovação explícita de um segundo médico humano independente.
