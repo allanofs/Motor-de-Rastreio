@@ -78,6 +78,6 @@ A Fase 6.2 só passa se:
 - `npm run check` e preservação V2 permanecerem verdes;
 - zero mudança em `engine/**` e `model/**`.
 
-**Status do gate:** implementação criada no commit `702e3434b78458603880e3fae9241a4b326efe34`; CI ainda precisa validar a tradução antes de encerrar a subfase.
+**Status do gate:** implementação aplicada na linha da PR no commit `fe5a57b9ee21523ed15d3fd316d21d0521dde51a`; CI ainda precisa validar a tradução antes de encerrar a subfase.
 
 A próxima etapa após este gate é Fase 6.3: FIT+ e resolver longitudinal diagnóstico.
