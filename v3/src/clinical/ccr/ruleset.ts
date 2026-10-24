@@ -4,6 +4,7 @@ import {
   ccrPolicies,
   ccrPhase63Policies,
   ccrPhase64Policies,
+  ccrPhase65Policies,
 } from "./policies";
 import {
   ba45To49Rule,
@@ -16,6 +17,7 @@ import {
 import { ccrPhase62StrategyRules } from "./rules/strategies";
 import { ccrPhase63FollowupRules } from "./rules/followup";
 import { ccrPhase64FamilyRules } from "./rules/family";
+import { ccrPhase65SpecialRiskRules } from "./rules/specialRisk";
 import { ccrSources } from "./sources";
 import { ccrTerminology } from "./terminology";
 
@@ -67,5 +69,18 @@ export const ccrPhase64Ruleset = RulesetSchema.parse({
   rules: ccrPhase64Rules,
   sources: ccrSources,
   policies: ccrPhase64Policies,
+  terminology: ccrTerminology,
+});
+
+export const ccrPhase65Rules = [
+  ...ccrPhase64Rules,
+  ...ccrPhase65SpecialRiskRules,
+];
+
+export const ccrPhase65Ruleset = RulesetSchema.parse({
+  rulesetVersion: "crc-0.5.0-phase6.5-draft",
+  rules: ccrPhase65Rules,
+  sources: ccrSources,
+  policies: ccrPhase65Policies,
   terminology: ccrTerminology,
 });
