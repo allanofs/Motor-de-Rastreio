@@ -35,6 +35,7 @@ export const CCR_IDS = {
     familyStatus: "crc-family-status",
     familyHighRisk: "crc-family-high-risk",
     familyChoice: "crc-family-strategy-choice",
+    specialRisk: "crc-special-risk-status",
   },
   modalities: {
     fit: "crc-fit",
