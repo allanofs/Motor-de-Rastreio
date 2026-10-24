@@ -7,7 +7,9 @@ import {
 type FamilyFactLike = {
   readonly conceptId: string;
   readonly presence: string;
-  readonly details?: Readonly<Record<string, string | number | boolean>>;
+  readonly details?:
+    | Readonly<Record<string, string | number | boolean>>
+    | undefined;
 };
 
 export type FamilyProfile =
