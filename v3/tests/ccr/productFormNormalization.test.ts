@@ -278,7 +278,7 @@ describe("CCR Phase 7.1 product form normalization", () => {
     expect(
       normalized.patient.examHistory[0]?.status === "performed" &&
         normalized.patient.examHistory[0].date,
-    ).toEqual({ year: 2025, month: 3 });
+    ).toEqual({ precision: "month", year: 2025, month: 3 });
   });
 
   it("keeps Care Setting outside Patient and maps only canonical resource IDs", () => {
