@@ -50,7 +50,7 @@ Esse invariante é protegido por `tests/ccr/r1Reconfirmation.test.ts`.
 
 ## Gate final pós-reconfirmação
 
-Workflow PR #3, run `40122322725`, HEAD `80d8aa86f7f665760503607dd0610e182bb66ec1`:
+Workflow PR #3, run `40122322725`, candidato R1 reconfirmado:
 
 - typecheck: ✅;
 - schema checks: ✅ 62/62;
@@ -61,6 +61,8 @@ Workflow PR #3, run `40122322725`, HEAD `80d8aa86f7f665760503607dd0610e182bb66ec
 - `r2Gate.test.ts`: ✅ 3/3;
 - build: ✅;
 - V2 byte-for-byte: ✅.
+
+Commits documentais posteriores ao gate não alteram código clínico, ruleset, fontes, policies ou resolvers e permanecem submetidos ao mesmo workflow da PR.
 
 ## Material entregue ao R2
 
