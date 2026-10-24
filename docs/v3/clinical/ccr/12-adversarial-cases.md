@@ -1,6 +1,6 @@
-# 12 — Casos adversariais candidatos — pós-auditoria
+# 12 — Casos adversariais — manifesto clínico pós-auditoria
 
-**60 casos documentais; não executáveis.** A expectativa abaixo é a especificação humana consolidada para futura golden suite. `asOf` padrão: 24/10/2026 quando não indicado.
+**60 casos documentais de referência.** Desde a Fase 6.5, este arquivo funciona como **manifesto clínico-fonte** da suíte adversarial executável. Nem toda linha corresponde a exatamente um `it()` isolado: alguns casos são cobertos por propriedades transversais, matrizes de policy/care-setting, permutações temporais ou testes especializados das Fases 6.3–6.5. A rastreabilidade executável está distribuída principalmente em `tests/ccr/goldenSafety.test.ts`, `longitudinal.test.ts`, `familyHistory.test.ts`, `specialRisk.test.ts` e regressões da versão mais recente. `asOf` padrão: 24/10/2026 quando não indicado.
 
 | Caso | Cenário | Expected consolidado |
 |---|---|---|
@@ -28,15 +28,15 @@
 | 022 | “sem lesão”, mas preparo inadequado | não qualifica como normal resolutivo |
 | 023 | colonoscopia com pólipo | revisão de surveillance, sem intervalo automático |
 | 024 | lesão com AP confirmando CRC | sair do screening; HandedOff só se cuidado assumido |
-| 025 | CRC prévio tratado | fora da rotina habitual |
+| 025 | CRC prévio tratado | fora da rotina habitual; `ClinicalReviewRequired` se cuidado especializado não estiver confirmado |
 | 026 | pólipo prévio de tipo desconhecido | ClinicalReviewRequired |
 | 027 | Crohn conhecido, extensão incerta | revisão; não average-risk automático |
 | 028 | história familiar nunca perguntada | não assumir ausência; indicação mínima pode continuar conhecida, estratégia pode ficar pendente |
 | 029 | 1 FDR CRC aos 70, Internacional | iniciar aos 40/10a antes; depois average-risk; sem q5 universal |
 | 030 | 1 FDR CRC aos 42, Internacional | ACG: colonoscopia aos 40/10a antes e q5 |
 | 031 | 2 FDR com CRC | ACG: colonoscopia aos 40/10a antes e q5 |
-| 032 | Lynch confirmada | revisão/handoff especializado |
-| 033 | FAP confirmada | revisão/handoff especializado |
+| 032 | Lynch confirmada | revisão/handoff especializado; diagnóstico não prova HandedOff sozinho |
+| 033 | FAP confirmada | revisão/handoff especializado; diagnóstico não prova HandedOff sozinho |
 | 034 | profissional informa que caso não é contexto de screening | Motor se abstém; não faz triagem/urgência |
 | 035 | profissional está incerto se caso é preventivo | Motor se abstém; avaliação clínica fora do módulo |
 | 036 | FIT indisponível no SUS | preservar recomendação; clarificar rota |
@@ -65,13 +65,17 @@
 | 059 | profissional muda avaliação de preventiva para não preventiva | Motor interrompe rota de screening e se abstém; não faz diagnóstico |
 | 060 | adenoma avançado prévio + colonoscopia posterior sem novas lesões | permanece no contexto de surveillance; não retornar ao habitual automaticamente |
 
-## Requisitos transversais para futura golden suite
+## Invariantes executáveis consolidados na Fase 6.5
 
-- mesmas datas em ordens de entrada diferentes devem gerar mesma saída;
-- unknown nunca equivale a false;
+- mesmas datas/eventos em ordens de entrada diferentes devem gerar a mesma saída;
+- `unknown` nunca equivale a `false` nem a `never_performed`;
 - same-day/intervalos sobrepostos não ganham ordem fictícia;
 - FIT+ aberto nunca pode coexistir com ação rotineira redundante;
-- policy comparison deve preservar divergência sem escolher “vencedora”;
-- nenhum caso de sintomas deve transformar o Motor em triador diagnóstico.
+- policy comparison preserva divergência sem escolher “vencedora”;
+- Care Setting altera rota operacional, não a indicação científica;
+- hard exclusions (CRC prévio, surveillance por pólipo relevante, DII colônica, síndrome hereditária) precisam produzir uma saída explícita de revisão, não apenas sumir da rotina;
+- diagnóstico/risco especial não equivale a `HandedOff` sem assunção real do cuidado;
+- traces devem preservar policy, ruleset, fontes e evidência usada/considerada;
+- nenhum caso transforma o Motor em triador de sintomas/urgência.
 
-Antes de converter estes casos em testes executáveis, mapear cada expected a proposições `APPROVED_R1`/`APPROVED_R1_MODIFIED` e à fonte governante correspondente.
+O detalhamento da cobertura executável e das falhas encontradas durante o ataque adversarial está em `20-phase6-5-golden-suite.md`.
