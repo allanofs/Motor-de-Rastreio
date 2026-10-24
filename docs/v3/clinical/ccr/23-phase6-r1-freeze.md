@@ -160,6 +160,17 @@ A auditoria pré-R2 encontrou dois itens a resolver antes da assinatura R2 final
 
 Esses findings não alteraram outputs clínicos, mas são relevantes para evidência e auditabilidade e bloqueiam a assinatura R2 limpa.
 
+### Gate técnico de preparação R2
+
+Commit `4002daaa172272fef088e5a0ede55eb00ce0c6a0`: workflow `40120075597` **success**.
+
+- **417/417 testes totais**;
+- **21/21 arquivos de teste**;
+- `r2Gate.test.ts`: **3/3**;
+- **62/62 schema checks**;
+- typecheck/build: ✅;
+- V2 byte-for-byte: ✅.
+
 ### Depois da segunda revisão
 
 Se aprovada, deve-se criar uma nova versão candidata/release, registrar reviewer/data distintos, executar novamente a suíte completa e somente então discutir `lifecycleStatus=active`, release público e merge.
@@ -178,6 +189,7 @@ Trace / governance audit           ✅
 Primeira revisão da tradução       ✅ reviewed_by_1
 Auditoria independente pré-R2      ✅
 R2-01 / R2-02                      ⛔ bloqueiam assinatura R2 final
+Gate técnico R2                    ✅ 417/417
 Segunda revisão médica humana      ⏳ pendente
 Ativação clínica                   ❌ não autorizada
 Release público                    ❌ não autorizado
