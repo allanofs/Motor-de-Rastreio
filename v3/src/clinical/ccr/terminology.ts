@@ -12,18 +12,23 @@ export const CCR_IDS = {
     population: "crc-population",
     fitStrategy: "crc-strategy-fit",
     colonoscopyStrategy: "crc-strategy-colonoscopy",
+    fitFollowup: "crc-fit-positive-followup",
+    postFitRoutine: "crc-post-fit-routine",
   },
   modalities: {
     fit: "crc-fit",
-    // Legacy generic modality kept for Phase 6.0 technical fixtures only.
+    // Legacy generic modality kept for Phase 6.0 technical fixtures and diagnostic colonoscopy whose indication is not established.
     colonoscopy: "crc-colonoscopy",
     colonoscopyScreening: "crc-colonoscopy-screening",
+    // This modality is reserved for a diagnostic colonoscopy known to belong to the post-FIT-positive pathway.
     colonoscopyDiagnostic: "crc-colonoscopy-diagnostic",
   },
   results: {
     fitNegative: "negative",
     fitPositive: "positive",
     colonoscopyNormal: "normal",
+    colonoscopyPolypOrLesion: "polyp-or-lesion",
+    colonoscopyCancer: "cancer",
   },
   concepts: {
     screeningContextConfirmed: "crc-screening-context-confirmed",
@@ -35,6 +40,7 @@ export const CCR_IDS = {
     familyHistoryUnknown: "crc-family-history-unknown",
     screeningStrategySelection: "crc-screening-strategy-selection",
     historySufficientForCurrentStatus: "crc-history-sufficient-current-status",
+    specialistCareAssumed: "crc-specialist-care-assumed",
   },
   resources: {
     fit: "crc-resource-fit",
