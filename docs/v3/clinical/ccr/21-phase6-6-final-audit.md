@@ -38,10 +38,11 @@ Componentes adicionais:
 
 - 8 actions CCR registradas;
 - 7 decision-support considerations;
-- 9 tracks CCR, incluindo `crc-special-risk-status`;
+- 10 tracks CCR, incluindo `crc-special-risk-status`;
 - resolvers especializados para cobertura de estratégia, episódios FIT+, pós-FIT e história familiar;
 - 3 policies independentes;
-- nenhuma regra compartilhada simultaneamente por duas policies no ruleset candidato.
+- nenhuma regra compartilhada simultaneamente por duas policies no ruleset candidato;
+- entrypoint canônico `ccrCandidateRuleset` para impedir integração acidental com snapshots históricos de 6.1–6.4.
 
 ## 4. Auditoria de fontes
 
@@ -240,10 +241,25 @@ Conclusão: FG01–FG04 não exigiram alteração arquitetural para o piloto CCR
 | Policy isolation | ✅ |
 | Source/locator integrity | ✅ |
 | Trace invariants | ✅ |
-| Typecheck/schema/build/CI | ✅ após gate verde |
+| Canonical candidate entrypoint | ✅ |
+| Typecheck/schema/build/CI | ✅ 409/409 testes; 62/62 schema checks; build; V2 byte-for-byte |
 | Primeira revisão humana **do código traduzido** | ⏳ pendente explícita |
 | Segunda revisão médica independente | ⏳ obrigatória antes de release público |
 | Release clínico público | ❌ não autorizado nesta fase |
+
+### Contagem de testes ao fechamento técnico
+
+O HEAD pré-empacotamento documental da 6.6 passou:
+
+- **409/409 testes totais** em 19 arquivos de teste;
+- **167 testes CCR específicos** nas suítes 6.0–6.6;
+- `governancePhase66.test.ts`: 10/10;
+- `phase66Inventory.test.ts`: 1/1;
+- `candidateEntrypoint.test.ts`: 1/1;
+- schema checks: 62/62;
+- typecheck: verde;
+- build: verde;
+- V2 byte-for-byte: verde.
 
 ## 11. Recomendação de governança
 
@@ -273,6 +289,8 @@ A promoção para `reviewed_by_1` deve ser um ato explícito de revisão humana 
 Ao final da Fase 6.6, se CI permanecer verde:
 
 - congelar `crc-0.5.0-phase6.5-draft` como **candidate-for-R1-code-review**;
+- usar `ccrCandidateRuleset` / `ccrCandidatePolicies` / `ccrCandidateResolvers` como entrypoint canônico de integração;
+- manter snapshots 6.1–6.4 apenas para regressão/auditoria histórica;
 - não adicionar novas regras clínicas no mesmo ciclo;
 - manter PR #3 Draft;
 - não mergear;
@@ -281,7 +299,7 @@ Ao final da Fase 6.6, se CI permanecer verde:
 
 ## 13. Próxima ação humana
 
-A próxima ação adequada não é “Fase 6.7 com mais código”. É uma **revisão humana de tradução clínica** do candidato, usando este relatório como checklist.
+A próxima ação adequada não é “Fase 6.7 com mais código”. É uma **revisão humana de tradução clínica** do candidato, usando `22-phase6-r1-code-review-packet.md` como checklist.
 
 Após aprovação explícita do autor/revisor:
 
