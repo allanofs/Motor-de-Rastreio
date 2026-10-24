@@ -1,12 +1,12 @@
 # 25 — Formulário de segunda revisão médica independente (R2) — CCR
 
-**Candidato-base:** `crc-0.5.1-phase6-r1-draft`  
+**Candidato-base atual:** `crc-0.5.1-phase6-r1-draft`  
 **PR:** #3 — Draft  
 **Objetivo:** registrar uma revisão médica humana independente da tradução executável do módulo de rastreamento colorretal.
 
 > Este formulário não deve ser preenchido pelo autor/revisor R1. O segundo revisor precisa ser uma pessoa diferente e deve revisar o conteúdo clínico, não apenas confirmar que os testes passam.
 
-> **Estado atual:** não assinar ainda. A auditoria pré-R2 identificou `R2-01` e `R2-02` em `24-phase6-r2-independent-audit.md`; ambos devem ser resolvidos antes da aprovação R2 final. O gate técnico de preparação passou 417/417 testes, 62/62 schema checks, typecheck, build e preservação byte-for-byte da V2.
+> **Estado atual:** não assinar ainda. `R2-01` ainda precisa de correção de metadado USPSTF e `R2-02` já teve a fonte normativa adequada identificada (Portaria SAES/MS nº 5.215/2026), mas a migração dos `sourceRefs` e a reauditoria das fontes SUS ainda precisam ser aplicadas. Depois disso será criado/revalidado o candidato corrigido e a R1 deverá ser reconfirmada antes da assinatura R2.
 
 ## Identificação do revisor R2
 
@@ -78,11 +78,12 @@
 
 ### R2-01 — Grade USPSTF em regras de modalidade
 
-- [ ] Confirmo que Grade A/B não está sendo atribuído como se fosse uma graduação individual de FIT/colonoscopia; a graduação deve permanecer ligada à recomendação populacional de rastrear por faixa etária.
+- [ ] Confirmo que Grade A/B não está sendo atribuído como se fosse uma graduação individual de FIT/colonoscopia; a graduação permanece ligada à recomendação populacional de rastrear por faixa etária.
 
-### R2-02 — proveniência B12
+### R2-02 — fonte SUS de rastreamento
 
-- [ ] Confirmei a edição/documento exato representado por `crc-src-B12`, ou revisei a substituição/complementação por fonte oficial 2026 inequivocamente identificável.
+- [ ] Confirmei que a Portaria SAES/MS nº 5.215/2026 é a fonte normativa usada para idade 50–75/FIT bienal e que o antigo protocolo OCI `B12` foi corrigido para sua edição real e restrito a locators que realmente sustenta.
+- [ ] Revi individualmente os sourceRefs SUS de história familiar/hard exclusions após a migração e confirmei que nenhum locator atribui ao documento conteúdo que ele não contém.
 
 ## Resultado da revisão
 
@@ -113,8 +114,8 @@ Ao aprovar, o revisor declara que:
 
 ## Texto recomendado para autorização explícita
 
-> Eu, **[NOME DO REVISOR]**, após revisão independente do candidato CCR **[VERSÃO]** em **[DATA]**, aprovo as 43 traduções executáveis como segunda revisão médica (`reviewed_by_2`). Confirmo que os findings R2-01 e R2-02 foram resolvidos e que esta aprovação não autoriza automaticamente `lifecycleStatus=active`, release público ou merge da PR #3.
+> Eu, **[NOME DO REVISOR]**, após revisão independente do candidato CCR **[VERSÃO CORRIGIDA]** em **[DATA]**, aprovo as 43 traduções executáveis como segunda revisão médica (`reviewed_by_2`). Confirmo que R2-01 e R2-02 foram resolvidos e que esta aprovação não autoriza automaticamente `lifecycleStatus=active`, release público ou merge da PR #3.
 
 Se a aprovação for parcial, substituir “as 43 traduções executáveis” pela lista exata de rules/blocos aprovados.
 
-**Importante:** enquanto `R2-01` e `R2-02` permanecerem abertos, qualquer assinatura neste formulário deve ser tratada como revisão em andamento, não como autorização para `reviewed_by_2`.
+**Importante:** até a correção R2-01/R2-02 ser aplicada, testada e reconfirmada em R1, qualquer assinatura neste formulário deve ser tratada como revisão em andamento, não como autorização para `reviewed_by_2`.
