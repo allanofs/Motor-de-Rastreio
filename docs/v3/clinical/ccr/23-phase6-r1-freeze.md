@@ -6,29 +6,28 @@
 **Snapshot pré-R1:** `crc-0.5.0-phase6.5-draft`  
 **Candidato R1:** `crc-0.5.1-phase6-r1-draft`
 
-## Estado R1
-
-As 43 regras estão em `lifecycleStatus=draft` e `reviewStatus=reviewed_by_1`, com `Allan Ramos Costa` registrado em 24/10/2026. Nenhuma regra está `active` ou `reviewed_by_2`.
+As 43 regras estão `lifecycleStatus=draft` e `reviewStatus=reviewed_by_1`, com `Allan Ramos Costa` registrado em 24/10/2026. Nenhuma regra está `active` ou `reviewed_by_2`.
 
 O snapshot 0.5.0 permanece imutável. A promoção 0.5.0 -> 0.5.1 foi governance-only e passou 414/414 testes, 62/62 schema checks, typecheck, build e preservação byte-for-byte da V2.
 
-## Preparação R2
+## Gate R2
 
-A auditoria independente pré-R2 está em `24-phase6-r2-independent-audit.md`; o formulário do segundo médico está em `25-phase6-r2-review-form.md`; `tests/ccr/r2Gate.test.ts` impede promoção acidental.
+A preparação da segunda revisão está documentada em:
 
-Dois findings precisam ser corrigidos antes da assinatura R2:
+- `24-phase6-r2-independent-audit.md`;
+- `25-phase6-r2-review-form.md`;
+- `tests/ccr/r2Gate.test.ts`.
 
-1. **R2-01 — USPSTF:** Grade A/B deve permanecer vinculado à recomendação populacional por idade, não às modalidades FIT/colonoscopia individualmente.
-2. **R2-02 — SUS:** `B12` é protocolo OCI diagnóstico, 2ª edição 2025. A fonte normativa apropriada para FIT bienal 50–75 é a **Portaria SAES/MS nº 5.215/2026**; os sourceRefs precisam ser migrados e os demais locators SUS revalidados.
+A auditoria pré-R2 identificou:
+
+1. **R2-01:** corrigir a granularidade do Grade USPSTF nas regras específicas de FIT/colonoscopia.
+2. **R2-02:** migrar a rotina SUS para a fonte normativa **Portaria SAES/MS nº 5.215/2026**, corrigindo `B12` para sua edição diagnóstica de 2025 e revalidando os demais locators SUS.
 
 O gate técnico de preparação passou 417/417 testes, 62/62 schema checks, typecheck/build e V2 byte-for-byte.
 
-## Estado
-
 ```text
-Fase 6 técnica                    ✅
 R1                                ✅ reviewed_by_1
-Pré-auditoria R2                  ✅
+Auditoria independente pré-R2     ✅
 R2-01                             ⛔ correção pendente
 R2-02                             🟡 fonte correta identificada; migração pendente
 Segundo médico humano             ⏳
@@ -38,4 +37,4 @@ release                           ❌
 merge PR #3                       ❌
 ```
 
-**Próximo passo:** corrigir R2-01/R2-02 em novo candidato ainda R1, rerodar a suíte, reconfirmar R1 e somente então entregar ao segundo médico independente.
+**Próximo passo:** aplicar R2-01/R2-02 em novo candidato ainda R1, rerodar a suíte, reconfirmar R1 das mudanças e somente então entregar ao segundo médico independente.
