@@ -108,6 +108,79 @@ function criticalLongitudinalGate(
   return undefined;
 }
 
+function afterCriticalGate(
+  input: DomainResolverInput,
+  baseResult: DomainResolution,
+): DomainResolution {
+  const analysis = analyzeFitHistory(input.history.events);
+
+  if (baseResult.state.status === "Current") return baseResult;
+
+  if (analysis.pendingFitIds.length > 0)
+    return noAction(
+      {
+        status: "NotApplicable",
+        reason: "Do not start a new screening action while a FIT result is pending.",
+      },
+      analysis.pendingFitIds,
+      [],
+      ["Pending FIT does not start or reset the interval."],
+    );
+
+  if (analysis.invalidFitIds.length > 0)
+    return noAction(
+      {
+        status: "NotApplicable",
+        reason: "Invalid/inconclusive FIT requires clarification before a new routine action.",
+      },
+      analysis.invalidFitIds,
+      [],
+      ["Invalid/inconclusive FIT is not a negative qualifying event."],
+    );
+
+  if (analysis.resolvedPairs.length > 0) {
+    if (input.policy.family === "br_ampliado")
+      return noAction(
+        {
+          status: "NotApplicable",
+          reason:
+            "A resolved FIT-positive episode has no automated BA-A next routine clock in this pilot.",
+        },
+        fitEpisodeEvidence(analysis),
+        [],
+        resolutionTraceGuardrails(analysis),
+      );
+
+    if (input.policy.family === "internacional") {
+      const coverage = postFitNormalCoverage(input.history.events, input.asOf);
+      if (coverage.status === "Current")
+        return noAction(
+          {
+            status: "NotApplicable",
+            reason:
+              "A qualifying normal post-FIT diagnostic colonoscopy still provides current 10-year coverage.",
+          },
+          coverage.evidenceRecordIds,
+          [],
+          resolutionTraceGuardrails(analysis),
+        );
+      if (coverage.status === "Indeterminate")
+        return noAction(
+          {
+            status: "Indeterminate",
+            reason:
+              "Post-FIT colonoscopy date precision is insufficient to determine current coverage.",
+          },
+          coverage.evidenceRecordIds,
+          ["crc_post_fit_colonoscopy_date_precision"],
+          resolutionTraceGuardrails(analysis),
+        );
+    }
+  }
+
+  return baseResult;
+}
+
 function wrapStrategyResolver(base: DomainResolver): DomainResolver {
   return {
     ...base,
@@ -122,102 +195,32 @@ function wrapStrategyResolver(base: DomainResolver): DomainResolver {
     resolve(input) {
       const critical = criticalLongitudinalGate(input);
       if (critical !== undefined) return critical;
-
-      const analysis = analyzeFitHistory(input.history.events);
-      const baseResult = base.resolve(input);
-
-      // A pending/invalid FIT never erases already-valid Current coverage, but it must suppress a new screening action.
-      if (baseResult.state.status === "Current") return baseResult;
-
-      if (analysis.pendingFitIds.length > 0)
-        return noAction(
-          {
-            status: "NotApplicable",
-            reason: "Do not start a new screening action while a FIT result is pending.",
-          },
-          analysis.pendingFitIds,
-          [],
-          ["Pending FIT does not start or reset the interval."],
-        );
-
-      if (analysis.invalidFitIds.length > 0)
-        return noAction(
-          {
-            status: "NotApplicable",
-            reason: "Invalid/inconclusive FIT requires clarification before a new routine action.",
-          },
-          analysis.invalidFitIds,
-          [],
-          ["Invalid/inconclusive FIT is not a negative qualifying event."],
-        );
-
-      if (analysis.resolvedPairs.length > 0) {
-        if (input.policy.family === "br_ampliado")
-          return noAction(
-            {
-              status: "NotApplicable",
-              reason:
-                "A resolved FIT-positive episode has no automated BA-A next routine clock in this pilot.",
-            },
-            fitEpisodeEvidence(analysis),
-            [],
-            resolutionTraceGuardrails(analysis),
-          );
-
-        if (input.policy.family === "internacional") {
-          const coverage = postFitNormalCoverage(input.history.events, input.asOf);
-          if (coverage.status === "Current")
-            return noAction(
-              {
-                status: "NotApplicable",
-                reason:
-                  "A qualifying normal post-FIT diagnostic colonoscopy still provides current 10-year coverage.",
-              },
-              coverage.evidenceRecordIds,
-              [],
-              resolutionTraceGuardrails(analysis),
-            );
-          if (coverage.status === "Indeterminate")
-            return noAction(
-              {
-                status: "Indeterminate",
-                reason:
-                  "Post-FIT colonoscopy date precision is insufficient to determine current coverage.",
-              },
-              coverage.evidenceRecordIds,
-              ["crc_post_fit_colonoscopy_date_precision"],
-              resolutionTraceGuardrails(analysis),
-            );
-        }
-      }
-
-      return baseResult;
+      return afterCriticalGate(input, base.resolve(input));
     },
   };
 }
 
-export const baStrategyChoiceResolver63 = wrapStrategyResolver(
-  baStrategyChoiceResolver,
-);
-export const internationalStrategyChoiceResolver63 = wrapStrategyResolver(
-  internationalStrategyChoiceResolver,
-);
-export const fitStrategyCoverageResolver63 = wrapStrategyResolver(
-  fitStrategyCoverageResolver,
-);
-export const colonoscopyStrategyCoverageResolver63 = wrapStrategyResolver(
-  colonoscopyStrategyCoverageResolver,
-);
+const baChoice63 = wrapStrategyResolver(baStrategyChoiceResolver);
 
-export const susRoutineLongitudinalResolver63: DomainResolver = {
-  resolverId: "crc-sus-routine-longitudinal-phase6.3",
+export const routineLongitudinalResolver63: DomainResolver = {
+  resolverId: "crc-routine-longitudinal-phase6.3",
   version: "6.3",
   topicId: CCR_IDS.topic,
   trackId: CCR_IDS.tracks.routine,
-  requiredConceptIds: [CCR_IDS.concepts.specialistCareAssumed],
+  requiredConceptIds: [
+    ...new Set([
+      ...baChoice63.requiredConceptIds,
+      CCR_IDS.concepts.specialistCareAssumed,
+    ]),
+  ],
   resolve(input) {
     const critical = criticalLongitudinalGate(input);
     if (critical !== undefined) return critical;
+
+    if (input.policy.family === "br_ampliado")
+      return afterCriticalGate(input, baStrategyChoiceResolver.resolve(input));
+
+    if (input.policy.family !== "sus_oficial") return mirrorGeneric(input);
 
     const analysis = analyzeFitHistory(input.history.events);
     if (analysis.resolvedPairs.length > 0)
@@ -259,3 +262,13 @@ export const susRoutineLongitudinalResolver63: DomainResolver = {
     return generic;
   },
 };
+
+export const internationalStrategyChoiceResolver63 = wrapStrategyResolver(
+  internationalStrategyChoiceResolver,
+);
+export const fitStrategyCoverageResolver63 = wrapStrategyResolver(
+  fitStrategyCoverageResolver,
+);
+export const colonoscopyStrategyCoverageResolver63 = wrapStrategyResolver(
+  colonoscopyStrategyCoverageResolver,
+);
