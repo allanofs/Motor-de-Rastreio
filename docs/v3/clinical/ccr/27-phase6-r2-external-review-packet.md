@@ -224,9 +224,11 @@ No fechamento para R2, o candidato possui:
 
 - 43 regras clínicas executáveis;
 - 3 policies isoladas;
+- **428/428 testes totais** em 23 arquivos de teste;
+- **62/62 schema checks**;
+- typecheck e build verdes;
 - regressões de representabilidade, estratégia, longitudinalidade, história familiar, hard exclusions, traces e policy leakage;
-- mais de 400 testes totais no repositório;
-- schema checks, typecheck e build como gates obrigatórios;
+- teste dedicado provando que a reconfirmação R1 `0.5.2 -> 0.5.3` altera somente metadados de revisão;
 - V2 preservada byte-for-byte;
 - nenhuma necessidade de adaptar `v3/src/engine/**` ou `v3/src/model/**` especificamente para CCR.
 
