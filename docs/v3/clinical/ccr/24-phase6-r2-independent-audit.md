@@ -214,4 +214,4 @@ merge PR #3                     ❌
 5. somente após aprovação explícita do segundo médico, registrar reviewer/data distintos e produzir `reviewed_by_2` em uma nova versão de governança;
 6. ainda assim, ativação/release/merge continuam decisões separadas.
 
-**Governança:** este documento é uma auditoria de preparação para R2. Ele não deve ser usado como assinatura do segundo revisor. O formulário R2 permanece explicitamente bloqueado enquanto R2-01/R2-02 estiverem abertos.
+**Governança:** este documento é uma auditoria de preparação para R2. Ele não deve ser usado como assinatura do segundo revisor. O formulário R2 permanece explicitamente bloqueado enquanto R2-01/R2-02 estiverem abertos. O gate técnico de preparação passou integralmente.
