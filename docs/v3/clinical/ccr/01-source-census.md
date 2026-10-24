@@ -1,74 +1,63 @@
-# 01 — Censo de fontes CCR
+# 01 — Censo de fontes CCR — consolidado pós-auditoria
 
-Corte e verificação: **23/10/2026**. Pesquisa dirigida, não revisão sistemática. Fontes são documentos intelectuais distintos: espelhos e formas HTML/PDF do mesmo documento não aumentam a contagem. `FINAL` descreve a publicação; **não** significa aprovação da nossa interpretação. Todas as proposições são `awaiting_clinical_review`.
+**Corte clínico original:** 23/10/2026. **Auditoria/consolidação:** 24/10/2026.
 
-**27 documentos candidatos localizados**: 7 oficiais finais/atos (B07 apenas identificado, sem primário confirmado; B06 lido em reprodução), 2 preliminares/registros de consulta, 6 sociedades brasileiras, 8 internacionais e 4 suplementares/comunicações. A categoria é exclusiva para contagem; a autoridade real está em `02-source-authority.md`. Não são 27 fontes integrais verificadas.
+A pesquisa dirigida localizou **27 documentos candidatos distintos**. O censo original integral permanece preservado no commit `9c12ba39ac70ef94016c11eccf58ad90a71d9241`. Este arquivo registra o status necessário para a especificação consolidada.
 
-## Oficiais finais/atos localizados (status clínico discriminado) (7)
+## Fontes brasileiras governantes ou corroboradoras
 
-| ID | Instituição / título / ano | Status | Jurisdição / tipo | URL | Verificação / relevância |
-|---|---|---|---|---|---|
-| B01 | MS/INCA — Relatório das atividades do GT CCR — 2024; 2024 (publicação posterior) | HISTORICAL | Brasil; Relatório técnico de atividades | [Original ou canal identificado](https://ninho.inca.gov.br/jspui/bitstream/123456789/17247/1/Relat%C3%B3rio%20das%20Atividade%20do%20Grupo%20de%20Trabalho%20%202024.pdf) | 2026-10-23: Texto localizado; contexto institucional. Demanda, elaboração e reuniões; não governa intervalo |
-| B02 | MS/INCA — Relatório do GT CCR — 2025; 2025 (disponibilizado em 2026) | FINAL_TECHNICAL | Brasil; Relatório técnico de atividades | [Original ou canal identificado](https://ninho.inca.gov.br/jspui/bitstream/123456789/17247/3/Relat%C3%B3rio%202025%20do%20GT%20de%20Rastreamento%20CCR.pdf) | 2026-10-23: PDF consultado, 15 páginas. Apresentação p.3; painel p.9; produtos p.12; conclusão p.13 |
-| B05 | Conitec — Ata da 152ª reunião — Comitê de PCDT; junho/2026 | FINAL_DELIBERATION_RECORD | Brasil/SUS; Ata final | [Original ou canal identificado](https://www.gov.br/conitec/pt-br/midias/reuniao_conitec/2026/ata-da-152o-reuniao-da-conitec_pcdt_site/@@display-file/file) | 2026-10-23: PDF consultado, 24 páginas; trecho p.9 inspecionado visualmente. PDF pp.8–11: pós-CP, 181 contribuições, ajustes e deliberação 1.107/2026 |
-| B06 | SAES/MS — Portaria nº4.642, de 06/08/2026; DOU 10/08/2026 | IMPLEMENTATION_ONLY; substituição relatada, ver B07 | Brasil/SUS; Ato de tabela de procedimentos | [Original ou canal identificado](https://www.conass.org.br/conass-informa-n-158-2026-publicada-portaria-saes-ms-n-4-642-que-inclui-procedimento-e-altera-atributos-de-procedimento-da-tabela-de-procedimentos-medicamentos-orteses-proteses-e-m/) | 2026-10-23: Reprodução CONASS lida; anúncio oficial B10 corrobora inclusão; original DOU não recuperado. Anexo I; código antigo 02.02.04.020-8; não usar como cadastro atual sem B07 |
-| B07 | SAES/MS — Portaria nº5.215, de 22/10/2026; DOU 23/10/2026 | NORMATIVE_STATUS_UNVERIFIED; SOURCE ACCESS BLOCKER | Brasil/SUS; Ato substitutivo de tabela | [Original ou canal identificado](https://www.in.gov.br/web/dou/-/portaria-saes/ms-n-5.215-de-22-de-outubro-de-2026-739944058) | 2026-10-23: URL primária localizada mas 502; reproduções Atlas/LegisMap lidas e concordantes; original não confirmado. Art.5 torna B06 sem efeito; anexos relatam código 02.14.01.032-5; validar primário antes de uso |
-| B08 | MS/Conitec — PCDT Adenocarcinoma de Cólon e Reto — Portaria Conjunta nº25; 17/11/2025 | FINAL_ACTIVE_WITHIN_SCOPE | Brasil/SUS; Portaria e PCDT final | [Original ou canal identificado](https://www.gov.br/conitec/pt-br/midias/protocolos/adenocarcinoma-de-colon-e-de-reto-pcdt/@@display-file/file) | 2026-10-23: PDF consultado, 38 páginas. Art.1; §3.1 p.3; diagnóstico/tratamento não substituem guideline de screening |
-| B12 | MS/SAES — Protocolo de Acesso às OCI na Atenção Especializada em Oncologia; 2026 | FINAL_TECHNICAL; operational scope | Brasil/SUS; Protocolo operacional | [Original ou canal identificado](https://www.gov.br/saude/pt-br/composicao/saes/agora-tem-especialistas/publicacoes/protocolo-de-acesso-as-ofertas-de-cuidados-integrados-em-oncologia.pdf/@@download/file) | 2026-10-23: PDF consultado, 26 páginas. pp.17–18 impressas: FIT bienal 50–75, FIT+→colonoscopia e critérios de encaminhamento |
+| ID | Fonte | Status consolidado | Papel no piloto |
+|---|---|---|---|
+| B03 | Conitec/INCA — Diretrizes Brasileiras do Rastreamento CCR — CP20/2026 | `PRELIMINARY` | não promover detalhes alteráveis; útil para rastreabilidade da proposta |
+| B05 | Conitec — Ata 152ª reunião/2026 | `FINAL_DELIBERATION_RECORD` | confirma deliberação pós-CP e que houve ajustes; não substitui o texto final integral |
+| B08 | PCDT Adenocarcinoma de Cólon e Reto — 2025 | `FINAL_ACTIVE_WITHIN_SCOPE` | doença estabelecida/diagnóstico; não governa screening populacional |
+| B12 | MS/SAES — Protocolo de Acesso às OCI em Oncologia — 2026 | `FINAL_TECHNICAL; operational_scope` | confirma núcleo SUS: FIT bienal, 50–75, FIT+→colonoscopia |
+| B06 | Portaria SAES/MS 4.642/2026 | `SUPERSEDED/ADMINISTRATIVE` | histórico administrativo; não usar como cadastro atual |
+| B07 | Portaria SAES/MS 5.215/2026 | `ADMINISTRATIVE; corroborated` | CONASEMS/espelhos corroboram substituição de B06; código administrativo não é input clínico do piloto |
+| B09–B11 | comunicações INCA/MS 2026 | `COMMUNICATION_ONLY` | implantação, características gerais do FIT e rollout; não substituem guideline completa |
 
-## Preliminares e registros de consulta (2)
+### Links principais
 
-| ID | Instituição / título / ano | Status | Jurisdição / tipo | URL | Verificação / relevância |
-|---|---|---|---|---|---|
-| B03 | MS/Conitec/INCA — Diretrizes Brasileiras do Rastreamento do câncer de cólon e reto — CP20; março/2026 | PRELIMINARY | Brasil/SUS; Relatório preliminar | [Original ou canal identificado](https://www.gov.br/conitec/pt-br/midias/consultas/relatorios/2026/relatorio-preliminar-diretrizes-brasileiras-do-rastreamento-do-cancer-de-colon-e-reto-cp-20/@@display-file/file) | 2026-10-23: PDF consultado, 65 páginas; Figura 1 inspecionada visualmente. Oito recomendações; texto e figura não equivalem a versão pós-CP |
-| B04 | Conitec — Contribuições da CP nº20/2026; abril/2026 | CONSULTATION_RECORD | Brasil; Contribuições públicas | [Original ou canal identificado](https://www.gov.br/conitec/pt-br/midias/consultas/contribuicoes/2026/contribuicao-cp-20-2026-db-rastreamento-do-cancer-de-colon-e-reto) | 2026-10-23: Registro oficial localizado; não adotado como recomendação. Contribuições não são decisão da Conitec |
+- B03: https://www.gov.br/conitec/pt-br/midias/consultas/relatorios/2026/relatorio-preliminar-diretrizes-brasileiras-do-rastreamento-do-cancer-de-colon-e-reto-cp-20/@@display-file/file
+- B05: https://www.gov.br/conitec/pt-br/midias/reuniao_conitec/2026/ata-da-152o-reuniao-da-conitec_pcdt_site/@@display-file/file
+- B08: https://www.gov.br/conitec/pt-br/midias/protocolos/adenocarcinoma-de-colon-e-de-reto-pcdt/@@display-file/file
+- B12: https://www.gov.br/saude/pt-br/composicao/saes/agora-tem-especialistas/publicacoes/protocolo-de-acesso-as-ofertas-de-cuidados-integrados-em-oncologia.pdf/@@download/file
+- B07 DOU identificado: https://www.in.gov.br/web/dou/-/portaria-saes/ms-n-5.215-de-22-de-outubro-de-2026-739944058
 
-## Sociedades brasileiras (6)
+## Sociedades brasileiras
 
-| ID | Instituição / título / ano | Status | Jurisdição / tipo | URL | Verificação / relevância |
-|---|---|---|---|---|---|
-| S01 | SBOC — Diretrizes 2026 — Cólon: doença localizada, v6 FINAL; 18/05/2026 | FINAL_SOCIETY | Brasil; Guideline de tratamento com seção de screening | [Original ou canal identificado](https://sboc.org.br/wp-content/uploads/2026/04/Diretrizes-SBOC-2026-C%E2%94%9C%E2%94%82lon-doen%E2%94%9Coa-localizada-v6-VERS%E2%94%9CaO-FINAL.pdf) | 2026-10-23: PDF consultado, 34 páginas; pp.5–6 inspecionadas visualmente. Somente Prevenção e rastreamento, pp.4–6; não importar seguimento pós-câncer |
-| S02 | SBOC — Diretrizes 2026 — Cólon: doença localizada, v3 colaboração; 29/04/2026 | DRAFT_SUPERSEDED_BY_S01 | Brasil; Versão para colaboração | [Original ou canal identificado](https://sboc.org.br/wp-content/uploads/2026/04/Diretrizes-SBOC-2026-Colon-doenca-localizada-v3-VERSAO-PARA-COLABORACAO.pdf) | 2026-10-23: PDF consultado; descartado como governante após S01. Controle de versão; URL recente não prova versão final |
-| S03 | SBCP — ACP recomenda rastreio a partir dos 50 anos — posicionamento SBCP; 05/10/2023 | COMMUNICATION_ONLY; posição institucional | Brasil; Nota sobre recomendações e comissão | [Original ou canal identificado](https://sbcp.org.br/medico/american-college-of-physicians-recomenda-rastreio-do-cancer-colorretal-a-partir-dos-50-anos/) | 2026-10-23: Página consultada. Parágrafos finais: orientação médica a partir dos 45; não adoção automática do ACP |
-| S04 | SBCP — Entrevista Dr. Fábio Campos — mudança para 45; 2018 | HISTORICAL_COMMUNICATION | Brasil; Entrevista institucional | [Original ou canal identificado](https://sbcp.org.br/medico/confira-a-entrevista-do-dr-fabio-campos-para-o-programa-bandnews/) | 2026-10-23: Página localizada; contexto histórico. Não guideline graduada contemporânea |
-| S05 | FBG — Participe da Consulta Pública nº20; 14/04/2026 | COMMUNICATION_ONLY | Brasil; Convite à CP | [Original ou canal identificado](https://www.fbg.org.br/2026/04/14/participe-da-consulta-publica-n20-e-fortaleca-a-gastroenterologia/) | 2026-10-23: Registro localizado por busca; abertura falhou. Não localizar guideline autônoma final não significa que ela inexista |
-| S06 | AMB/CFM e sociedades — Diagnóstico, estadiamento e tratamento cirúrgico e multidisciplinar do CCR; 14/08/2001 | HISTORICAL | Brasil; Projeto Diretrizes | [Original ou canal identificado](https://amb.org.br/files/_BibliotecaAntiga/diagnostico-estadiamento-e-tratamento-cirurgico-e-multidisciplinar-do-cancer-colorreta.pdf) | 2026-10-23: PDF consultado, 12 páginas. Não governa o piloto de screening contemporâneo |
+| ID | Fonte | Status | Papel |
+|---|---|---|---|
+| S01 | SBOC — Diretrizes 2026, Cólon doença localizada, v6 FINAL | `FINAL_SOCIETY` | somente seção explícita de prevenção/rastreamento; sustenta BA-A, colonoscopia 10 anos e faixa/intervalos descritos |
+| S03 | SBCP — posicionamento 2023 | `COMMUNICATION_ONLY` | apoio contextual para avaliação a partir de 45; não guideline completa |
+| S02/S04/S05/S06 | versões históricas, colaboração ou comunicação | histórico/suplementar | não governam regras do piloto |
 
-## Internacionais (8)
+S01: https://sboc.org.br/wp-content/uploads/2026/04/Diretrizes-SBOC-2026-C%E2%94%9C%E2%94%82lon-doen%E2%94%9Coa-localizada-v6-VERS%E2%94%9CaO-FINAL.pdf
 
-| ID | Instituição / título / ano | Status | Jurisdição / tipo | URL | Verificação / relevância |
-|---|---|---|---|---|---|
-| I01 | USPSTF — Colorectal Cancer: Screening — final recommendation; 18/05/2021 | FINAL_CURRENT_LOCATED | EUA; Recomendação populacional | [Original ou canal identificado](https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/colorectal-cancer-screening) | 2026-10-23: Página primária consultada; versão final posterior não localizada. Recommendation Summary; Practice Considerations; Screening Intervals; Table 1 |
-| I02 | ACS — Colorectal cancer screening: update 2026 — Wolf et al.; 27/05/2026 | FINAL_CURRENT_LOCATED | EUA; Guideline populacional atualizada | [Original ou canal identificado](https://acsjournals.onlinelibrary.wiley.com/doi/10.3322/caac.70083) | 2026-10-23: Texto primário consultado; portal ACS confirma atualização. Table 1; Recommendations and rationale; novos testes e prazo preferencial pós-positivo |
-| I03 | ACG — ACG Clinical Guidelines: CRC Screening 2021 — Shaukat et al.; 2021 | FINAL_CURRENT_LOCATED | EUA; Guideline gastroenterologia | [Original ou canal identificado](https://medicine.uams.edu/familymedicine/wp-content/uploads/sites/7/2021/07/ACG_Clinical_Guidelines__Colorectal_Cancer.14.pdf) | 2026-10-23: Artigo primário em repositório universitário, 22 páginas; Table 1 verificada visualmente. Table 1 p.460; recomendações 9–12 para família; DOI10.14309/ajg.0000000000001122 |
-| I04 | USMSTF — Recommendations on FIT to screen for colorectal neoplasia — Robertson et al.; 2017 (online 2016) | FINAL; PRIMARY_ACCESS_PARTIAL | EUA; Consenso específico FIT | [Original ou canal identificado](https://www.asge.org/docs/default-source/education/practice_guidelines/fecal_immunochemical_testing.pdf) | 2026-10-23: Trechos primários indexados recuperados; abertura PDF/HTML502/403. Recommendation/summary e Table: FIT+ não repetir; FIT+ com colonoscopia prévia; leitura integral pendente |
-| I05 | USMSTF — Follow-up after colonoscopy and polypectomy — Gupta et al.; 2020 | FINAL; PRIMARY_ACCESS_PARTIAL | EUA; Consenso de seguimento | [Original ou canal identificado](https://www.asge.org/docs/default-source/guidelines/recommendations-for-follow-up-after-colonoscopy-and-polypectomy-a-consensus-update-by-the-us-multi-society-task-force-on-colorectal-cancer-2020-march-gie.pdf) | 2026-10-23: Trechos primários indexados lidos; PDFs/PMC/autor bloqueados. Tables 3–5; Normal high-quality colonoscopy; premissas e exceções; integral pendente |
-| I06 | USMSTF — Optimizing bowel preparation quality — Jacobson et al.; 2025 | FINAL; PRIMARY_ACCESS_PARTIAL | EUA; Atualização do consenso 2014 | [Original ou canal identificado](https://www.asge.org/home/resources/publications/guidelines/optimizing-bowel-preparation-quality-for-colonoscopy--consensus-recommendations-by-the-us-multi-society-task-force-on-colorectal-cancer) | 2026-10-23: Trechos primários indexados e abstract PubMed 40047767; integral 502/403. Table 2 e Management of inadequate and nonsalvageable preparation; integral pendente |
-| I07 | USMSTF — Updates on age to start and stop screening; 2022 | FINAL_UPDATE; PRIMARY_ACCESS_PARTIAL | EUA; Atualização etária | [Original ou canal identificado](https://www.asge.org/home/resources/publications/guidelines/updates-on-age-to-start-and-stop-colorectal-cancer-screening-recommendations-from-the-u.s.-multi-society-task-force-on-colorectal-cancer) | 2026-10-23: Registro primário indexado; integral 502. Impede usar idades da versão 2017 como atualização vigente; não governante escolhido |
-| I08 | ACG — Statement on inclusion of blood-based tests in ACS guideline; 01/06/2026 | SOCIETY_STATEMENT; não guideline substituta | EUA; Posicionamento complementar | [Original ou canal identificado](https://webfiles.gi.org/links/media/ACG_ACS_CRC_Screening_Guideline_Blood_Test_06012026.pdf) | 2026-10-23: PDF consultado, 2 páginas. Não equivale a nova ACG CRC guideline; novos testes fora do piloto |
+## Fontes internacionais
 
-## Suplementares/comunicações (4)
+| ID | Fonte | Status pós-auditoria | Papel aprovado |
+|---|---|---|---|
+| I01 | USPSTF — CRC Screening 2021 | `FINAL_CURRENT_LOCATED` | governante populacional da policy Internacional |
+| I02 | ACS — update 2026 | `FINAL_CURRENT_LOCATED` | alternativa/comparação; não governante do piloto Internacional A |
+| I03 | ACG — CRC Screening 2021 | `FINAL_CURRENT_LOCATED` | complemento explícito para história familiar na policy Internacional |
+| I04 | USMSTF — FIT 2017 | `FINAL; PRIMARY_ACCESS_CONFIRMED` | FIT+→colonoscopia; não resolver FIT+ repetindo FIT; contexto de FIT+ após colonoscopia prévia |
+| I05 | USMSTF — follow-up colonoscopy/polypectomy 2020 | `FINAL; PRIMARY_ACCESS_CONFIRMED` | colonoscopia normal high-quality→10 anos, inclusive independentemente da indicação, salvo exceções de maior risco |
+| I06 | USMSTF — bowel preparation 2025 | `FINAL; PRIMARY_ACCESS_PARTIAL` | colonoscopia inadequada não fecha episódio; prazos permanecem decision support, não deadline automático |
+| I07 | USMSTF — idade 2022 | `FINAL_UPDATE; supplemental` | não governante escolhido |
+| I08 | ACG statement 2026 | `SOCIETY_STATEMENT` | novos testes fora do piloto |
 
-| ID | Instituição / título / ano | Status | Jurisdição / tipo | URL | Verificação / relevância |
-|---|---|---|---|---|---|
-| B09 | INCA — SUS adota novo exame para detectar câncer de intestino antes de sintomas; 21/05/2026 | COMMUNICATION_ONLY | Brasil; Comunicação institucional | [Original ou canal identificado](https://www.gov.br/inca/pt-br/assuntos/noticias/2026/sus-adota-novo-exame-para-detectar-cancer-de-intestino-antes-dos-sintomas) | 2026-10-23: Página consultada. Anúncio; amostra única, sem preparo/dieta; não norma clínica completa |
-| B10 | INCA — SUS inclui teste de alta tecnologia para rastreamento de câncer colorretal; 10/08/2026 | COMMUNICATION_ONLY | Brasil; Comunicação institucional | [Original ou canal identificado](https://www.gov.br/inca/pt-br/assuntos/noticias/2026/sus-inclui-teste-de-alta-tecnologia-para-rastreamento-de-cancer-colorretal) | 2026-10-23: Página consultada. Corrobora inclusão administrativa; não atualiza sozinha o status em outubro |
-| B11 | Ministério da Saúde — Ministério da Saúde amplia acesso a medicamentos oncológicos... — seção FIT; 20/10/2026 | COMMUNICATION_ONLY | Brasil; Anúncio operacional | [Original ou canal identificado](https://www.gov.br/saude/pt-br/assuntos/noticias-ms/2026/outubro/ministerio-da-saude-amplia-acesso-a-medicamentos-oncologicos-de-alta-tecnologia-no-rio-de-janeiro) | 2026-10-23: Página consultada. Seção SUS distribui exame: novembro, capitais/municípios >500 mil; anúncio, não oferta universal comprovada |
-| U01 | ACG/EBGI — Optimizing bowel preparation: Insights from USMSTF; 16/04/2025 | SUPPLEMENTARY_SUMMARY | EUA; Resumo editorial da guideline | [Original ou canal identificado](https://gi.org/journals-publications/ebgi/anderson_hagen_apr2025/) | 2026-10-23: Resumo localizado, não substitui I06. Controle de simplificação do intervalo 12 meses versus pós-teste positivo |
+Links:
+- I01: https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/colorectal-cancer-screening
+- I03: https://medicine.uams.edu/familymedicine/wp-content/uploads/sites/7/2021/07/ACG_Clinical_Guidelines__Colorectal_Cancer.14.pdf
+- I04: https://www.asge.org/home/resources/publications/guidelines/fecal-immunochemical-testing-for-colorectal-neoplasia
+- I05: https://www.asge.org/home/resources/publications/guidelines/recommendations-for-follow-up-after-colonoscopy-and-polypectomy-a-consensus-update-by-the-us-multi-society-task-force-on-colorectal-cancer
+- I06: https://www.asge.org/home/resources/publications/guidelines/optimizing-bowel-preparation-quality-for-colonoscopy--consensus-recommendations-by-the-us-multi-society-task-force-on-colorectal-cancer
 
-## Espelhos e canais auxiliares — sem dupla contagem
+## Bloqueios remanescentes
 
-- B07: [Atlas Público](https://atlaspublico.com.br/regulacao/dou/portaria-saes-ms-n-5-215-de-22-de-outubro-de-2026-872384) e [LegisMap](https://legismap.com.br/leis-e-normas/portaria-saes-ms-n-5-215-de-22-10-2026). Concordância não converte reprodução em conferência primária.
-- I01: [resumo clínico USPSTF](https://www.uspreventiveservicestaskforce.org/uspstf/document/ClinicalSummaryFinal/colorectal-cancer-screening).
-- I02: [portal profissional ACS](https://www.cancer.org/health-care-professionals/american-cancer-society-prevention-early-detection-guidelines/colorectal-cancer-screening-guidelines.html).
-- I04: [página primária ASGE](https://www.asge.org/home/resources/publications/guidelines/fecal-immunochemical-testing-for-colorectal-neoplasia) e [AGA](https://gastro.org/clinical-guidance/fecal-immunochemical-testing-fit-to-screen-for-colorectal-neoplasia/), com acesso integral bloqueado.
-- I05: [página primária ASGE](https://www.asge.org/home/resources/publications/guidelines/recommendations-for-follow-up-after-colonoscopy-and-polypectomy-a-consensus-update-by-the-us-multi-society-task-force-on-colorectal-cancer), [PMC7389642](https://pmc.ncbi.nlm.nih.gov/articles/PMC7389642/) e [manuscrito do autor](https://scholarworks.indianapolis.iu.edu/server/api/core/bitstreams/59af2518-f95c-4d4e-8dd7-8a9c03b38893/content). Trechos indexados são evidência parcial; não alegamos leitura integral.
-- I06: DOI10.1053/j.gastro.2025.02.002; [PubMed](https://pubmed.ncbi.nlm.nih.gov/40047767/) confirma publicação e definição de preparo adequado. U01 é somente apoio à busca.
+1. **Texto final integral brasileiro pós-CP e portaria conjunta específica:** ainda não confirmado. Isso bloqueia a agenda SUS após FIT+→colonoscopia normal e metadados dependentes do texto final; não bloqueia o núcleo FIT 50–75/bienal/FIT+→colonoscopia.
+2. **I06 integral/exceções:** acesso ainda não é necessário para automatizar deadlines porque o piloto deliberadamente não os automatiza.
+3. **Cadastro administrativo B07:** forte corroborado, mas não é requisito clínico do piloto.
 
-## Registro de busca e limites
-
-Buscas em Conitec (relatórios, diretrizes, recomendações 2026, consultas e atas), MS/INCA, DOU/BVS, SBOC/SBCP/FBG/AMB, USPSTF, ACS, ACG, ASGE/AGA, PubMed/PMC. Termos incluíram “Diretrizes Brasileiras Rastreamento Cólon Reto”, “CP20/2026”, “portaria conjunta”, “4.642”, “5.215”, “FIT positive recent colonoscopy”, “normal regardless of indication”, “inadequate preparation 2025”, “update/corrigendum”.
-
-A [listagem Conitec 2026](https://www.gov.br/conitec/pt-br/assuntos/avaliacao-de-tecnologias-em-saude/recomendacoes-da-conitec/2026) consultada não mostrou a diretriz de rastreamento; data de atualização e indexação podem limitar a busca. A ausência nessa listagem **não demonstra inexistência** do ato. Relatório final integral pós-CP e portaria conjunta específica de aprovação do screening: **não localizados/confirmados**. O registro de deliberação 1.107 é conhecido por B05, não foi confundido com número de relatório final.
-
-Não localizar corrigenda/substituto após busca não prova ausência. Atualização ACS 2026 e preparo USMSTF2025 foram incorporados; a guideline ACG 2021 continua referenciada pela própria ACG em material 2026. Sem revisão sistemática, estimativa de eficácia primária ou agregação de votos entre guidelines. Não há PDFs de terceiros copiados neste repositório.
+Não concluir inexistência a partir de busca negativa. Fonte `FINAL` não significa interpretação aprovada; a aprovação da especificação está registrada nos documentos de revisão.

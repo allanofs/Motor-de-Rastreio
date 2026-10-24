@@ -1,56 +1,76 @@
-# 02 — Autoridade documental e cadeia brasileira
+# 02 — Autoridade documental e cadeia brasileira — consolidado
 
-Corte: 23/10/2026. **UNREVIEWED_PROPOSAL**. Status de fonte e aprovação de proposição são eixos independentes. URLs e acesso estão no [censo](01-source-census.md).
+**Corte:** 24/10/2026. Este arquivo substitui a proposta não revisada por uma matriz de autoridade pós-auditoria.
 
-## Matriz de autoridade
+## Princípios de autoridade
 
-| Classe | Documentos | O que demonstram | O que não demonstram |
-|---|---|---|---|
-| A — ato normativo | B08 final; B06 ato antigo lido via CONASS; B07 identificado com primário bloqueado | Aprovação do PCDT de doença estabelecida; inclusão/revisão de procedimento quando autenticada | Diretriz completa de screening ou intervalo pós-colonoscopia |
-| B — técnico final | B05 ata pós-CP; B12 protocolo OCI; B01–B02 relatórios GT | Deliberação, núcleo operacional e encaminhamento; trajetória do trabalho | Que o PDF preliminar foi publicado integralmente sem alterações |
-| C — implementação | B06/B07 e B12 | Atributos, registro, rota assistencial; B12 confirma núcleo FIT 50–75/bienal/FIT+→colonoscopia | Disponibilidade em cada UBS ou autorização de toda modalidade |
-| D — preliminar | B03; S02 versão de colaboração; B04 contribuições | Proposta e debate; B03 tem recomendações numeradas e GRADE | Recomendação final vigente por simples existência |
-| E — comunicação | B09–B11, S03–S05 e I08 conforme seu papel | Anúncio, posição institucional, atualização e implantação planejada | Norma clínica completa ou consenso formal graduado |
-| Sociedade final | S01; I01–I07 nos seus escopos | Conteúdo candidato da política correspondente | Autoridade automática sobre SUS ou aprovação médica do Motor |
+1. **SUS** é governado por fontes oficiais brasileiras dentro do respectivo escopo.
+2. **Brasil ampliado** usa curadoria brasileira explícita; fonte de sociedade só complementa a pergunta que realmente cobre.
+3. **Internacional** usa um governante populacional único (USPSTF) e complementos especializados declarados por pergunta.
+4. Não existe regra de desempate por recência, maioria, “mais restritivo” ou “mais internacional”.
+5. Silêncio, inacessibilidade e contradição documental não são equivalentes.
 
-S01 tem finalidade predominantemente terapêutica. Somente sua seção explícita de prevenção/rastreamento pode complementar o Brasil ampliado. AMB2001 é histórico e não resolve lacunas contemporâneas por conveniência.
+## Cadeia brasileira consolidada
 
-## Cadeia documental reconstruída
-
-| Etapa | Documento/localizador | Veredito |
+| Etapa | Fonte | Estado |
 |---|---|---|
-| Demanda e GT | B02, Apresentação p.3; B03, Apresentação PDF p.5 | INCA; GT instituído pela Portaria GM/MS1.929/2023, citada nos relatórios. A portaria constitutiva não foi conferida diretamente; não é fonte de recomendação clínica |
-| Desenvolvimento | B01 reuniões 2024; B02 painel 12/08/2025, p.9 | Elaboração técnica e oito recomendações; não aprovação normativa por si |
-| Relatório preliminar | B03 capa/advertências e recomendações 1–8 | **PRELIMINARY**, mesmo quando o texto declara aprovação pelo painel |
-| CP20 | B04 registro; B05 PDF p.8 | CP08–27/04/2026; contribuições não são votos vinculantes |
-| Apreciação das contribuições | B05 PDFpp.8–10 | 181 contribuições; revisões de fluxo pós-colonoscopia, acurácia e GRADE |
-| Deliberação final da comissão | B05 PDF p.11, parágrafo Recomendação | Aprovação recomendada por unanimidade; Registro de Deliberação 1.107/2026. **CONFIRMADO** |
-| Relatório final integral pós-CP | buscas descritas no censo | **AINDA NÃO CONFIRMADO**. Número de deliberação não é número de relatório |
-| Portaria conjunta de aprovação do screening | não localizada | **AINDA NÃO CONFIRMADO**, não declarar inexistente |
-| Anúncio ministerial | B09, 21/05; B10, 10/08 | Comunicação; anúncio pode preceder o término da cadeia normativa |
-| Tabela SUS | B06 e possível substituição B07 | Inclusão histórica corroborada oficialmente por B10. B07 requer conferência no primário |
-| Protocolo operacional nacional | B12 pp.17–18 | Confirma FIT bienal 50–75 e colonoscopia pós-positivo; é técnico final com escopo operacional, não texto final da diretriz de screening |
-| Implantação anunciada | B11 seção FIT, 20/10 | Início previsto novembro em capitais e municípios >500 mil; **não comprova implantação já concluída em 23/10** |
+| desenvolvimento técnico | B01/B02 | histórico/contexto |
+| relatório preliminar | B03 | `PRELIMINARY` |
+| consulta pública | B04 | registro participativo |
+| deliberação pós-CP | B05 | final; confirma aprovação recomendada e ajustes |
+| texto final integral pós-CP | não confirmado | **bloqueio documental remanescente** |
+| protocolo operacional | B12 | final técnico; confirma núcleo FIT 50–75 bienal e FIT+→colonoscopia |
+| procedimento/tabela | B06→B07 | administrativo; não governa regra clínica |
+| implantação | B09–B11 | comunicação/rollout, não elegibilidade clínica |
 
-## Mudança administrativa descoberta no corte
+## O que está suficientemente autenticado para o piloto SUS
 
-B07 é referido em duas reproduções concordantes como publicado em 23/10/2026 (DOU Seção 1 pp.73–74): art.5 torna B06 sem efeito; Anexo I muda código para 02.14.01.032-5; art.4 prevê efeitos operacionais na competência seguinte; Anexo II separa apoio diagnóstico sintomático de screening. Isso modifica cadastro/procedimento, não autoriza rastreamento de sintomáticos.
+Pode ser usado na especificação clínica:
 
-**SOURCE ACCESS BLOCKER SA-01:** original DOU retornou 502/inacessível, inclusive tentativa direta. Portanto essa substituição é **relatada, ainda não autenticada nesta execução**. Não há autorização para usar o código antigo como atual nem promover o novo a cadastro definitivo. A decisão clínica geral tem apoio independente em B12; a codificação administrativa fica bloqueada. Nenhuma alteração de código foi feita.
+- idade **50–75 anos inclusive**;
+- contexto de rastreamento preventivo de risco habitual definido pelo profissional;
+- **FIT como estratégia nuclear**;
+- periodicidade **bienal** após FIT final negativo válido;
+- FIT positivo exige **colonoscopia diagnóstica**;
+- atingir 76 anos não apaga episódio diagnóstico aberto.
 
-## Alertas de interpretação após a CP
+Não pode ser promovido ainda como regra SUS:
 
-1. B03 Figura 1 (PDF p.10; página impressa 5) permite leitura de retorno a FIT após 10 anos; texto da rec.8 (PDF p.23; impressa 17) menciona colonoscopia após 10 anos. A figura foi inspecionada visualmente; não tratamos os dois métodos futuros como equivalentes.
-2. B05 PDF p.8 informa que o fluxo FIT+→colonoscopia sem achados relevantes foi ajustado. Não fornece ali o algoritmo final completo. Logo, não afirmar “SUS final pós-colonoscopia=10 anos” somente por B03.
-3. B05 PDF p.9 menciona referência de até 30 dias **em indicadores em desenvolvimento**. Não equivale automaticamente a prazo normativo universal ou lei de 30 dias contada do FIT.
-4. B03 rec.4 imprime certeza alta, enquanto discussão/Quadro F reportam moderada. B05 menciona reavaliação da acurácia/GRADE. Preservar ambas as informações; exigir texto final.
-5. B03 expressa 50 ng/m L e aproximação a µg/g. O dispositivo e a diluição interferem; não criar conversor universal ou reinterpretar laudo com ponto de corte global.
+- novo intervalo/modalidade após FIT+ seguido de colonoscopia normal de alta qualidade;
+- qualquer prazo universal rígido após FIT+;
+- ponto de corte bruto do FIT ou conversão universal de unidades;
+- prazo universal para repetir FIT inválido;
+- prazo universal após colonoscopia inadequada.
 
-## Uso por política
+## Brasil ampliado — autoridade aprovada
 
-- SUS: autoridade brasileira oficial no escopo; usar B12 como corroborador final do núcleo. B03 apenas proposta rastreável, com bloqueio onde depende do texto final.
-- Brasil ampliado: curadoria explícita, S01 para perguntas em que tem conteúdo próprio; não promover S03 a guideline completa nem misturar posições americanas sem aprovação.
-- Internacional: I01 populacional, I04 follow-up FIT, I05 seguimento e I06 qualidade, com exceções e acesso parcial explicitados. ACS é alternativa coerente separada, atualizada em 2026.
-- Silêncio, ausência de acesso e contradição interna são resultados diferentes. Todos levam a limite de automação identificado, sem preencher com outra política.
+A curadoria **BA-A** está aprovada:
 
-Não há hierarquia por recência isolada, maioria de organizações, “mais restritivo” ou “mais internacional”.
+- B12 governa o núcleo brasileiro operacional;
+- S01 pode complementar apenas prevenção/rastreamento;
+- 45–49 = decisão compartilhada/revisão, não rotina automática;
+- 50–75 = FIT bienal como default;
+- colonoscopia primária de 10 anos pode ser estratégia alternativa explicitamente escolhida;
+- silêncio brasileiro não é preenchido automaticamente por fonte estrangeira.
+
+## Internacional — divisão de responsabilidade aprovada
+
+| Pergunta | Governante |
+|---|---|
+| elegibilidade média, início/término, modalidades e intervalos de rotina | USPSTF I01 |
+| história familiar | ACG I03 |
+| FIT positivo e persistência da investigação | USMSTF I04 |
+| normal high-quality após colonoscopia | USMSTF I05 |
+| preparo inadequado | USMSTF I06, apenas como decision support no piloto |
+
+A ACS 2026 permanece alternativa documentada/comparativa, não governante da policy Internacional selecionada.
+
+## Gate de escopo aprovado
+
+O Motor não determina se um quadro sintomático é urgência ou investigação diagnóstica. O profissional confirma que o módulo está sendo usado em contexto apropriado de rastreamento preventivo. Caso contrário, o Motor se abstém.
+
+## Governança de revisão
+
+- conteúdo consolidado revisado nesta fase pode receber `reviewed_by_1`;
+- segunda revisão médica independente continua necessária antes de release clínico público;
+- nenhuma limitação documental autoriza alteração automática da Foundation.

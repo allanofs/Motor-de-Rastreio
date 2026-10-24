@@ -1,72 +1,77 @@
-# 12 — Candidate clinical cases adversariais
+# 12 — Casos adversariais candidatos — pós-auditoria
 
-**60 casos documentais; todos awaiting_clinical_review. Não são golden patients e não são testes executáveis.** As Of padrão 23/10/2026, salvo explicitado. Não há expected aprovado. A certeza é da interpretação/limite descrito, não grade formal de evidência.
+**60 casos documentais; não executáveis.** A expectativa abaixo é a especificação humana consolidada para futura golden suite. `asOf` padrão: 24/10/2026 quando não indicado.
 
-Oráculo independente: cada cenário tem fonte, localizador e rationale antes de existir regra clínica. Referências de proposição podem ajudar navegação, mas a expectativa deverá ser revisada diretamente na fonte. Nenhum teste foi gerado a partir de código clínico.
+| Caso | Cenário | Expected consolidado |
+|---|---|---|
+| 001 | 49a, risco habitual, SUS | sem rotina SUS; não é contraindicação diagnóstica |
+| 002 | completa 50a, SUS, nunca rastreado | Due para FIT se demais gates conhecidos |
+| 003 | 60a, SUS, never_performed confirmado | Due FIT |
+| 004 | 75a, SUS, never_performed | dentro da faixa: Due FIT se elegível |
+| 005 | 76a, SUS, sem episódio aberto | fora da nova rotina SUS |
+| 006 | 80a, Internacional, nunca rastreado | decisão seletiva; não Due automático |
+| 007 | 80a, Internacional, screening prévio | decisão seletiva com histórico/saúde/preferência |
+| 008 | 60a recusa informada | registrar preferência; não inventar realização |
+| 009 | histórico desconhecido | não inferir never_performed |
+| 010 | declara nunca ter feito qualquer screening CCR | never_performed pode sustentar Due se elegível |
+| 011 | FIT− SUS há 14 meses | Current |
+| 012 | FIT− SUS 2023 | Due pelo intervalo bienal |
+| 013 | FIT+ sem seguimento | InFollowUp; colonoscopia necessária |
+| 014 | FIT+ antigo sem resolução | permanece aberto |
+| 015 | FIT+→FIT− sem colonoscopia | FIT+ permanece aberto |
+| 016 | FIT coletado; resultado pending | PendingResult; não Current |
+| 017 | FIT inválido | não ancora; regularizar segundo laboratório/serviço |
+| 018 | FIT+→colonoscopia normal high-quality | SUS: episódio resolvido, agenda futura bloqueada; Internacional: q10 |
+| 019 | FIT+→colonoscopia com preparo inadequado | follow-up continua aberto |
+| 020 | colonoscopia normal anterior→novo FIT+ | novo gatilho; exame anterior não resolve |
+| 021 | colonoscopia incompleta após FIT+ | follow-up continua aberto |
+| 022 | “sem lesão”, mas preparo inadequado | não qualifica como normal resolutivo |
+| 023 | colonoscopia com pólipo | revisão de surveillance, sem intervalo automático |
+| 024 | lesão com AP confirmando CRC | sair do screening; HandedOff só se cuidado assumido |
+| 025 | CRC prévio tratado | fora da rotina habitual |
+| 026 | pólipo prévio de tipo desconhecido | ClinicalReviewRequired |
+| 027 | Crohn conhecido, extensão incerta | revisão; não average-risk automático |
+| 028 | história familiar nunca perguntada | não assumir ausência; indicação mínima pode continuar conhecida, estratégia pode ficar pendente |
+| 029 | 1 FDR CRC aos 70, Internacional | iniciar aos 40/10a antes; depois average-risk; sem q5 universal |
+| 030 | 1 FDR CRC aos 42, Internacional | ACG: colonoscopia aos 40/10a antes e q5 |
+| 031 | 2 FDR com CRC | ACG: colonoscopia aos 40/10a antes e q5 |
+| 032 | Lynch confirmada | revisão/handoff especializado |
+| 033 | FAP confirmada | revisão/handoff especializado |
+| 034 | profissional informa que caso não é contexto de screening | Motor se abstém; não faz triagem/urgência |
+| 035 | profissional está incerto se caso é preventivo | Motor se abstém; avaliação clínica fora do módulo |
+| 036 | FIT indisponível no SUS | preservar recomendação; clarificar rota |
+| 037 | FIT+ e colonoscopia indisponível | InFollowUp + regulação; não repetir FIT como substituto |
+| 038 | 47a average-risk | SUS sem rotina; BA-A shared decision; Internacional Grade B |
+| 039 | FIT− só “2025” | respeitar data parcial; anual pode ficar Indeterminate, bienal pode permanecer Current conforme janela |
+| 040 | mesmos eventos digitados em ordens diferentes | mesma interpretação temporal |
+| 041 | FIT+ e colonoscopia no mesmo dia sem hora | ordem não demonstrada; revisão |
+| 042 | FIT+ só mês/ano e colonoscopia só ano sobreposto | não provar posterioridade |
+| 043 | 85a com FIT+ aberto desde 84 | follow-up não é apagado por teto etário |
+| 044 | polipectomia após FIT+ com AP pending | InFollowUp/ClinicalReviewRequired |
+| 045 | colonoscopia agendada e cancelada | FIT+ permanece aberto |
+| 046 | FIT− válido e depois FIT inválido | inválido não apaga âncora anterior; avaliar nova coleta |
+| 047 | FIT+→colo normal→novo FIT+ | último positivo abre novo follow-up |
+| 048 | nunca fez FIT, mas tem colonoscopia documentada | historyKnowledge=known, não never_performed global |
+| 049 | história familiar unknown, demais dados permitem reconhecer indicação etária | reconhecer indicação mínima; não afirmar estratégia definitiva average-risk |
+| 050 | usuário solicita teste sanguíneo ACS 2026 | fora do piloto; explicar sem fallback automático |
+| 051 | código administrativo antigo após B07 | não usar código clínico/cadastro por presunção; questão administrativa |
+| 052 | radioterapia pélvica prévia, policy Internacional USPSTF | não importar automaticamente critério ACS; revisão se relevante |
+| 053 | apenas avó com CRC aos 78 | Internacional/ACG: 1 SDR isolado pode seguir average-risk se sem outros modificadores |
+| 054 | laudo “normal” com pólipo hiperplásico | não generalizar; revisar se achado permite rotina habitual |
+| 055 | FIT− em 24/10/2024, SUS, asOf 24/10/2026 | Due na data do intervalo; sem grace period inventado |
+| 056 | exame futuro em relação ao asOf | dado inválido/Indeterminate; não Current |
+| 057 | status de rotina aparentemente Current + novo FIT+ | follow-up prevalece; nenhuma ação redundante de screening |
+| 058 | never_performed contradiz FIT existente | contradição explícita; revisão, sem escolher silenciosamente |
+| 059 | profissional muda avaliação de preventiva para não preventiva | Motor interrompe rota de screening e se abstém; não faz diagnóstico |
+| 060 | adenoma avançado prévio + colonoscopia posterior sem novas lesões | permanece no contexto de surveillance; não retornar ao habitual automaticamente |
 
-| Caso | Dados | Política | Resultado esperado proposto | Fonte + locator | Certeza | Questão aberta | Rationale independente |
-|---|---|---|---|---|---|---|---|
-| CASE-CCR-001 | 49 anos, assintomático, risco conhecido, nunca fez exames | SUS | Sem convite habitual antes da faixa; não chamar de contraindicação diagnóstica | B12 p.17; B05 PDF p.9 | alta para núcleo; policy pendente | OQ-CCR-001 | A faixa do programa não é a faixa de investigação de sintomas. |
-| CASE-CCR-002 | Completa 50 anos em 23/10/2026; assintomático; nunca realizou | SUS | Candidato Due após aprovação da policy e dados completos | B12 p.17; B03 rec.5 | média | OQ-CCR-001 | B05 manteve início 50; fronteira de início não pode ser herdada da USPSTF. |
-| CASE-CCR-003 | 60 anos, elegível e nunca realizou qualquer exame CCR | SUS | Candidato a oferta FIT; não Current | B12 p.17; B03 rec.7 | alta para oferta | OQ-CCR-001, 004 | Ausência declarada verdadeira é diferente de histórico desconhecido. |
-| CASE-CCR-004 | Completa 75 anos hoje; nunca realizou | SUS | Revisar fronteira; não criar expected binário aprovado | B06 Anexo I; B03 rec.6; B12 | baixa para fronteira | OQ-CCR-003 | Teto descrito não resolve sozinho aniversário versus ano 75. |
-| CASE-CCR-005 | 76 anos, sem sintomas e sem FIT+ conhecido | SUS | Fora do convite habitual descrito; revisão de benefício/exceções, sem importar ACS | B12 p.17; B03 rec.6 | média | OQ-CCR-003, 018 | Não aplicar oferta seletiva internacional como norma SUS. |
-| CASE-CCR-006 | 80 anos, nunca rastreado, boa saúde declarada | Internacional A | Decisão seletiva humana; não Due automático | I01 Recommendation Summary 76–85 | alta para individualizar | OQ-CCR-018, 019 | Nunca rastreado altera benefício, não elimina decisão individual. |
-| CASE-CCR-007 | 80 anos, screening prévio adequado | Internacional A | Revisão compartilhada; não convite automático | I01 Starting/stopping ages | alta | OQ-CCR-018 | Benefício depende do passado e saúde. |
-| CASE-CCR-008 | 60 anos, elegível, recusa informada de rastreamento | Todas | Registrar preferência e apoiar decisão; não emitir ordem automática nem inventar exame | I01 Implementation; I02 Table 1; S01 Faixa etária | média | OQ-CCR-018 | Oferta não significa consentimento ou realização. |
-| CASE-CCR-009 | 60 anos, histórico de exames desconhecido | SUS | Indeterminate/esclarecer; não concluir never_performed | B03 fluxo; contrato Foundation | alta para guarda | OQ-CCR-012 | Arrayvazio não é resposta negativa conhecida. |
-| CASE-CCR-010 | 60 anos, declara nunca ter feito nenhum exame de CCR | SUS | Oferta candidata se demais dados decisivos conhecidos | B12 p.17; B03 rec.7 | média | OQ-CCR-001 | Due precisa política e declaração explícitas. |
-| CASE-CCR-011 | FIT− final válido em 10/01/2026; sem positivo aberto | SUS | Candidato Current dentro do intervalo, se aprovado núcleo e âncora | B12 p.17; B03 rec.7/comunicação | média | OQ-CCR-004, 013 | Negativo qualifica; proteção não é exclusão de câncer. |
-| CASE-CCR-012 | FIT− final válido em 01/09/2023; permanece elegível | SUS | Candidato Due após intervalo bienal | B12 p.17; B03 rec.7 | média | OQ-CCR-004 | Não copiar intervalo anual. |
-| CASE-CCR-013 | FIT+ final em 10/10/2026; sem seguimento | SUS | InFollowUp com necessidade de colonoscopia | B12 pp.17–18; B03 rec.8 | alta para ação | OQ-CCR-007 | Resultado positivo é gatilho diagnóstico. |
-| CASE-CCR-014 | FIT+ em 2022; nada documentado depois | SUS | Investigação permanece aberta; não considerar resolvido pela antiguidade | B12 OCI; guarda longitudinal | alta para nãoapagar | OQ-CCR-014 | Tempo transcorrido não é evidência de resolução. |
-| CASE-CCR-015 | FIT+ emjaneiro/2026; FIT− emjunho; sem colonoscopia | Internacional A; SUS como interpretação brasileira explícita | Manter follow-up; o negativo repetido não resolve | I04 Recommendation/summary; B12 fluxo | alta | OQ-CCR-014 | A fonte FIT recomenda colonoscopia, não repetição confirmatória. |
-| CASE-CCR-016 | FIT realizado em 15/10/2026; resultado pending; sem positivo antigo | Todas | PendingResult; sem Current nemnova oferta rotineira | Processo B12 + guarda Work CCR-PROP-019 | média, mapeamento | OQ-CCR-015 | Realização não é resultado interpretável. |
-| CASE-CCR-017 | FIT inválido por amostra não aceita | SUS | Semâncora; orientar conforme laboratório; não inventar prazo | Silêncio B03/B12 + guarda CCR-PROP-020 | alta para não qualificar; baixa para prazo | OQ-CCR-015 | Inválido não é negativo. |
-| CASE-CCR-018 | FIT+2025; colonoscopia normal adequada/completa em 02/2026 | SUS versus Internacional A | SUS: próxima agenda bloqueada; Internacional: 10 anos candidato sob I05 e revisão | B05 PDF p.8; B03 Figura 1/rec.8; I05 Normal high-quality | média | OQ-CCR-008, 020 | Separar resolução e intervalo; não importar 10 anospara SUS. |
-| CASE-CCR-019 | FIT+2025; colonoscopia 2026 com preparo inadequado | Todas | InFollowUp/revisão; sem Current | I05 quality; I06 Management — inadequate; B03 rec.8 | alta para nãoencerrar | OQ-CCR-016 | Exame insuficiente não exclui lesão. |
-| CASE-CCR-020 | Colonoscopia normal em 2025; FIT+ em 2026 | Internacional A; SUS revisão própria | Novo gatilho; não usar exame anterior como resolução | I04 positive FIT/recent colonoscopy | média, recomendação fraca/baixa | OQ-CCR-014, 020 | O exame antigo precede o novo problema. |
-| CASE-CCR-021 | Colonoscopia interrompida antes doceco após FIT+ | Todas | Investigação incompleta; revisão/rota de novo exame | I05 Table 3; I06 | alta | OQ-CCR-016 | Completude é condição da evidência negativa. |
-| CASE-CCR-022 | Laudo registra preparo inadequado, apesar de'exame sem lesão' | Todas | Nãoqualificar como normal resolutivo | I05 quality assumptions; I06 | alta | OQ-CCR-013, 016 | 'Semachado' em exame insuficiente não prova normal. |
-| CASE-CCR-023 | Colonoscopia após FIT+ com pólipo; histologia conhecida relevante | Todas | Sai da rotina simples; revisão de surveillance, sem intervalo automático | B03 rec.8; I05 Tables 4–5 | alta para limite | OQ-CCR-011 | Achado demanda pergunta distinta do screening habitual. |
-| CASE-CCR-024 | Colonoscopia mostra lesão; biópsia confirma CCR | Todas | Sair do screening; handoff somente com transferência confirmada | B08 art.1; B03 rec.8 | alta | OQ-CCR-010 | Doença estabelecida não é convite preventivo. |
-| CASE-CCR-025 | CCR prévio tratado, sem sintomas atuais | Todas | Sem rotina habitual; seguimento especializado | B08 âmbito; I01 população | alta | OQ-CCR-010 | Assintomático não torna sobrevivente risco habitual. |
-| CASE-CCR-026 | Pólipo prévio, não sabe tipo nem seguimento | Todas | ClinicalReviewRequired; buscarlaudo | I05 Tables 3–5; B03 população | alta para abstenção | OQ-CCR-011 | Não classificar todo pólipo como avançado ou inócuo. |
-| CASE-CCR-027 | Crohn conhecido; extensão colônica desconhecida | Todas | Revisar risco; sem surveillance genérica automática | B08 introdução; I01 população | média | OQ-CCR-012 | Não assumir doença colônica extensa nem habitualidade. |
-| CASE-CCR-028 | História familiar nunca perguntada | Todas | Falta dado decisivo; não registrar'não' | I03 rec.9–12; S01 p.6 + guarda Work | alta para guarda | OQ-CCR-012 | Ausência de pergunta é informação faltante. |
-| CASE-CCR-029 | Pai teve CCR aos 70; sem outra HF | Internacional A | Revisão familiar; não aplicar 5 anos universal; reconhecer subgrupo ACG | I03 Table 1 rec.11 | alta para distinção | OQ-CCR-012, 017 | Idade do FDR muda a recomendação. |
-| CASE-CCR-030 | Mãe teve CCR aos 42 | Internacional A | Avaliação especializada; candidato familiar ACG, sem agenda automática no piloto | I03 Table 1 rec.9–10 | alta para fora do núcleo | OQ-CCR-012 | FDR jovemnãoé a população primária comum. |
-| CASE-CCR-031 | Dois FDR com CCR aos 65 e 72 | Internacional A | Revisão familiar; multiplicidade importa | I03 Table 1 rec.9 | alta | OQ-CCR-012 | Não usar apenas idade do familiar maisjovem e ignorarnúmero. |
-| CASE-CCR-032 | Lynch confirmada | Todas | Sair do habitual; revisão/handoff especializado | B08 introdução; I01 população | alta | OQ-CCR-012 | Nenhum protocolo genético automático foi especificado. |
-| CASE-CCR-033 | FAP confirmada | Todas | Sair do habitual; avaliação especializada | B08 introdução; I01 população | alta | OQ-CCR-012 | FIT bienal não é substituto de cuidado hereditário. |
-| CASE-CCR-034 | 35 anos com sangue visível nasfezes | SUS | Investigação clínica; não dizer'abaixo da idade, não faz nada' | B08§3.1; B12 p.18 | alta | OQ-CCR-009 | A idade do convite não limita o diagnóstico. |
-| CASE-CCR-035 | 62 anos com anemia ferropriva semetiologia estabelecida | Todas | Saída diagnóstica/revisão; FIT− não encerra investigação | B08§3.1; B12 p.18 | alta | OQ-CCR-009 | Sintoma/achado clínico altera contexto. |
-| CASE-CCR-036 | 60 anos elegível; FIT unavailable | SUS | Preservar recomendação; clarificar rota; sem troca automática por colonoscopia | B11 rollout; B12; silêncio de fallback | alta para limite operacional | OQ-CCR-022 | Recurso não muda evidência. |
-| CASE-CCR-037 | FIT+ e colonoscopia unavailable localmente | SUS | InFollowUp +regulação/encaminhamento; não repetir FIT como substituto | B12 OCI; B08 art.3; P0 44 | alta | OQ-CCR-022 | Barreira de acesso não resolve resultado. |
-| CASE-CCR-038 | 47 anos assintomático risco habitual, nenhuma avaliação prévia | SUS/Internacional A | SUS sem convite habitual descrito; Internacional oferta candidata B | B12 p.17; I01 Summary 45–49 | alta para divergência | OQ-CCR-001, 017 | Comparação é entre policies, não erro a resolver por maior restrição. |
-| CASE-CCR-039 | FIT− apenas'2025'; asOf 23/10/2026 | Internacional A versus SUS | Anual: janela atravessa vencimento→Indeterminate; bienal: janela 2027 futura, se qualificação aprovada | I01 intervalos; B12 + calendário Foundation | alta temporal; policy condicional | OQ-CCR-004 | Não inventar 01/01 como data. |
-| CASE-CCR-040 | Mesmo histórico fornecido em seis ordens de digitação | Todas | Mesma interpretação temporal e evidência; IDs/ordem não mudam causalidade | B12/I04 + Foundation determinística | alta para requisito | OQ-CCR-014 | Casos derivam das datas, não de sort por input. |
-| CASE-CCR-041 | FIT+ e colonoscopia normal no mesmo dia; semhora validada | Todas | Ordem não demonstrada; revisão, sem resolução automática | Foundation isCertainlyAfter; P0 29 guarda | alta para limite | OQ-CCR-014 | Não introduzir same-day ordering. |
-| CASE-CCR-042 | FIT+ só mês 05/2026; colonoscopia sóano 2026 | Todas | Intervalos sobrepostos; não provar posterioridade | Foundation temporal; B12 fluxo + guarda | alta | OQ-CCR-014 | Precisão insuficiente não é cronologia favorável. |
-| CASE-CCR-043 | 85 anos com FIT+ aberto desde 84 | Todas | Revisão da investigação/benefício; não apagar gatilho ao atingir teto | I01 stoppingages; B12 followup + guarda | média | OQ-CCR-018 | Interromper screening não determina automaticamente cessação diagnóstica. |
-| CASE-CCR-044 | Colonoscopia com polipectomia após FIT+; anatomopatológico pending | Todas | InFollowUp/ClinicalReviewRequired; não'normal' | B03 rec.8; I05 Tables 4–5 | alta | OQ-CCR-011, 013 | Falta resultado que muda classificação. |
-| CASE-CCR-045 | Colonoscopia agendada e cancelada; FIT+ permanece | Todas | Sem evento resolutivo; manter followup | B12 OCI + guarda | alta | OQ-CCR-014 | Pedido/agendamento não é procedimento. |
-| CASE-CCR-046 | FIT− válido 2025; novo FIT inválido 2026; sem positivo | SUS | Inválido não é nova âncora nem apaga negativo anterior; revisar necessidade de recoleta | B03 intervalo; silêncio inválido + guarda | média | OQ-CCR-015 | Não confundir ocorrência de falha com cancelamento de evidência passada. |
-| CASE-CCR-047 | FIT+2024→colo normal 2025→FIT+2026 | Internacional A | Último positivo aberto; não fechar todo o histórico pela colo intermediária | I04 recent colonoscopy; I05 normal | média | OQ-CCR-014 | Cada novo gatilho precisa interpretação própria. |
-| CASE-CCR-048 | Nunca fez FIT, mas tem colonoscopia documentada | Todas | historyKnowledge CCR known; não never_performed global; avaliar FG01 | I01 estratégias; Foundation validate.ts | alta para contradição | OQ-CCR-023 | Conhecimento de modalidade não é ausência global. |
-| CASE-CCR-049 | DII não sabe; sintomas negados; quer resultado automático | Todas | Esclarecer exclusão proposta; não classificar como habitual por unknown | I01 população; B08 + guarda | média | OQ-CCR-012 | Dados de exclusão decisivos não podem ser ignorados. |
-| CASE-CCR-050 | Pede teste sanguíneo após ler ACS 2026 | Internacional B | Apoio/explicação: fora do piloto; sem fallback automático | I02 Table 1; I08 | alta para escopo | OQ-CCR-017 | Novidade não implica equivalência às modalidades preferidas. |
-| CASE-CCR-051 | Procedimento cadastrado com código de agosto; pesquisa em 23/10 | SUS administrativo | Bloqueio de autenticação B07; não validar código antigo como atual | B06/B07 espelhos; SA-01 | baixa para status normativo | OQ-CCR-002 | Mudança regulatória exige fonte primária. |
-| CASE-CCR-052 | Radioterapia pélvica prévia para outro câncer | Internacional B; SUS separado | Fora do average-risk ACS; sem transpor critério automaticamente para SUS | I02 Table 1 nota b | alta para ACS | OQ-CCR-012, 017 | Critérios de população são da fonte escolhida. |
-| CASE-CCR-053 | Somente avó com CCR aos 78; outros riscosnegados | Internacional A | Não rotularalto riscode FDR; revisão de subgrupo SDR conforme ACG | I03 Table 1 rec.12 | alta | OQ-CCR-012 | Grau de parentesco importa. |
-| CASE-CCR-054 | Colonoscopia dita'normal', mas há pólipo hiperplásico no laudo | Internacional A | Revisar definição de normal e condições de I05; não encaixar pólipo desconhecido sem checagem | I05 Tables 3–5 | média | OQ-CCR-011, 013 | Alguns achados podem ter seguimento habitual, mas o piloto não deve generalizar. |
-| CASE-CCR-055 | FIT− válido 23/10/2024; asOf 23/10/2026 | SUS | Vencimento candidato na própria data, conforme calendário e âncora aprovada | B12 bienal + Foundation dueWindow | alta temporal; policy condicional | OQ-CCR-004 | Não acrescentar período de graça sem fonte. |
-| CASE-CCR-056 | Exame informado em 2027, asOf 23/10/2026 | Todas | Dado futuro inválido/Indeterminate; não Current | Foundation validateHistoricalDate | alta | OQ-CCR-023 | Não inventar exceção clínica para data impossível. |
-| CASE-CCR-057 | Colonoscopia recente mantém rotina Current, masnovo FIT+ relevante | Internacional A | Follow-upaberto e rotina sem ação redundante; prova futura de coordenação FG02 | I04 + Foundation tracks | média | OQ-CCR-023 | Track independente não autoriza ações clínicas incompatíveis. |
-| CASE-CCR-058 | historyKnowledge never_performed com FIT realizado no array | Todas | Contradição explícita; revisão/esclarecimento, sem escolher automaticamente um lado | Foundation semanticIssues | alta | OQ-CCR-023 | Não interpretar a incoerência como negativa verdadeira. |
-| CASE-CCR-059 | FIT− recente, depois sangue visível e perda ponderal | Todas | Sair da rotina para investigação; não tranquilizar só pelo relógio | B08§3.1; B12 p.18 | alta | OQ-CCR-009 | Current deagenda não significa ausência de doença. |
-| CASE-CCR-060 | Adenoma avançado prévio; colonoscopia posterior sem novas lesões | Todas | Revisar programa de surveillance; não retornar ao habitual por um único exame 'normal' sem história | I05 escopo/seguimento; B08 risco | alta para abstenção | OQ-CCR-011 | O contexto anterior modifica o significado da colonoscopia posterior. |
+## Requisitos transversais para futura golden suite
 
-## Revisão futura
+- mesmas datas em ordens de entrada diferentes devem gerar mesma saída;
+- unknown nunca equivale a false;
+- same-day/intervalos sobrepostos não ganham ordem fictícia;
+- FIT+ aberto nunca pode coexistir com ação rotineira redundante;
+- policy comparison deve preservar divergência sem escolher “vencedora”;
+- nenhum caso de sintomas deve transformar o Motor em triador diagnóstico.
 
-Revisor deve confirmar população, interpretação e saída de cada caso, priorizando erro por falsa tranquilização, perda de seguimento e mistura de políticas. Variantes de datas e ordens são exigências técnicas documentais, sem alteração de suíte nesta fase. Casos 18/39/51 não têm resultado clínico único aprovado: a diferença/bloqueio é parte do oráculo proposto, não uma lacuna a preencher com default.
+Antes de converter estes casos em testes executáveis, mapear cada expected a proposições `APPROVED_R1`/`APPROVED_R1_MODIFIED` e à fonte governante correspondente.

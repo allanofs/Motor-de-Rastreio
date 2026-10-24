@@ -1,46 +1,80 @@
-# 05 — SUS / Brasil oficial — política proposta
+# 05 — Policy SUS / Brasil oficial — consolidada
 
-**awaiting_clinical_review — parcialmente especificada; não autorizada para implementação.**
-Corte 23/10/2026. Fontes não intercambiáveis: [B12 protocolo operacional](https://www.gov.br/saude/pt-br/composicao/saes/agora-tem-especialistas/publicacoes/protocolo-de-acesso-as-ofertas-de-cuidados-integrados-em-oncologia.pdf/@@download/file), [B05 ata pós-CP](https://www.gov.br/conitec/pt-br/midias/reuniao_conitec/2026/ata-da-152o-reuniao-da-conitec_pcdt_site/@@display-file/file), B03 preliminar, B06/B07 tabela e B08 PCDT de doença estabelecida. Status detalhado em 02.
+**Status:** `reviewed_by_1` em 24/10/2026. Especificação clínica documental, não regra executável.
 
-## Núcleo e autoridade por pergunta
+## Governante e limites
 
-| Decisão | Proposta revisável | Fonte/localizador | Limite |
-|---|---|---|---|
-| Quem | Assintomático, elegível, sem condição que retire do risco habitual | B12 p.17; B03 pressupostos PDF p.9; B08 introdução | Definição familiar/alto risco precisa curadoria; desconhecido não é negativo |
-| Início |50 anos | B12 p.17; B05 PDF p.9 mantém início após CP; B03 rec.5 | Não importar 45 USPSTF; fonte final integral da diretriz ainda pendente |
-| Término |75 é teto descrito | B12 p.17; B06 Anexo I; B03 rec.6 | OQ-CCR-003: aniversário 75 versus ano 75; investigação já indicada não some com a idade |
-| Modalidade primária | FIT | B12 p.17; B03 rec.2 | Colonoscopia tem papel diagnóstico no fluxo; não fallback automático |
-| Tipo | Qualitativo ou quantitativo no preliminar | B03 rec.3 | Proposta pendente do texto final; kit validado e laudo governam operação |
-| Periodicidade |2 anos após resultado negativo válido | B12 p.17; B05 PDF p.9; B03 rec.7/implementação | Definir data de coleta versus laudo; não periodicidade de positivos |
-| FIT+ | Colonoscopia diagnóstica/rota especializada | B12 pp.17–18; B03 rec.8 | Não esperar próxima rodada e não repetir FIT como “confirmação negativa” |
-| Prazo FIT+ | Não afirmar prazo universal normativo confirmado | B05 PDF p.9 cita referência≤30 dias em indicadores em desenvolvimento | Não confundir com legislação de diagnóstico após suspeita ou com prazo OCI |
-| Negativo/pendente/inválido | Negativo final pode ancorar rotina; pendente aguarda; inválido pede esclarecimento/laboratório | B03 comunicação de resultados; guardas explícitas do Work | Condições final/validade/clock e manejo de inválido precisam validação humana |
-| Pós-colonoscopia normal após FIT+ | Resolver investigação somente com exame posterior suficiente; nova rotina ainda bloqueada | B03 Figura 1/rec.8; B05 PDF p.8 informa revisão | Não publicar 10 anos como política final SUS |
-| Pólipo/DII/hereditariedade | Revisão ou handoff documentado, sem surveillance automática | B08 introdução; B03 população/rec.8 | Suspeita não é diagnóstico; pólipo não caracterizado não recebe intervalo |
-| Câncer confirmado | Sair da rotina; cuidado conforme PCDT | B08 art.1 e âmbito | HandedOff somente com destino conhecido; suspeita permanece investigação |
-| Sintomas | Saída da rota assintomática, avaliação diagnóstica | B08 §3.1; B12 p.18 | Não construir score diagnóstico nem usar idade como barreira |
-| Recursos locais | Rota pactuada/clarificar; preservar recomendação | B12 organização da rede; B11 anúncio de rollout | Ausência local não é inelegibilidade clínica |
+A policy SUS usa fontes oficiais brasileiras dentro do próprio escopo. O núcleo tem suporte em B12 e é coerente com a cadeia B03/B05/comunicações oficiais. A versão final integral pós-CP ainda não foi confirmada; por isso alguns detalhes permanecem deliberadamente não automatizados.
 
-## Critérios mínimos de segurança propostos
+## População e estratégia aprovadas
 
-Antes de concluir risco habitual, conhecer sintomas relevantes, CCR prévio, adenoma/pólipo com seguimento, DII relevante e predisposição/família. Triagem familiar positiva leva a revisão; não exigir pedigree completo de todos. A ausência de dado decisivo produz Indeterminate/ClinicalReviewRequired, sem afirmar que a própria norma exige aquele campo do formulário.
+| Item | Decisão consolidada |
+|---|---|
+| contexto | uso profissional em rastreamento preventivo; sintomas/urgência não são triados pelo Motor |
+| idade inicial | 50 anos |
+| idade final | 75 anos **inclusive** |
+| a partir de 76 | fora da nova rotina populacional; não apagar investigação já aberta |
+| método nuclear | FIT |
+| FIT negativo válido | nova rodada em 2 anos |
+| anchor | data de coleta/realização; resultado final válido é condição para qualificar |
+| FIT positivo | colonoscopia diagnóstica; follow-up permanece aberto até resolução suficiente |
+| prazo FIT+ | sem deadline universal automático |
+| FIT pending | não ancora rotina |
+| FIT inválido/inconclusivo | não é negativo; não ancora; regularizar/repetir conforme laboratório/serviço sem prazo universal |
 
-Há diferença entre “não elegível para convite populacional nesta faixa” e “não deve investigar”. FIT positivo, sintomas e câncer conhecido seguem suas próprias decisões clínicas. Em pessoa frágil, incapaz de completar diagnóstico/tratamento ou que recusa, revisão compartilhada; não criar estimativa automática de vida por idade.
+## Gate de escopo
 
-## Política longitudinal: propostas abertas
+O profissional deve confirmar que o módulo está sendo usado em contexto apropriado de screening. O Motor não coleta checklist sintomático nem decide urgência, diagnóstico ou necessidade de investigação de sintomas.
 
-- FIT− posterior não apaga FIT+; B12 define investigação via colonoscopia e I04 oferece recomendação explícita de não substituição. Para SUS, a guarda é interpretação coerente do fluxo brasileiro a ser aprovada; grade internacional não será atribuída a B12.
-- Colonoscopia anterior ao FIT+ não o resolve. Se não há regra brasileira suficientemente explícita para nova colonoscopia após exame recente, mostrar ClinicalReviewRequired com seguimento aberto; não suprimir o positivo.
-- Uma colonoscopia posterior, completa, preparo adequado e laudo normal pode ser candidata a resolução diagnóstica. Não inferir que “sem câncer”, “com pólipo removido” ou “anatomopatológico pendente” sejam normal.
-- Nova agenda após resolução exige fonte final e aprovação. Mesmo uma resolução clínica explícita não autoriza o Motor a inventar Current sem a âncora genérica validada da Foundation.
+## Risco habitual e exclusões
 
-## Administrativo e implantação
+Saem da rota habitual e vão para revisão/handoff conforme o caso:
 
-B07, se autenticado, muda o cadastro para 02.14.01.032-5 e torna B06 sem efeito. **SA-01** impede afirmar cadastro vigente a partir apenas dos espelhos. Não é detalhe descartável: registrar ato/código/competência e não usar o antigo como padrão.
+- CRC prévio;
+- pólipo/adenoma prévio com seguimento especializado conhecido ou achado atual não caracterizado;
+- DII colônica conhecida;
+- Lynch/FAP/outra predisposição hereditária conhecida ou suspeita.
 
-B11 anuncia distribuição e início progressivo em novembro; em 23/10 isso é previsão. Não codificar município, elegibilidade geográfica ou disponibilidade presumida. Um serviço fora do rollout não torna a pessoa biologicamente “sem indicação”.
+História familiar positiva relevante **não recebe automaticamente o algoritmo ACG dentro da policy SUS**. Deve ser revisada. História familiar desconhecida não pode ser convertida em ausência, mas também não deve apagar uma indicação mínima já conhecida pela idade/policy; pode impedir a definição da estratégia final.
 
-## O que esta política não contém
+## Colonoscopia após FIT+
 
-Nenhum algoritmo genético, pós-polipectomia completo, tratamento oncológico, teste sanguíneo/RNA, substituição automática por outra modalidade, diagnóstico de sintomáticos ou cadastro de recursos por cidade. Proposições 1–22, 41, 43–45 são propostas, com limites individuais no registro. OQ-CCR-001–016/022/023 precisam das decisões indicadas.
+Para uma colonoscopia ser capaz de resolver automaticamente o episódio devem existir informações profissionais suficientes de que:
+
+1. ocorreu certamente depois do FIT+;
+2. foi completa;
+3. o preparo foi adequado;
+4. houve resultado final suficiente;
+5. não há pólipo/lesão/AP pendente que exija outra rota.
+
+Upload de PDF não é obrigatório; relato leigo isolado de “deu normal” não é suficiente para fechar automaticamente o episódio.
+
+### Após colonoscopia normal adequada
+
+- o **episódio diagnóstico FIT+ pode ser considerado resolvido**;
+- a **próxima modalidade/intervalo SUS não é automatizada ainda**, porque o fluxo final pós-CP integral não foi autenticado;
+- não importar 10 anos da policy Internacional nem da colonoscopia primária BA-A para o SUS.
+
+## Colonoscopia inadequada
+
+Colonoscopia incompleta, preparo inadequado ou qualidade desconhecida:
+
+- não fecha FIT+;
+- não produz `Current`;
+- mantém `InFollowUp`/revisão;
+- não recebe prazo automático universal no piloto.
+
+## Histórico e estados
+
+- `never_performed` só quando confirmado que nenhum rastreamento CCR relevante foi realizado;
+- `unknown` ou `not_asked` nunca viram `Due` por presunção;
+- histórico suficientemente conhecido para a decisão é suficiente; não exigir reconstrução vitalícia completa;
+- FIT+ aberto tem prioridade sobre oferta rotineira e não pode ser silenciado por idade, FIT− posterior ou falta de recurso.
+
+## Disponibilidade
+
+Falta de FIT/colonoscopia local muda a rota operacional, não a indicação. Não existe fallback universal FIT indisponível→colonoscopia nem colonoscopia indisponível→novo FIT.
+
+## Bloqueio remanescente
+
+Apenas a agenda SUS **depois** de FIT+ resolvido por colonoscopia normal de alta qualidade e metadados dependentes da versão final brasileira permanecem bloqueados por fonte externa.

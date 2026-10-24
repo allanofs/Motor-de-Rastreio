@@ -1,44 +1,50 @@
-# 03 — Perguntas clínicas antes das proposições
+# 03 — Perguntas clínicas — estado pós-auditoria
 
-Corte 23/10/2026. Perguntas organizam a extração; respostas não são código nem aprovação. A lista foi estruturada antes do registro de proposições. Todos os IDs abaixo são provisórios.
+**Consolidação:** 24/10/2026. A lista abaixo preserva as 32 perguntas originais, mas registra o estado após a primeira revisão humana.
 
-| ID | Pergunta | Componentes / população | Prioridade | Proposições candidatas (sufixos) |
-|---|---|---|---|---|
-| CQ-CCR-001 | Elegibilidade habitual por política | assintomático, risco, idade, benefício e preferência | P0 | 1–5, 23–28 |
-| CQ-CCR-002 | População de risco não habitual | CCR/pólipos/DII/hereditariedade/família/radiação | P0 | 11–15, 31–33, 40 |
-| CQ-CCR-003 | Saída por sintomas | sangue visível, anemia ferropriva, alteração persistente, perda/massa | P0 | 10 |
-| CQ-CCR-004 | Método primário SUS | FIT ou alternativa; escopo formal versus administrativo | P0 | 2, 6 |
-| CQ-CCR-005 | Idade inicial SUS | faixa 50 versus 45 | P0 | 1, 4 |
-| CQ-CCR-006 | Teto SUS e limites inclusivos | aniversário 75 versus faixa 75 completa; diagnóstico não cessa | P0 | 5 |
-| CQ-CCR-007 | Intervalo SUS | dois anos; âncora clínica e idade na próxima rodada | P0 | 3, 16 |
-| CQ-CCR-008 | FIT tipo, amostra e preparo | qualitativo/quantitativo, uma amostra, dieta/medicação | P1 | 6, 7, 41 |
-| CQ-CCR-009 | Ponto de corte e unidade | 50 ng/m L, dispositivo; classificação final do laboratório | P0 | 7 |
-| CQ-CCR-010 | FIT negativo qualificador | final/validade/data e ausência de positivo aberto | P0 | 16 |
-| CQ-CCR-011 | FIT positivo: ação | colonoscopia diagnóstica; informação de conclusão | P0 | 8, 17, 18 |
-| CQ-CCR-012 | Prazo FIT+ | norma versus indicador 30 dias versus ACS 6 meses | P0 | 8, 37 |
-| CQ-CCR-013 | FIT inválido | quando repetir; existe protocolo explícito? | P1 | 20 |
-| CQ-CCR-014 | FIT pendente | não gerar nova rotina/Current enquanto falta resultado | P1 | 19 |
-| CQ-CCR-015 | Colonoscopia primária | papel e 10 anos por política; não transportar para SUS | P0 | 28, 34 |
-| CQ-CCR-016 | Qualidade da colonoscopia | ceco, preparo, achados, ressecção, laudo final | P0 | 21, 29, 42 |
-| CQ-CCR-017 | Colonoscopia inadequada pós-FIT+ | não resolver; repetição com contexto e fonte | P0 | 21, 39 |
-| CQ-CCR-018 | Normal após FIT+ | resolução do episódio diferente de nova agenda; política | P0 | 9, 29 |
-| CQ-CCR-019 | Colonoscopia anterior ao FIT+ | não resolver evento posterior | P0 | 30 |
-| CQ-CCR-020 | Pólipos e pós-polipectomia | limite do piloto, detalhes mínimos, surveillance | P0 | 12, 38 |
-| CQ-CCR-021 | Câncer detectado/conhecido | suspeita versus confirmação e handoff real | P0 | 11, 22 |
-| CQ-CCR-022 | História familiar | grau, número, idade e câncer versus pólipo avançado | P0 | 15, 31–33 |
-| CQ-CCR-023 | Síndromes hereditárias | Lynch/FAP/outras; apenas revisão/handoff | P1 | 14 |
-| CQ-CCR-024 | DII | não é rotina habitual; sem inventar surveillance | P1 | 13 |
-| CQ-CCR-025 | Idoso e benefício | histórico, saúde, expectativa, tratamento e preferência | P0 | 25, 26, 36 |
-| CQ-CCR-026 | Composição Brasil ampliado | curadoria da fonte por pergunta e lacunas | P0 | 34–36 |
-| CQ-CCR-027 | Política internacional | USPSTF versus ACS; complementos coerentes | P0 | 23–30, 37 |
-| CQ-CCR-028 | Histórico conhecido/desconhecido | never_performed global; modalidade; not_asked | P0 | 15, 19, 20 |
-| CQ-CCR-029 | Cronologia e qualificadores | múltiplos positivos; datas parciais e evidência usada | P0 | 16–22, 29, 30 |
-| CQ-CCR-030 | Recursos locais | available/unavailable/unknown; rota, sem substituição clínica | P0 | 43, 44 |
-| CQ-CCR-031 | Correspondência com a Foundation | Current, SharedDecision e interação entre tracks | P1 | 45 |
-| CQ-CCR-032 | Limite e futuras modalidades | sangue/RNA/CTC; não expansão automática do piloto | P2 | 40, 41 |
+| ID | Pergunta | Estado pós-auditoria |
+|---|---|---|
+| CQ-CCR-001 | Elegibilidade habitual por política | **RESOLVIDA**: policies separadas; 50–75 SUS, 45–75 USPSTF, BA-A específica |
+| CQ-CCR-002 | População de risco não habitual | **RESOLVIDA no piloto**: reconhecer e revisar/handoff; família Internacional tem ACG |
+| CQ-CCR-003 | Saída por sintomas | **SUBSTITUÍDA** por gate de escopo profissional 17B; Motor não faz triagem sintomática |
+| CQ-CCR-004 | Método primário SUS | **RESOLVIDA**: FIT |
+| CQ-CCR-005 | Idade inicial SUS | **RESOLVIDA**: 50 |
+| CQ-CCR-006 | Teto SUS | **RESOLVIDA**: 75 inclusive; rotina cessa a partir de 76, sem apagar follow-up aberto |
+| CQ-CCR-007 | Intervalo SUS | **RESOLVIDA**: 2 anos; âncora = coleta/realização com resultado final válido |
+| CQ-CCR-008 | FIT tipo, amostra e preparo | **DOCUMENTAL/OPERACIONAL**; piloto usa laudo categórico final |
+| CQ-CCR-009 | Ponto de corte/unidade | **FORA DA AUTOMAÇÃO**; não converter/reclassificar valor bruto |
+| CQ-CCR-010 | FIT negativo qualificador | **RESOLVIDA**: final válido + data + sem FIT+ aberto |
+| CQ-CCR-011 | FIT positivo: ação | **RESOLVIDA**: colonoscopia; follow-up persiste até resolução suficiente |
+| CQ-CCR-012 | Prazo FIT+ | **RESOLVIDA**: sem deadline universal automático |
+| CQ-CCR-013 | FIT inválido | **RESOLVIDA**: não qualifica; sem prazo universal; seguir laboratório/serviço |
+| CQ-CCR-014 | FIT pendente | **RESOLVIDA**: PendingResult; não qualifica nem apaga follow-up |
+| CQ-CCR-015 | Colonoscopia primária | **RESOLVIDA**: estratégia alternativa onde policy permite; escolha humana |
+| CQ-CCR-016 | Qualidade da colonoscopia | **RESOLVIDA**: informação profissional suficiente sobre completude, preparo, resultado e pendências |
+| CQ-CCR-017 | Colonoscopia inadequada pós-FIT+ | **RESOLVIDA**: não fecha episódio; prazos apenas decision support |
+| CQ-CCR-018 | Normal após FIT+ | **PARCIAL**: resolução diagnóstica definida; Internacional=10 anos se high-quality/sem exceções; agenda SUS ainda bloqueada |
+| CQ-CCR-019 | Colonoscopia anterior ao FIT+ | **RESOLVIDA**: não resolve evento posterior |
+| CQ-CCR-020 | Pólipos/pós-polipectomia | **RESOLVIDA por escopo**: revisão/handoff; sem surveillance automática |
+| CQ-CCR-021 | Câncer detectado/conhecido | **RESOLVIDA**: sai do screening; HandedOff só com transferência confirmada |
+| CQ-CCR-022 | História familiar | **RESOLVIDA**: coleta em etapas; unknown não vira ausência; ACG na Internacional |
+| CQ-CCR-023 | Síndromes hereditárias | **RESOLVIDA por escopo**: revisão/handoff, sem algoritmo genético |
+| CQ-CCR-024 | DII | **RESOLVIDA por escopo**: fora da rotina habitual; revisão |
+| CQ-CCR-025 | Idoso/benefício | **RESOLVIDA**: USPSTF 76–85 decisão seletiva; sem calculadora implícita de expectativa de vida |
+| CQ-CCR-026 | Composição Brasil ampliado | **RESOLVIDA**: BA-A conservadora |
+| CQ-CCR-027 | Política internacional | **RESOLVIDA**: USPSTF governante + complementos especializados |
+| CQ-CCR-028 | Histórico conhecido/desconhecido | **RESOLVIDA**: never_performed global explícito; unknown não vira Due por presunção |
+| CQ-CCR-029 | Cronologia/qualificadores | **RESOLVIDA**: ordem estrita; gatilhos positivos preservados; same-day/overlap abstêm |
+| CQ-CCR-030 | Recursos locais | **RESOLVIDA conceitualmente**: disponibilidade altera rota, não recomendação |
+| CQ-CCR-031 | Correspondência com Foundation | **GATE FASE 6**: provar representabilidade sem mudar Foundation |
+| CQ-CCR-032 | Futuras modalidades | **ADIADA**: sangue/RNA/CTC e outros fora do piloto |
 
-## Critério de resposta
+## Pergunta substituta de escopo
 
-Para cada pergunta: identificar fonte responsável e população; conferir status/versão/localizador; extrair proposição; separar interpretação do Work; propor representação humana; declarar dados críticos, limites e revisão. Não registrar “não recomendado” quando a fonte apenas é silenciosa.
+**CQ-CCR-SCOPE:** “O profissional está utilizando este módulo em contexto apropriado de rastreamento preventivo?”
 
-CQ012 não pergunta um prazo universal: compara o tipo de autoridade e seu evento inicial. CQ018 separa fechar investigação de atribuir novo intervalo. CQ022 impede chamar FDR desconhecido de ausência de risco. CQ028 não converte “nunca FIT” em ausência de qualquer exame de CCR.
+- `sim` → avaliar rastreamento;
+- `não` ou `incerto` → abstenção: situação fora do escopo do módulo;
+- o Motor não coleta uma lista de sintomas e não decide urgência/diagnóstico.
+
+## Critério para Fase 6
+
+A Fase 6 não deve reabrir perguntas clínicas resolvidas. Só deve retornar à revisão humana se um caso real mostrar que a decisão aprovada não é representável com segurança ou se nova fonte oficial alterar materialmente a policy.

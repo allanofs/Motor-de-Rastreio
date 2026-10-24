@@ -1,37 +1,38 @@
-# 10 — Recursos locais e operacionalização
+# 10 — Care Setting e operacionalização — consolidado
 
-**awaiting_clinical_review.** Recomendação científica, acesso local e elegibilidade são dimensões distintas. Não há lógica geográfica nem consulta a disponibilidade real nesta fase.
+Status: reviewed_by_1 em 24/10/2026.
 
-| Recurso | Estado local | Efeito operacional proposto | Preserva recomendação? | Fonte/limite |
-|---|---|---|---|---|
-| FIT | available | Ofertar por equipe/fluxo validado se elegível | Sim | B12 p.17; B09 instruções gerais não substituem kit |
-| FIT | unavailable | Esclarecer rota de obtenção/programa; revisão operacional | Sim | B11 rollout progressivo; nenhuma substituição automática por colonoscopia localizada |
-| FIT | unknown | Confirmar oferta/local/fluxo | Sim | Guarda Work; não pressupor disponibilidade |
-| Colonoscopia após FIT+ | available | Encaminhar/realizar na rede e acompanhar resultado | Sim | B12 OCIpp.17–18 |
-| Colonoscopia após FIT+ | unavailable | Regulação/serviço referencial conforme pactuação; manter investigação aberta | Sim, sem trocar por FIT | B08 art.3/B12 organização da rede; prazo local não inventado |
-| Colonoscopia após FIT+ | unknown | Identificar responsável e rota; não atrasar por novo FIT | Sim | B12 + guarda Work |
-| Anatomopatológico necessário | available | Obter resultado e vincular à investigação | Sim | B03 rec.8/B12 componentes OCI |
-| Anatomopatológico necessário | unavailable | Encaminhamento/resolução de barreira; não declarar lesão benigna/episódio fechado | Sim | B08/B12; sem fallback diagnóstico fictício |
-| Anatomopatológico necessário | unknown | Esclarecer coleta, laboratório e resultado | Sim | Guarda Work |
-| Regulação/encaminhamento | available | Usar fluxo responsável e acompanhar situação | Sim | B08 art.3; B12 |
-| Regulação/encaminhamento | unavailable | Revisão do profissional/gestão para definir rota; não dizer“sem indicação” | Sim | Não foi localizada rota nacional única para toda falha local |
-| Regulação/encaminhamento | unknown | Clarificar; não marcar handoff | Sim | Guarda Work |
+Princípio central: recomendação científica, disponibilidade local e rota assistencial são dimensões separadas. A falta de recurso não transforma “indicado” em “não indicado”.
 
-## Recomendação ideal versus rota autorizada
+| Recurso | Estado | Efeito operacional |
+|---|---|---|
+| FIT | available | ofertar conforme policy/fluxo |
+| FIT | unavailable | identificar rota/programa; não trocar automaticamente por colonoscopia |
+| FIT | unknown | clarificar disponibilidade |
+| colonoscopia após FIT+ | available | realizar/encaminhar e manter follow-up até resolução |
+| colonoscopia após FIT+ | unavailable | regulação/serviço referencial; não repetir FIT como substituto |
+| colonoscopia após FIT+ | unknown | identificar responsável/rota; investigação continua aberta |
+| AP necessário | unavailable/unknown | resolver barreira/resultado; não declarar episódio fechado |
+| encaminhamento/regulação | solicitado/agendado | continua InFollowUp |
+| cuidado assumido | atendimento/transferência confirmada | pode marcar HandedOff |
 
-| Recomendação científica | Recurso local | Rota operacional autorizada/proposta | Fonte |
-|---|---|---|---|
-| FIT no núcleo SUS | Ausente | Identificar fluxo de oferta; **nenhum fallback clínico automático identificado** | B12 p.17/B11; lacuna OQ-CCR-022 |
-| Colonoscopia após FIT+ | Ausente no local | Encaminhar/regulação para rede definida pelos gestores; não repetir FIT para resolver | B08 art.3/B12 OCI; I04 apenas como fundamento da opção internacional |
-| Avaliação de suspeita/pólipo/câncer | Rede especializada | Consulta, colonoscopia, AP quando indicado e retorno; não algoritmo oncológico | B12 OCI pp.17–18/B08 |
-| Repetir exame inadequado | Capacidade insuficiente | Priorizar avaliação/rota apropriada, sem alterar o achado ou “normalizar” | I06 para opção internacional; política SUS requer suplemento explicitado |
+## HandedOff
 
-Não existe autorização documental neste pacote para FIT unavailable→colonoscopia automática, colonoscopia unavailable→FIT ou outro método diagnóstico automático, ou resultado positivo→aguardar nova rodada bienal.
+HandedOff exige evidência de que outro profissional/serviço realmente assumiu o pathway. Não basta pedido, regulação, consulta agendada ou procedimento solicitado.
 
-## Datas e alcance do rollout
+## Sem fallback clínico inventado
 
-B11, 20/10/2026, anuncia início em novembro nas capitais e municípios>500 mil. Anúncio de implantação não comprova oferta de hoje em cada município. B07, se autenticado, relata efeitos operacionais na competência seguinte à publicação. Não confundir competência de faturamento, chegada de kits e elegibilidade clínica. A política de acesso regional e o planejamento de capacidade são do serviço, não parâmetros clínicos a inventar.
+Não existe autorização neste pacote para:
 
-## Quem solicita/oferece?
+- FIT indisponível → colonoscopia automática na policy SUS;
+- colonoscopia indisponível após FIT+ → repetir FIT;
+- barreira local → considerar paciente Current;
+- município/localização → alterar elegibilidade clínica.
 
-B12 situa rastreamento e acesso na rede APS/especializada; B06/B07 tratam atributos e categorias de registro. CBO de procedimento não deve ser convertido automaticamente em autorização universal de prescrição/solicitação. Instrução operacional local e competências profissionais precisam de conferência própria. O piloto apenas representa disponibilidade/rota, sem cadastro geográfico ou persistência.
+## Rollout e cadastro
+
+Anúncios de implantação gradual e códigos administrativos não comprovam disponibilidade real em cada serviço. O piloto pode representar `available/unavailable/unknown`, mas não consulta geografia, não persiste cadastro e não determina competência profissional por CBO.
+
+## Ideal versus operacional
+
+O Motor deve mostrar a recomendação clínica ideal da policy e, quando o perfil do serviço estiver conhecido, a rota operacional autorizada. A alternativa operacional nunca deve ser apresentada como evidência clínica equivalente quando não for.
