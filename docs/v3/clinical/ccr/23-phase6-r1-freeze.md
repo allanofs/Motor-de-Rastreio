@@ -153,7 +153,12 @@ A preparação desse gate foi iniciada em:
 - `25-phase6-r2-review-form.md` — formulário para o segundo médico;
 - `tests/ccr/r2Gate.test.ts` — impede `reviewed_by_2`/`active` acidental sem segunda identidade humana.
 
-A auditoria pré-R2 encontrou dois itens a resolver antes da assinatura R2 final: granularidade do Grade USPSTF nas regras de modalidade e reconciliação documental da proveniência `B12`. Esses findings não mudaram outputs clínicos, mas são relevantes para evidência/auditabilidade.
+A auditoria pré-R2 encontrou dois itens a resolver antes da assinatura R2 final:
+
+- **R2-01:** Grade USPSTF está atualmente replicado nas regras de modalidade; deve permanecer semanticamente ligado à recomendação populacional por faixa etária, enquanto FIT/colonoscopia mantêm apenas estratégia/intervalo;
+- **R2-02:** a proveniência/versionamento do documento `B12` precisa ser reconciliada, apesar de o comportamento SUS estar corroborado por comunicações oficiais MS/INCA 2026.
+
+Esses findings não alteraram outputs clínicos, mas são relevantes para evidência e auditabilidade e bloqueiam a assinatura R2 limpa.
 
 ### Depois da segunda revisão
 
@@ -172,7 +177,7 @@ Adversarial / goldens              ✅
 Trace / governance audit           ✅
 Primeira revisão da tradução       ✅ reviewed_by_1
 Auditoria independente pré-R2      ✅
-R2-01 / R2-02                      ⏳ requerem resolução
+R2-01 / R2-02                      ⛔ bloqueiam assinatura R2 final
 Segunda revisão médica humana      ⏳ pendente
 Ativação clínica                   ❌ não autorizada
 Release público                    ❌ não autorizado
