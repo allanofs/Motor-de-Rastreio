@@ -1,24 +1,23 @@
 import {
-  CCR_R2_REVIEWED_RULESET_VERSION,
-  ccrPhase6R2ReviewedPolicies,
-  ccrPhase6R2ReviewedResolvers,
-  ccrPhase6R2ReviewedRuleset,
-} from "./r2ReviewedCandidate";
+  CCR_ACTIVE_RULESET_VERSION,
+  ccrPhase6ActivePolicies,
+  ccrPhase6ActiveResolvers,
+  ccrPhase6ActiveRuleset,
+} from "./activeCandidate";
 
-export const CCR_CANDIDATE_RULESET_VERSION =
-  CCR_R2_REVIEWED_RULESET_VERSION;
+export const CCR_CANDIDATE_RULESET_VERSION = CCR_ACTIVE_RULESET_VERSION;
 
 /**
- * Canonical Phase 6 candidate entrypoint after R1 and private external physician
- * R2 review.
+ * Canonical Phase 6 clinical-content entrypoint after R1, privacy-preserving R2
+ * and explicit project-lead activation authorization.
  *
- * The R2 reviewer is represented in the public repository only by a stable,
- * non-identifying handle; the project lead attests that this handle represents
- * a physician distinct from the R1 reviewer. Historical snapshots remain
- * available for regression/audit. All 43 rules are reviewed_by_2 but remain
- * lifecycle=draft. Activation, public release and merge are separate later
- * gates.
+ * Historical pre-R2, R1 and R2-draft snapshots remain available for audit and
+ * regression. All 43 canonical rules are reviewed_by_2 and lifecycle=active.
+ *
+ * IMPORTANT: content activation is not deployment authorization. Public release,
+ * real-world clinical use, patient-facing use, product integration readiness and
+ * merge of PR #3 remain separate gates.
  */
-export const ccrCandidateRuleset = ccrPhase6R2ReviewedRuleset;
-export const ccrCandidatePolicies = ccrPhase6R2ReviewedPolicies;
-export const ccrCandidateResolvers = ccrPhase6R2ReviewedResolvers;
+export const ccrCandidateRuleset = ccrPhase6ActiveRuleset;
+export const ccrCandidatePolicies = ccrPhase6ActivePolicies;
+export const ccrCandidateResolvers = ccrPhase6ActiveResolvers;
