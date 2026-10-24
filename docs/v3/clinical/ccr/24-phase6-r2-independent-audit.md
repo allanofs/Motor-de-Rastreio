@@ -213,3 +213,5 @@ merge PR #3                     ❌
 4. entregar `25-phase6-r2-review-form.md` a um médico independente;
 5. somente após aprovação explícita do segundo médico, registrar reviewer/data distintos e produzir `reviewed_by_2` em uma nova versão de governança;
 6. ainda assim, ativação/release/merge continuam decisões separadas.
+
+**Governança:** este documento é uma auditoria de preparação para R2. Ele não deve ser usado como assinatura do segundo revisor.
