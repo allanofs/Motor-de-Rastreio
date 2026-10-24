@@ -6,7 +6,7 @@
 
 > Este formulário não deve ser preenchido pelo autor/revisor R1. O segundo revisor precisa ser uma pessoa diferente e deve revisar o conteúdo clínico, não apenas confirmar que os testes passam.
 
-> **Estado atual:** não assinar ainda. `R2-01` precisa de correção de metadado USPSTF. Para `R2-02`, a auditoria identificou a fonte normativa adequada — **Portaria SAES/MS nº 5.215/2026** — mas os `sourceRefs` SUS ainda precisam ser migrados, `B12` corrigido para sua edição real de 2025 e os locators SUS revalidados. Depois dessas correções, o candidato deverá passar novamente pela suíte e pela reconfirmação R1 antes da assinatura R2.
+> **BLOQUEADO PARA ASSINATURA FINAL:** R2-01 e R2-02 precisam ser aplicados ao candidato, testados e reconfirmados em R1 antes de este formulário poder autorizar `reviewed_by_2`.
 
 ## Identificação do revisor R2
 
@@ -78,12 +78,13 @@
 
 ### R2-01 — Grade USPSTF em regras de modalidade
 
-- [ ] Confirmo que Grade A/B não está sendo atribuído como se fosse uma graduação individual de FIT/colonoscopia; a graduação permanece ligada à recomendação populacional de rastrear por faixa etária.
+- [ ] Grade A/B não está atribuído como graduação individual de FIT/colonoscopia; permanece ligado à recomendação populacional de rastrear por faixa etária.
 
 ### R2-02 — fonte SUS de rastreamento
 
-- [ ] Confirmei que a Portaria SAES/MS nº 5.215/2026 é a fonte normativa usada para idade 50–75/FIT bienal e que o antigo protocolo OCI `B12` foi corrigido para sua edição real e restrito a locators que realmente sustenta.
-- [ ] Revi individualmente os sourceRefs SUS de história familiar/hard exclusions após a migração e confirmei que nenhum locator atribui ao documento conteúdo que ele não contém.
+- [ ] A Portaria SAES/MS nº 5.215/2026 é a fonte normativa usada para idade 50–75/FIT bienal.
+- [ ] O protocolo OCI `B12` está identificado como 2ª edição 2025 e restrito a locators que realmente sustenta.
+- [ ] Os sourceRefs SUS de história familiar/hard exclusions foram revistos individualmente e nenhum locator atribui conteúdo inexistente à fonte.
 
 ## Resultado da revisão
 
