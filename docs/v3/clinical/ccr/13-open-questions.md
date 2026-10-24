@@ -1,4 +1,4 @@
-# 13 — Questões abertas — estado pós-auditoria
+# 13 — Questões abertas — estado pós-Fase 6.6
 
 **Consolidação:** 24/10/2026.
 
@@ -28,16 +28,15 @@
 | OQ-CCR-020 | `PARTIALLY_RESOLVED` | I04/I05 acesso primário confirmado; I06 permanece parcial, mas não bloqueia porque prazos não são automatizados |
 | OQ-CCR-021 | `RESOLVED_R1` | BA-A aprovada: FIT q2y default, colo q10 selecionável, 45–49 shared decision |
 | OQ-CCR-022 | `OPERATIONAL_P1` | rota local/competência não altera recomendação; representar disponibilidade, sem geografia automática |
-| OQ-CCR-023 | `PHASE6_TECHNICAL_GATE` | provar coordenação routine/follow-up/history na Foundation antes de ativar conteúdo |
+| OQ-CCR-023 | `RESOLVED_PHASE6` | coordenação routine/follow-up/history demonstrada nas Fases 6.0–6.6 sem alteração de `v3/src/engine/**` ou `v3/src/model/**`; follow-up aberto suprime screening redundante e os goldens adversariais permanecem verdes |
 
 ## Resumo
 
-- 16 questões resolvidas em primeira revisão;
+- 17 questões resolvidas/substituídas/fechadas pela Fase 6;
 - 2 parcialmente resolvidas;
 - 2 dependências externas/documentais relevantes (001 e 006);
 - 1 administrativa (002);
-- 1 operacional (022);
-- 1 gate técnico da Fase 6 (023).
+- 1 operacional (022).
 
 ## Bloqueios de fonte remanescentes
 
@@ -47,17 +46,28 @@ Texto final integral brasileiro pós-CP ainda não autenticado. Continuação se
 ### SA-I06
 Documento/trechos USMSTF 2025 sustentam que preparo inadequado não fecha episódio e há recomendações temporais específicas. Como o piloto deliberadamente não transforma esses prazos em deadline automático, a leitura integral não bloqueia a primeira implementação.
 
-## Foundation gaps
+## Foundation gaps — resultado da prova técnica
 
-FG01–FG04 permanecem como observações, não alterações aprovadas:
+FG01–FG04 foram testados como observações arquiteturais:
 
 - histórico por modalidade;
 - coordenação de Current/follow-up;
 - granularidade de semantic issues;
 - representação de shared decision.
 
-A Fase 6 deve primeiro provar representabilidade com conteúdo/gates existentes. Alteração de Foundation só pode ser proposta diante de contraexemplo real, mínimo e reproduzível.
+**Resultado da Fase 6:** nenhum deles exigiu mudança da Foundation para o piloto CCR. A representabilidade foi demonstrada com regras declarativas, tracks independentes, DomainResolvers e safe failure já existentes.
+
+Isso não significa que os pontos deixaram de existir como possíveis melhorias futuras; significa apenas que **não são bloqueios arquiteturais deste piloto**.
 
 ## P2 deliberadamente fora do piloto
 
 Surveillance completa pós-polipectomia, Lynch/FAP/DII automatizados, radioterapia, novos testes sanguíneos/RNA/CTC, geografia, persistência de paciente e ampliação diagnóstica.
+
+## Estado de governança após a Fase 6.6
+
+- especificação clínica R1: concluída;
+- tradução técnica: auditada e candidata a freeze;
+- regras executáveis: permanecem `draft/source_verified`;
+- revisão humana explícita da tradução código <- especificação: ainda necessária antes de `reviewed_by_1`;
+- segunda revisão médica independente: obrigatória antes de release clínico público;
+- PR #3: deve permanecer Draft até decisão explícita do autor/revisor.
