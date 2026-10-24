@@ -13,6 +13,11 @@ import {
   baStrategyChoice50To75Rule,
   internationalStrategyRules,
 } from "./rules/strategies";
+import {
+  baPhase63FollowupRules,
+  internationalPhase63FollowupRules,
+  susPhase63FollowupRules,
+} from "./rules/followup";
 import { CCR_IDS } from "./terminology";
 
 const phase61SusPolicy = PolicySchema.parse({
@@ -63,7 +68,6 @@ export const brasilAmpliadoPolicy = PolicySchema.parse({
     baFitStrategyRule.ruleId,
     baColonoscopyStrategyRule.ruleId,
   ],
-  // Human selection is represented as explicit patient context, not a static policy primary strategy.
   primaryStrategies: [],
 });
 
@@ -73,8 +77,37 @@ export const internationalPolicy = PolicySchema.parse({
     ...internationalPopulationRules.map((rule) => rule.ruleId),
     ...internationalStrategyRules.map((rule) => rule.ruleId),
   ],
-  // The policy lists eligible strategies; the engine does not silently select one.
   primaryStrategies: [],
 });
 
 export const ccrPolicies = [susPolicy, brasilAmpliadoPolicy, internationalPolicy];
+
+export const susPhase63Policy = PolicySchema.parse({
+  ...susPolicy,
+  ruleIds: [
+    ...susPolicy.ruleIds,
+    ...susPhase63FollowupRules.map((rule) => rule.ruleId),
+  ],
+});
+
+export const brasilAmpliadoPhase63Policy = PolicySchema.parse({
+  ...brasilAmpliadoPolicy,
+  ruleIds: [
+    ...brasilAmpliadoPolicy.ruleIds,
+    ...baPhase63FollowupRules.map((rule) => rule.ruleId),
+  ],
+});
+
+export const internationalPhase63Policy = PolicySchema.parse({
+  ...internationalPolicy,
+  ruleIds: [
+    ...internationalPolicy.ruleIds,
+    ...internationalPhase63FollowupRules.map((rule) => rule.ruleId),
+  ],
+});
+
+export const ccrPhase63Policies = [
+  susPhase63Policy,
+  brasilAmpliadoPhase63Policy,
+  internationalPhase63Policy,
+];
