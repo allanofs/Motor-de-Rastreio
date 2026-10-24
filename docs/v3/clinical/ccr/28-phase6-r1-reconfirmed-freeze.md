@@ -48,13 +48,28 @@ Fontes, sourceRefs, policies, terminology, resolvers e campos clínicos das regr
 
 Esse invariante é protegido por `tests/ccr/r1Reconfirmation.test.ts`.
 
+## Gate final pós-reconfirmação
+
+Workflow PR #3, run `40122322725`, HEAD `80d8aa86f7f665760503607dd0610e182bb66ec1`:
+
+- typecheck: ✅;
+- schema checks: ✅ 62/62;
+- suíte completa: ✅ **428/428**;
+- arquivos de teste: ✅ **23/23**;
+- `r1Reconfirmation.test.ts`: ✅ 4/4;
+- `r2Corrections.test.ts`: ✅ 7/7;
+- `r2Gate.test.ts`: ✅ 3/3;
+- build: ✅;
+- V2 byte-for-byte: ✅.
+
 ## Material entregue ao R2
 
 - `27-phase6-r2-external-review-packet.md` - resumo clínico autoexplicativo;
 - `25-phase6-r2-review-form.md` - checklist e declaração formal;
 - `12-adversarial-cases.md` - 60 cenários documentais de segurança;
 - `26-phase6-r2-technical-corrections.md` - origem e resolução de R2-01/R2-02;
-- código e goldens na PR #3 para auditoria aprofundada opcional.
+- código e goldens na PR #3 para auditoria aprofundada opcional;
+- pacote compartilhável DOCX/PDF gerado a partir do resumo e formulário para envio ao revisor externo.
 
 ## Próximo gate
 
