@@ -21,10 +21,15 @@ it("keeps model and engine independent of browser, clock, storage, network and N
   for (const file of sources("src"))
     expect(readFileSync(file, "utf8"), file).not.toMatch(forbidden);
 });
-it("ships no clinical rules or patient persistence dependency", () => {
+it("keeps clinical content outside the frozen engine/model and adds no persistence dependency", () => {
   const pkg = JSON.parse(readFileSync("package.json", "utf8")) as {
     dependencies: Record<string, string>;
   };
   expect(Object.keys(pkg.dependencies)).toEqual(["zod"]);
-  expect(readdirSync("src")).not.toContain("clinical");
+  expect(readdirSync("src")).toContain("clinical");
+  for (const file of [...sources("src/model"), ...sources("src/engine")]) {
+    const content = readFileSync(file, "utf8");
+    expect(content, file).not.toContain("../clinical");
+    expect(content, file).not.toContain("/clinical/");
+  }
 });

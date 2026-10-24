@@ -72,7 +72,7 @@ function outsideAgeRule(args: {
       topicId: CCR_IDS.topic,
       trackId: args.trackId,
       clinicalRole: "screening",
-      stance: "no_formal_recommendation",
+      stance: "recommend_against",
       computability: "computable",
       requiredKnownFacts: [CCR_IDS.concepts.screeningContextConfirmed],
       population: {
@@ -87,7 +87,7 @@ function outsideAgeRule(args: {
       supersedes: [],
       excludes: [],
       guardrails: [
-        "This age-bound routine rule does not close or erase an already-open diagnostic follow-up pathway.",
+        "This recommendation-against stance applies only to new routine population screening under this policy and does not close or erase an already-open diagnostic follow-up pathway.",
       ],
       sourceRefs: [{ sourceId: args.sourceId, locator: args.locator }],
     },

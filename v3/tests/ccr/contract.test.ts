@@ -222,8 +222,8 @@ describe("CCR Phase 6.1 test-only semantic preview", () => {
   it("International: age 86 stops routine population screening without inventing Grade D", () => {
     const track = onlyTrack(internationalPolicy.policyId, patient(86));
     expect(track.state.status).toBe("NotApplicable");
-    expect(track.actions.map((action) => action.actionId)).toContain(
-      "crc-action-avoid-routine-after-85",
-    );
+    expect(track.actions).toEqual([]);
+    expect(track.activeRuleIds).toEqual(["crc.intl.population.86-plus"]);
+    expect(track.guardrails).toContain("USPSTF does not assign a Grade D here; do not invent one.");
   });
 });
