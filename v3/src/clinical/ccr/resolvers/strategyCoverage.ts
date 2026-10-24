@@ -12,12 +12,12 @@ import {
   type CalendarDuration,
 } from "../../../model/dates";
 import type { ExamRecord } from "../../../model/patient";
-import { CCR_IDS, CCR_STRATEGY_VALUES } from "../terminology";
 import {
   colonoscopyScreeningAction,
   fitScreeningAction,
   offerScreeningStrategyAction,
 } from "../actions";
+import { CCR_IDS, CCR_STRATEGY_VALUES } from "../terminology";
 
 const fitQualifier = {
   modality: CCR_IDS.modalities.fit,
@@ -36,12 +36,13 @@ const screeningColonoscopyQualifier = {
 };
 
 type Strategy = (typeof CCR_STRATEGY_VALUES)[keyof typeof CCR_STRATEGY_VALUES];
+type SupportedFamily = "br_ampliado" | "internacional";
 type Coverage =
   | { status: "none"; evidenceRecordIds: string[] }
   | { status: "Current" | "Due" | "Indeterminate"; evidenceRecordIds: string[] };
 
 function intervalFor(
-  family: "br_ampliado" | "internacional",
+  family: SupportedFamily,
   strategy: Strategy,
 ): CalendarDuration {
   if (strategy === CCR_STRATEGY_VALUES.colonoscopy)
@@ -54,7 +55,7 @@ function intervalFor(
 function coverageFor(
   events: readonly ExamRecord[],
   strategy: Strategy,
-  family: "br_ampliado" | "internacional",
+  family: SupportedFamily,
   asOf: CalendarDate,
 ): Coverage {
   const qualifier =
@@ -102,26 +103,23 @@ function coverageFor(
   };
 }
 
-function strategySelection(facts: readonly { conceptId: string; presence: string; value?: unknown }[]): {
-  value?: Strategy;
-  conflict: boolean;
-} {
+function strategySelection(
+  facts: readonly { conceptId: string; presence: string; value?: unknown }[],
+): { value?: Strategy; conflict: boolean } {
   const values = facts.flatMap((fact) => {
     if (
       fact.conceptId !== CCR_IDS.concepts.screeningStrategySelection ||
       fact.presence !== "yes"
     )
       return [];
-    if (
-      fact.value === CCR_STRATEGY_VALUES.fit ||
+    return fact.value === CCR_STRATEGY_VALUES.fit ||
       fact.value === CCR_STRATEGY_VALUES.colonoscopy
-    )
-      return [fact.value];
-    return [];
+      ? [fact.value]
+      : [];
   });
   const unique = [...new Set(values)];
   return unique.length === 1
-    ? { value: unique[0], conflict: false }
+    ? { value: unique[0]!, conflict: false }
     : { conflict: unique.length > 1 };
 }
 
@@ -143,6 +141,10 @@ function evidenceIds(...coverages: Coverage[]): string[] {
   return [...new Set(coverages.flatMap((item) => item.evidenceRecordIds))].sort();
 }
 
+function cloneState(input: DomainResolverInput): DomainResolution["state"] {
+  return structuredClone(input.genericTrack.state) as DomainResolution["state"];
+}
+
 function noActionState(
   state: DomainResolution["state"],
   evidenceRecordIds: string[],
@@ -161,7 +163,7 @@ function noActionState(
 
 function mirrorGeneric(input: DomainResolverInput): DomainResolution {
   return {
-    state: structuredClone(input.genericTrack.state),
+    state: cloneState(input),
     actionIds: input.genericTrack.actions.map((action) => action.actionId),
     decisionSupportIds: input.genericTrack.decisionSupport.map(
       (item) => item.considerationId,
@@ -170,6 +172,13 @@ function mirrorGeneric(input: DomainResolverInput): DomainResolution {
     missingData: [...input.genericTrack.missingData],
     guardrails: [],
   };
+}
+
+function supportedFamily(input: DomainResolverInput): SupportedFamily | undefined {
+  return input.policy.family === "br_ampliado" ||
+    input.policy.family === "internacional"
+    ? input.policy.family
+    : undefined;
 }
 
 function strategyCoverageResolver(
@@ -187,13 +196,9 @@ function strategyCoverageResolver(
       CCR_IDS.concepts.historySufficientForCurrentStatus,
     ],
     resolve(input) {
-      if (
-        input.policy.family !== "br_ampliado" &&
-        input.policy.family !== "internacional"
-      )
-        return mirrorGeneric(input);
+      const family = supportedFamily(input);
+      if (family === undefined) return mirrorGeneric(input);
 
-      const family = input.policy.family;
       const fit = coverageFor(
         input.history.events,
         CCR_STRATEGY_VALUES.fit,
@@ -211,14 +216,10 @@ function strategyCoverageResolver(
       const other =
         ownStrategy === CCR_STRATEGY_VALUES.fit ? colonoscopy : fit;
 
-      // A resolver may preserve, but never invent, Current.
       if (input.genericTrack.state.status === "Current")
-        return noActionState(
-          structuredClone(input.genericTrack.state),
-          own.evidenceRecordIds,
-          [],
-          ["Future strategy preference does not erase current coverage."],
-        );
+        return noActionState(cloneState(input), own.evidenceRecordIds, [], [
+          "Future strategy preference does not erase current coverage.",
+        ]);
 
       if (other.status === "Current")
         return noActionState(
@@ -228,14 +229,17 @@ function strategyCoverageResolver(
           },
           other.evidenceRecordIds,
           [],
-          ["Do not offer redundant screening while valid cross-modality coverage remains current."],
+          [
+            "Do not offer redundant screening while valid cross-modality coverage remains current.",
+          ],
         );
 
       if (own.status === "Indeterminate" || other.status === "Indeterminate")
         return noActionState(
           {
             status: "Indeterminate",
-            reason: "Current screening coverage cannot be established with available date precision",
+            reason:
+              "Current screening coverage cannot be established with available date precision",
           },
           evidenceIds(own, other),
           ["crc_coverage_date_precision"],
@@ -244,22 +248,31 @@ function strategyCoverageResolver(
       const selection = strategySelection(input.patient.facts);
       if (selection.conflict)
         return noActionState(
-          { status: "Indeterminate", reason: "Conflicting screening strategy selections" },
+          {
+            status: "Indeterminate",
+            reason: "Conflicting screening strategy selections",
+          },
           evidenceIds(own, other),
           ["crc_strategy_selection_conflict"],
         );
-
       if (selection.value === undefined)
         return noActionState(
-          { status: "Indeterminate", reason: "A human screening strategy selection is required" },
+          {
+            status: "Indeterminate",
+            reason: "A human screening strategy selection is required",
+          },
           evidenceIds(own, other),
           [CCR_IDS.concepts.screeningStrategySelection],
-          ["The engine must not choose FIT versus colonoscopy on behalf of the clinician/patient."],
+          [
+            "The engine must not choose FIT versus colonoscopy on behalf of the clinician/patient.",
+          ],
         );
-
       if (selection.value !== ownStrategy)
         return noActionState(
-          { status: "NotApplicable", reason: "A different screening strategy was explicitly selected" },
+          {
+            status: "NotApplicable",
+            reason: "A different screening strategy was explicitly selected",
+          },
           evidenceIds(own, other),
         );
 
@@ -272,7 +285,8 @@ function strategyCoverageResolver(
         return noActionState(
           {
             status: "Indeterminate",
-            reason: "Screening history is insufficient to exclude still-current coverage",
+            reason:
+              "Screening history is insufficient to exclude still-current coverage",
           },
           evidenceIds(own, other),
           [CCR_IDS.concepts.historySufficientForCurrentStatus],
@@ -304,14 +318,9 @@ function choicePromptResolver(trackId: string): DomainResolver {
     ],
     resolve(input) {
       if (input.genericTrack.state.status !== "Due") return mirrorGeneric(input);
+      const family = supportedFamily(input);
+      if (family === undefined) return mirrorGeneric(input);
 
-      if (
-        input.policy.family !== "br_ampliado" &&
-        input.policy.family !== "internacional"
-      )
-        return mirrorGeneric(input);
-
-      const family = input.policy.family;
       const fit = coverageFor(
         input.history.events,
         CCR_STRATEGY_VALUES.fit,
@@ -329,16 +338,17 @@ function choicePromptResolver(trackId: string): DomainResolver {
         return noActionState(
           {
             status: "NotApplicable",
-            reason: "Current screening coverage makes a new strategy action unnecessary today",
+            reason:
+              "Current screening coverage makes a new strategy action unnecessary today",
           },
           evidenceIds(fit, colonoscopy),
         );
-
       if (fit.status === "Indeterminate" || colonoscopy.status === "Indeterminate")
         return noActionState(
           {
             status: "Indeterminate",
-            reason: "Clarify current screening coverage before selecting the next strategy",
+            reason:
+              "Clarify current screening coverage before selecting the next strategy",
           },
           evidenceIds(fit, colonoscopy),
           ["crc_coverage_date_precision"],
@@ -347,7 +357,10 @@ function choicePromptResolver(trackId: string): DomainResolver {
       const selection = strategySelection(input.patient.facts);
       if (selection.conflict)
         return noActionState(
-          { status: "Indeterminate", reason: "Conflicting screening strategy selections" },
+          {
+            status: "Indeterminate",
+            reason: "Conflicting screening strategy selections",
+          },
           evidenceIds(fit, colonoscopy),
           ["crc_strategy_selection_conflict"],
         );
@@ -369,7 +382,8 @@ function choicePromptResolver(trackId: string): DomainResolver {
         return noActionState(
           {
             status: "Indeterminate",
-            reason: "Clarify screening history before deciding that a new round is due",
+            reason:
+              "Clarify screening history before deciding that a new round is due",
           },
           evidenceIds(fit, colonoscopy),
           [CCR_IDS.concepts.historySufficientForCurrentStatus],
@@ -381,7 +395,9 @@ function choicePromptResolver(trackId: string): DomainResolver {
         decisionSupportIds: [],
         evidenceRecordIds: evidenceIds(fit, colonoscopy),
         missingData: [],
-        guardrails: ["Strategy choice remains human; the engine only identifies when a new round needs a strategy."],
+        guardrails: [
+          "Strategy choice remains human; the engine only identifies when a new round needs a strategy.",
+        ],
       };
     },
   };

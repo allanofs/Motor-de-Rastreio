@@ -8,6 +8,8 @@ export const CCR_SOURCE_IDS = {
   acg2021: "crc-src-I03",
   usmstfFit2017: "crc-src-I04",
   usmstfColonoscopy2020: "crc-src-I05",
+  // Backward-compatible semantic alias used by the Phase 6.2 strategy translation.
+  usmstf2020: "crc-src-I05",
 } as const;
 
 export const susOci2026 = SourceSchema.parse({
