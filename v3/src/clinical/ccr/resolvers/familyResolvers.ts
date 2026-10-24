@@ -14,7 +14,6 @@ import {
 import type { ExamRecord } from "../../../model/patient";
 import {
   colonoscopyScreeningAction,
-  fitScreeningAction,
   offerScreeningStrategyAction,
 } from "../actions";
 import { CCR_IDS, CCR_STRATEGY_VALUES } from "../terminology";
@@ -540,8 +539,6 @@ export const populationFamilyResolver64: DomainResolver = {
     ]),
   ],
   resolve(input) {
-    // Population-level age indication remains visible even when family history is unknown;
-    // modality-specific strategy tracks are what abstain until family history is clarified.
     return internationalStrategyChoiceResolver63.resolve(input);
   },
 };
