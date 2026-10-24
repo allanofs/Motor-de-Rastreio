@@ -21,4 +21,5 @@ export * from "./policies";
 export * from "./ruleset";
 export * from "./reviewedCandidate";
 export * from "./r2PreparedCandidate";
+export * from "./r1ReconfirmedCandidate";
 export * from "./candidate";
