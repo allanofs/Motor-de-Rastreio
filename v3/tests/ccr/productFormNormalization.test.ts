@@ -3,10 +3,12 @@ import {
   CCR_FAMILY_DETAIL_KEYS,
   CCR_IDS,
   CCR_STRATEGY_VALUES,
+} from "../../src/clinical/ccr";
+import {
   getCcrProductPolicyOptions,
   normalizeCcrProductDraft,
   evaluateCcrProductDraft,
-} from "../../src";
+} from "../../src/product/ccr";
 
 function policyId(family: "sus_oficial" | "br_ampliado" | "internacional") {
   const policy = getCcrProductPolicyOptions().find(
