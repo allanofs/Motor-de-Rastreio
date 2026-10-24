@@ -65,7 +65,6 @@ describe("CCR Phase 6.6 final governance/source gate", () => {
         year: 2026,
         month: 10,
         day: 24,
-        precision: "day",
       });
     }
     for (const rule of ccrPhase65Rules) {
