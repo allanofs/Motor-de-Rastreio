@@ -61,7 +61,7 @@ export type CcrPresentationCard = {
   missingData: string[];
   guardrails: string[];
   sourceIds: string[];
-  hasAutomaticAction: boolean;
+  hasActionOutput: boolean;
 };
 
 export type CcrPresentationSection = {
@@ -103,7 +103,9 @@ function summaryForState(state: PathwayState): string {
   }
 }
 
-function routeLabel(route: NonNullable<EvaluatedAction["operational"]>["route"]): string {
+function routeLabel(
+  route: NonNullable<EvaluatedAction["operational"]>["route"],
+): string {
   switch (route) {
     case "local":
       return "Executável no serviço informado";
@@ -150,7 +152,7 @@ function presentTrack(
     missingData: [...track.missingData],
     guardrails: [...track.guardrails],
     sourceIds: [...track.trace.sourceIds],
-    hasAutomaticAction: track.actions.length > 0,
+    hasActionOutput: track.actions.length > 0,
   };
 }
 
