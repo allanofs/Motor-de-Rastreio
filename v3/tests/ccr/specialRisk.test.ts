@@ -141,6 +141,10 @@ const hardExclusions = [
   CCR_IDS.concepts.hereditarySyndrome,
 ];
 
+const riskCases = policies.flatMap((policyId) =>
+  hardExclusions.map((conceptId) => [policyId, conceptId] as const),
+);
+
 describe("CCR Phase 6.5 special-risk correction", () => {
   it("keeps the Phase 6.5 bundle valid and every production translation draft/source_verified", () => {
     expect(ccrPhase65Ruleset.rulesetVersion).toBe("crc-0.5.0-phase6.5-draft");
@@ -163,7 +167,7 @@ describe("CCR Phase 6.5 special-risk correction", () => {
     if (policyId === internationalPhase65Policy.policyId) expect(sourceIds).toEqual(["crc-src-I01"]);
   });
 
-  it.each(policies.flatMap((policyId) => hardExclusions.map((conceptId) => [policyId, conceptId] as const))(
+  it.each(riskCases)(
     "routes %s / %s to ClinicalReviewRequired instead of simple NotApplicable",
     (policyId, conceptId) => {
       const result = run(policyId, conceptId);
