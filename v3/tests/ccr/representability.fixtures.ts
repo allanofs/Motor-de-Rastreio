@@ -10,6 +10,7 @@ import type {
   RuleDefinition,
   Ruleset,
 } from "../../src/model/content";
+import type { PathwayState } from "../../src/model/evaluation";
 import {
   ClinicalFactSchema,
   ExamRecordSchema,
@@ -69,9 +70,6 @@ export function makeRule(
   overrides: Partial<RuleDefinition> = {},
 ): RuleDefinition {
   return RuleDefinitionSchema.parse({
-    ruleId,
-    topicId: TOPIC,
-    trackId,
     lifecycleStatus: "active",
     reviewStatus: "reviewed_by_1",
     clinicalRole: "technical",
@@ -162,10 +160,9 @@ export function exam(
     date: date(when),
     result: { status: "final", code },
     quality: options.quality ?? "adequate",
-    completeness: options.completeness ??
-      (modality === "fit" ? "not_applicable" : "complete"),
-    resolutionInformation: options.resolutionInformation ??
-      (modality === "fit" ? "sufficient" : "sufficient"),
+    completeness:
+      options.completeness ?? (modality === "fit" ? "not_applicable" : "complete"),
+    resolutionInformation: options.resolutionInformation ?? "sufficient",
   });
 }
 
@@ -351,7 +348,7 @@ export const routineFitSuppressor: DomainResolver = {
         missingData: [],
         guardrails: ["do not offer routine FIT while positive FIT is unresolved"],
       };
-    const state = structuredClone(input.genericTrack.state);
+    const state = structuredClone(input.genericTrack.state) as PathwayState;
     return {
       state,
       actionIds: state.status === "Due" ? [OFFER_FIT.actionId] : [],
@@ -387,24 +384,28 @@ export const futureFitResolver: DomainResolver = {
         guardrails: [],
       };
 
-    const colonoscopies = input.history.events.filter(
-      (event) =>
-        event.status === "performed" &&
-        event.modality === "colonoscopy" &&
-        event.result.status === "final" &&
-        event.result.code === "colonoscopy-normal" &&
-        event.quality === "adequate" &&
-        event.completeness === "complete" &&
-        event.resolutionInformation === "sufficient" &&
-        event.date !== undefined,
-    );
-    const statuses = colonoscopies.map((event) => ({
-      event,
-      status: scheduleStatus(
-        dueWindow(event.date!, { unit: "years", amount: 10 }),
-        input.asOf,
-      ),
-    }));
+    const statuses = input.history.events.flatMap((event) => {
+      if (
+        event.status !== "performed" ||
+        event.modality !== "colonoscopy" ||
+        event.result.status !== "final" ||
+        event.result.code !== "colonoscopy-normal" ||
+        event.quality !== "adequate" ||
+        event.completeness !== "complete" ||
+        event.resolutionInformation !== "sufficient" ||
+        event.date === undefined
+      )
+        return [];
+      return [
+        {
+          eventId: event.id,
+          status: scheduleStatus(
+            dueWindow(event.date, { unit: "years", amount: 10 }),
+            input.asOf,
+          ),
+        },
+      ];
+    });
     const current = statuses.find((item) => item.status === "Current");
     if (current !== undefined)
       return {
@@ -414,7 +415,7 @@ export const futureFitResolver: DomainResolver = {
         },
         actionIds: [],
         decisionSupportIds: [],
-        evidenceRecordIds: [current.event.id],
+        evidenceRecordIds: [current.eventId],
         missingData: [],
         guardrails: ["future strategy preference does not erase current coverage"],
       };
@@ -427,15 +428,15 @@ export const futureFitResolver: DomainResolver = {
         },
         actionIds: [],
         decisionSupportIds: [],
-        evidenceRecordIds: [uncertain.event.id],
-        missingData: [`date_precision:${uncertain.event.id}`],
+        evidenceRecordIds: [uncertain.eventId],
+        missingData: [`date_precision:${uncertain.eventId}`],
         guardrails: [],
       };
     return {
       state: { status: "Due" },
       actionIds: [OFFER_FIT.actionId],
       decisionSupportIds: [],
-      evidenceRecordIds: colonoscopies.map((event) => event.id),
+      evidenceRecordIds: statuses.map((item) => item.eventId),
       missingData: [],
       guardrails: [],
     };
@@ -479,6 +480,6 @@ export function run(input: {
     asOf: AS_OF,
     policyId: input.policy.policyId,
     extensions: input.extensions ?? [],
-    careSetting: input.careSetting,
+    ...(input.careSetting === undefined ? {} : { careSetting: input.careSetting }),
   });
 }
