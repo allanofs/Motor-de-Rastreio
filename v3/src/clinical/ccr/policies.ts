@@ -23,6 +23,11 @@ import {
   internationalPhase64FamilyRules,
   susPhase64FamilyRules,
 } from "./rules/family";
+import {
+  baPhase65SpecialRiskRules,
+  internationalPhase65SpecialRiskRules,
+  susPhase65SpecialRiskRules,
+} from "./rules/specialRisk";
 import { CCR_IDS } from "./terminology";
 
 const phase61SusPolicy = PolicySchema.parse({
@@ -145,4 +150,34 @@ export const ccrPhase64Policies = [
   susPhase64Policy,
   brasilAmpliadoPhase64Policy,
   internationalPhase64Policy,
+];
+
+export const susPhase65Policy = PolicySchema.parse({
+  ...susPhase64Policy,
+  ruleIds: [
+    ...susPhase64Policy.ruleIds,
+    ...susPhase65SpecialRiskRules.map((rule) => rule.ruleId),
+  ],
+});
+
+export const brasilAmpliadoPhase65Policy = PolicySchema.parse({
+  ...brasilAmpliadoPhase64Policy,
+  ruleIds: [
+    ...brasilAmpliadoPhase64Policy.ruleIds,
+    ...baPhase65SpecialRiskRules.map((rule) => rule.ruleId),
+  ],
+});
+
+export const internationalPhase65Policy = PolicySchema.parse({
+  ...internationalPhase64Policy,
+  ruleIds: [
+    ...internationalPhase64Policy.ruleIds,
+    ...internationalPhase65SpecialRiskRules.map((rule) => rule.ruleId),
+  ],
+});
+
+export const ccrPhase65Policies = [
+  susPhase65Policy,
+  brasilAmpliadoPhase65Policy,
+  internationalPhase65Policy,
 ];
