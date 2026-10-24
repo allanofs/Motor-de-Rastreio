@@ -1,5 +1,6 @@
 export * from "./terminology";
 export * from "./sources";
+export * from "./r2Sources";
 export * from "./actions";
 export * from "./decisionSupport";
 export * from "./rules/routine";
@@ -19,4 +20,5 @@ export * from "./resolvers/phase64";
 export * from "./policies";
 export * from "./ruleset";
 export * from "./reviewedCandidate";
+export * from "./r2PreparedCandidate";
 export * from "./candidate";
