@@ -3,7 +3,8 @@
 **Candidato a revisar:** `crc-0.5.3-phase6-r1-reconfirmed-draft`  
 **Branch:** `v3-ccr-rules-pilot`  
 **PR:** #3 — Draft  
-**Estado:** pronto para revisão médica independente; não ativo; não liberado publicamente; não mergeado.
+**Estado:** pronto para revisão médica independente; não ativo; não liberado publicamente; não mergeado.  
+**Gate técnico:** 428/428 testes; 23/23 arquivos de teste; 62/62 schema checks; typecheck/build verdes; V2 byte-for-byte preservada.
 
 ## Objetivo da R2
 
