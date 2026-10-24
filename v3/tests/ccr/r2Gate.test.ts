@@ -1,19 +1,19 @@
 import { describe, expect, it } from "vitest";
 import {
-  CCR_CANDIDATE_RULESET_VERSION,
   CCR_R1_REVIEWER,
+  CCR_R2_REVIEWED_RULESET_VERSION,
   CCR_R2_REVIEWER_PUBLIC_ID,
-  ccrCandidateRuleset,
+  ccrPhase6R2ReviewedRuleset,
 } from "../../src/clinical/ccr";
 
 describe("CCR R2 human-review gate", () => {
-  it("requires all canonical rules to have two distinct human-review records while remaining draft", () => {
-    expect(CCR_CANDIDATE_RULESET_VERSION).toBe(
+  it("preserves the frozen R2-reviewed snapshot with two distinct reviewer records while remaining draft", () => {
+    expect(CCR_R2_REVIEWED_RULESET_VERSION).toBe(
       "crc-0.5.4-phase6-r2-reviewed-draft",
     );
-    expect(ccrCandidateRuleset.rules).toHaveLength(43);
+    expect(ccrPhase6R2ReviewedRuleset.rules).toHaveLength(43);
 
-    for (const rule of ccrCandidateRuleset.rules) {
+    for (const rule of ccrPhase6R2ReviewedRuleset.rules) {
       expect(rule.lifecycleStatus).toBe("draft");
       expect(rule.reviewStatus).toBe("reviewed_by_2");
       expect(rule.governance.reviews).toHaveLength(2);
@@ -36,9 +36,9 @@ describe("CCR R2 human-review gate", () => {
     expect(CCR_R2_REVIEWER_PUBLIC_ID).not.toMatch(/TESTE/i);
   });
 
-  it("forbids activation even after R2 until a separate activation gate", () => {
+  it("proves R2 review completion itself did not activate the frozen R2 snapshot", () => {
     expect(
-      ccrCandidateRuleset.rules.some(
+      ccrPhase6R2ReviewedRuleset.rules.some(
         (rule) => rule.lifecycleStatus === "active",
       ),
     ).toBe(false);
