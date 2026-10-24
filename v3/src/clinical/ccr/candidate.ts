@@ -1,22 +1,23 @@
 import {
-  CCR_R2_PREP_RULESET_VERSION,
-  ccrR2PreparedPolicies,
-  ccrR2PreparedResolvers,
-  ccrR2PreparedRuleset,
-} from "./r2PreparedCandidate";
+  CCR_R1_RECONFIRMED_RULESET_VERSION,
+  ccrPhase6R1ReconfirmedPolicies,
+  ccrPhase6R1ReconfirmedResolvers,
+  ccrPhase6R1ReconfirmedRuleset,
+} from "./r1ReconfirmedCandidate";
 
-export const CCR_CANDIDATE_RULESET_VERSION = CCR_R2_PREP_RULESET_VERSION;
+export const CCR_CANDIDATE_RULESET_VERSION =
+  CCR_R1_RECONFIRMED_RULESET_VERSION;
 
 /**
- * Canonical Phase 6 candidate entrypoint after the pre-R2 evidence/provenance
- * corrections.
+ * Canonical Phase 6 candidate entrypoint after explicit R1 reconfirmation of
+ * the pre-R2 evidence/provenance corrections.
  *
- * Historical 6.1-6.5 and R1 exports remain available for regression/audit.
- * Product integration should consume these aliases rather than a phase-specific
- * snapshot. This candidate is still lifecycle=draft and deliberately contains
- * rules reset to source_verified pending explicit R1 reconfirmation of the
- * metadata/source corrections. It is not reviewed_by_2 and is not a release.
+ * Historical 6.1-6.5, original R1 and pre-R2 snapshots remain available for
+ * regression/audit. Product integration should consume these aliases rather
+ * than a phase-specific snapshot. All 43 rules are reviewed_by_1 and remain
+ * lifecycle=draft. Independent physician R2, activation, release and merge are
+ * separate later gates.
  */
-export const ccrCandidateRuleset = ccrR2PreparedRuleset;
-export const ccrCandidatePolicies = ccrR2PreparedPolicies;
-export const ccrCandidateResolvers = ccrR2PreparedResolvers;
+export const ccrCandidateRuleset = ccrPhase6R1ReconfirmedRuleset;
+export const ccrCandidatePolicies = ccrPhase6R1ReconfirmedPolicies;
+export const ccrCandidateResolvers = ccrPhase6R1ReconfirmedResolvers;
