@@ -36,7 +36,7 @@ button, input, select { font: inherit; }
 h1 { margin: 0; font-size: clamp(28px, 4vw, 42px); letter-spacing: -.025em; }
 .hero-copy { max-width: 760px; color: #5c6578; line-height: 1.55; }
 .version-box { min-width: 220px; padding: 16px; border-radius: 14px; background: #fff; border: 1px solid #e1e6ef; }
-.version-box span, .result-meta span { display: block; color: #7a8498; font-size: 12px; margin-bottom: 5px; }
+.version-box span, .result-meta span { display: block; color: #596276; font-size: 12px; margin-bottom: 5px; }
 .version-box strong { font-size: 13px; word-break: break-word; }
 
 .workspace { display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(380px, .92fr); gap: 24px; align-items: start; }
@@ -47,7 +47,7 @@ h1 { margin: 0; font-size: clamp(28px, 4vw, 42px); letter-spacing: -.025em; }
 .form-section:last-of-type { border-bottom: 0; }
 .section-heading { display: flex; gap: 12px; margin-bottom: 18px; }
 .section-heading h2 { margin: 0 0 3px; font-size: 17px; }
-.section-heading p { margin: 0; color: #7a8498; font-size: 13px; line-height: 1.4; }
+.section-heading p { margin: 0; color: #596276; font-size: 13px; line-height: 1.4; }
 .step { display: grid; place-items: center; width: 28px; height: 28px; flex: 0 0 28px; border-radius: 50%; background: #eef2ff; color: #4056a1; font-weight: 800; font-size: 12px; }
 
 .field-grid { display: grid; gap: 14px; }
@@ -103,7 +103,7 @@ button.danger { background: #fff0f0; color: #a32c2c; padding: 7px 10px; font-siz
 .result-card[data-status="Current"] { border-left: 4px solid #3d8b67; }
 .card-topline { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; }
 .card-topline h3 { margin: 0; font-size: 14px; }
-.status-pill { border-radius: 999px; background: #f0f3f8; color: #4f596d; padding: 5px 8px; font-size: 11px; font-weight: 750; white-space: nowrap; }
+.status-pill { border-radius: 999px; background: #f0f3f8; color: #4f596d; padding: 5px 8px; font-size: 11px; font-weight: 750; white-space: normal; }
 .result-card p { color: #596276; line-height: 1.45; font-size: 13px; }
 .action-box { margin-top: 10px; padding: 11px; border-radius: 9px; background: #f5f7fc; font-size: 13px; line-height: 1.45; }
 .action-kind { display: block; margin-bottom: 3px; color: #6f7890; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; }
@@ -124,4 +124,20 @@ details summary { cursor: pointer; font-weight: 700; }
   .form-panel, .result-panel { padding-inline: 16px; }
   .two-columns, .exam-card .exam-fields, .result-meta { grid-template-columns: 1fr; }
   .span-two { grid-column: auto; }
+}
+
+/* Phase 7.5: visible focus, long status labels and narrow-screen containment. */
+:focus-visible { outline: 3px solid #304c9b; outline-offset: 3px; }
+input:focus-visible, select:focus-visible { outline: 3px solid #304c9b; }
+input, select, .panel, .card-topline > *, .result-meta > * { min-width: 0; }
+.result-panel { scroll-margin-top: 110px; }
+.result-card, .result-meta, .audit-list { overflow-wrap: anywhere; }
+.card-topline { flex-wrap: wrap; }
+.status-pill { max-width: 100%; }
+#result-notice:empty { display: none; }
+#result-notice { color: #40495c; line-height: 1.5; }
+.result-card[data-status="Conflict"], .result-card[data-status="ComputationError"] { border-left: 4px solid #a32c2c; }
+@media (max-width: 640px) {
+  input, select { font-size: 16px; }
+  button, summary { min-height: 44px; }
 }

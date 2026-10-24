@@ -29,7 +29,7 @@
       </header>
 
       <div class="workspace">
-        <form id="screening-form" class="panel form-panel" novalidate>
+        <form id="screening-form" class="panel form-panel" autocomplete="off" novalidate>
           <section class="form-section">
             <div class="section-heading">
               <span class="step">1</span>
@@ -241,7 +241,8 @@
           </div>
         </form>
 
-        <aside class="panel result-panel" aria-live="polite">
+        <aside id="result-panel" class="panel result-panel" tabindex="-1" aria-label="Resultado da avaliação">
+          <p id="result-notice" role="status" aria-live="polite"></p>
           <div id="empty-state" class="empty-state">
             <div class="empty-icon">◎</div>
             <h2>Resultado ainda não calculado</h2>

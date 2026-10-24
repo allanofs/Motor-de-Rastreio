@@ -176,7 +176,7 @@ function renderExamList(): void {
         <header><h3>FIT</h3><button type="button" class="danger" data-remove="${exam.id}">Remover</button></header>
         <div class="exam-fields">
           <label>Status ${selectHtml("status", exam.id, exam.status, [["performed","Realizado"],["not_performed","Não realizado"],["unknown","Desconhecido"]])}</label>
-          <label>Data/precisão <input data-exam-id="${exam.id}" data-field="date" type="text" placeholder="AAAA, AAAA-MM ou AAAA-MM-DD" value="${exam.date ?? ""}" /></label>
+          <label>Data/precisão <input data-exam-id="${exam.id}" data-field="date" type="text" placeholder="AAAA, AAAA-MM ou AAAA-MM-DD"  /></label>
           <label>Resultado ${selectHtml("result", exam.id, exam.result ?? "unknown", [["unknown","Desconhecido"],["pending","Pendente"],["invalid","Inválido/inconclusivo"],["negative","Negativo"],["positive","Positivo"]])}</label>
         </div>`;
     } else {
@@ -185,7 +185,7 @@ function renderExamList(): void {
         <div class="exam-fields">
           <label>Status ${selectHtml("status", exam.id, exam.status, [["performed","Realizada"],["not_performed","Não realizada"],["unknown","Desconhecido"]])}</label>
           <label>Papel ${selectHtml("role", exam.id, exam.role, [["other_or_unknown","Outro / desconhecido"],["screening","Rastreamento primário"],["post_fit_positive","Diagnóstica após FIT positivo"]])}</label>
-          <label>Data/precisão <input data-exam-id="${exam.id}" data-field="date" type="text" placeholder="AAAA, AAAA-MM ou AAAA-MM-DD" value="${exam.date ?? ""}" /></label>
+          <label>Data/precisão <input data-exam-id="${exam.id}" data-field="date" type="text" placeholder="AAAA, AAAA-MM ou AAAA-MM-DD"  /></label>
           <label>Resultado ${selectHtml("result", exam.id, exam.result ?? "unknown", [["unknown","Desconhecido"],["pending","Pendente"],["normal","Normal"],["polyp_or_lesion","Pólipo / lesão"],["cancer","Câncer"]])}</label>
           <label>Preparo ${selectHtml("preparation", exam.id, exam.preparation ?? "unknown", [["unknown","Desconhecido"],["adequate","Adequado"],["inadequate","Inadequado"]])}</label>
           <label>Exame completo? ${selectHtml("completeness", exam.id, exam.completeness ?? "unknown", [["unknown","Desconhecido"],["complete","Completo"],["incomplete","Incompleto"]])}</label>
@@ -193,6 +193,10 @@ function renderExamList(): void {
         </div>`;
     }
 
+    // User-entered dates are values, never HTML (including after add/remove).
+    const dateInput = card.querySelector<HTMLInputElement>('input[data-field="date"]');
+    if (dateInput !== null) dateInput.value = exam.date ?? "";
+    updateExamDisclosure(card, exam);
     list.append(card);
   }
 
@@ -202,6 +206,9 @@ function renderExamList(): void {
       const index = exams.findIndex((exam) => exam.id === id);
       if (index >= 0) exams.splice(index, 1);
       renderExamList();
+      invalidateResults();
+      const remaining = list.querySelectorAll<HTMLButtonElement>("button[data-remove]");
+      (remaining[Math.min(index, remaining.length - 1)] ?? element("add-fit")).focus();
     });
   });
 
@@ -218,8 +225,24 @@ function renderExamList(): void {
         return;
       }
       Object.assign(exam, { [field]: value });
+      if (field === "status") updateExamDisclosure(control.closest("article")!, exam);
     });
   });
+}
+
+// Disclosure follows event status only; clinical meaning remains in the normalizer.
+function updateExamDisclosure(card: HTMLElement, exam: UiExam): void {
+  card.querySelectorAll<HTMLElement>("[data-field]").forEach((control) => {
+    if (control.dataset.field === "status") return;
+    control.closest("label")?.classList.toggle("hidden", exam.status !== "performed");
+  });
+}
+
+function invalidateResults(): void {
+  const hadOutput = !element("result-state").classList.contains("hidden")
+    || !element("error-state").classList.contains("hidden");
+  clearResults();
+  if (hadOutput) element("result-notice").textContent = "Dados alterados. Avalie novamente para atualizar o resultado.";
 }
 
 function collectFamilyDetails(): Record<string, unknown> | undefined {
@@ -382,9 +405,12 @@ function evaluateForm(event: SubmitEvent): void {
   if (!result.ok) {
     if ("issues" in result) showError("Revise os dados de entrada", result.issues);
     else showError("Avaliação interrompida com segurança", [result.message]);
+    element("result-panel").focus();
     return;
   }
   renderSuccess(result);
+  element("result-notice").textContent = "Avaliação atualizada.";
+  element("result-panel").focus();
 }
 
 function resetPilot(): void {
@@ -395,6 +421,8 @@ function resetPilot(): void {
   updateConditionalFields();
   updateStrategyVisibility();
   clearResults();
+  element("result-notice").textContent = "Formulário limpo. Resultado ainda não calculado.";
+  element("policy").focus();
   element("ruleset-version").textContent = "crc-0.5.5-phase6-active";
 }
 
@@ -416,10 +444,19 @@ element<HTMLSelectElement>("history-knowledge").addEventListener(
 element<HTMLButtonElement>("add-fit").addEventListener("click", () => {
   exams.push(makeFitExam());
   renderExamList();
+  invalidateResults();
+  element("exam-list").lastElementChild?.querySelector<HTMLSelectElement>("select")?.focus();
 });
 element<HTMLButtonElement>("add-colonoscopy").addEventListener("click", () => {
   exams.push(makeColonoscopyExam());
   renderExamList();
+  invalidateResults();
+  element("exam-list").lastElementChild?.querySelector<HTMLSelectElement>("select")?.focus();
 });
 element<HTMLButtonElement>("clear-form").addEventListener("click", resetPilot);
 element<HTMLFormElement>("screening-form").addEventListener("submit", evaluateForm);
+
+// Any edit invalidates the displayed evaluation, including keyboard edits before blur.
+const form = element<HTMLFormElement>("screening-form");
+form.addEventListener("input", invalidateResults);
+form.addEventListener("change", invalidateResults);
