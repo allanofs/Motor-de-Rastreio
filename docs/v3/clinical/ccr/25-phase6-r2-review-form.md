@@ -6,7 +6,7 @@
 
 > Este formulário não deve ser preenchido pelo autor/revisor R1. O segundo revisor precisa ser uma pessoa diferente e deve revisar o conteúdo clínico, não apenas confirmar que os testes passam.
 
-> **Estado atual:** não assinar ainda. A auditoria pré-R2 identificou `R2-01` e `R2-02` em `24-phase6-r2-independent-audit.md`; ambos devem ser resolvidos antes da aprovação R2 final.
+> **Estado atual:** não assinar ainda. A auditoria pré-R2 identificou `R2-01` e `R2-02` em `24-phase6-r2-independent-audit.md`; ambos devem ser resolvidos antes da aprovação R2 final. O gate técnico de preparação passou 417/417 testes, 62/62 schema checks, typecheck, build e preservação byte-for-byte da V2.
 
 ## Identificação do revisor R2
 
