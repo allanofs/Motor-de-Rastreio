@@ -53,11 +53,11 @@ function allCards(model: ReturnType<typeof presentCcrProduct>) {
   return model.sections.flatMap((section) => section.cards);
 }
 
-describe("CCR Phase 7.2 presentation contract", () => {
+describe("CCR presentation contract and progressive input requests", () => {
   it("keeps ruleset, policy and release gate visible in the presentation model", () => {
     const evaluated = success(draft());
     const model = presentCcrProduct(evaluated);
-    expect(model.contractVersion).toBe("phase7.2");
+    expect(model.contractVersion).toBe("phase7.4.1");
     expect(model.rulesetVersion).toBe("crc-0.5.5-phase6-active");
     expect(model.releaseGate).toBe(
       "integration-only-not-authorized-for-real-world-use",
@@ -74,11 +74,53 @@ describe("CCR Phase 7.2 presentation contract", () => {
 
     expect(action?.text).toBe(fitScreeningAction.text);
     expect(action?.kind).toBe(fitScreeningAction.kind);
+    expect(action?.resourceId).toBe(CCR_IDS.resources.fit);
     expect(
       model.sections
         .find((section) => section.id === "do_now")
         ?.cards.some((card) => card.status === "Due"),
     ).toBe(true);
+  });
+
+  it("requests FIT availability only after the engine emits a FIT action with unknown availability", () => {
+    const model = presentCcrProduct(success(draft()));
+    expect(model.requestedInputs).toContain("fit_availability");
+    expect(model.requestedInputs).not.toContain("colonoscopy_availability");
+  });
+
+  it("requests explicit strategy selection before modality-specific availability in BA-A", () => {
+    const model = presentCcrProduct(
+      success(
+        draft({
+          policyId: policyId("br_ampliado"),
+          strategySelection: "unselected",
+        }),
+      ),
+    );
+    expect(model.requestedInputs).toContain("strategy_selection");
+    expect(model.requestedInputs).not.toContain("fit_availability");
+    expect(model.requestedInputs).not.toContain("colonoscopy_availability");
+  });
+
+  it("requests colonoscopy availability for open FIT-positive follow-up", () => {
+    const model = presentCcrProduct(
+      success(
+        draft({
+          historyKnowledge: "known",
+          exams: [
+            {
+              kind: "fit",
+              id: "fit-positive",
+              status: "performed",
+              date: "2026-01-10",
+              result: "positive",
+            },
+          ],
+        }),
+      ),
+    );
+    expect(model.requestedInputs).toContain("colonoscopy_availability");
+    expect(model.requestedInputs).not.toContain("fit_availability");
   });
 
   it("shows operational unavailability without changing the clinical action text", () => {
@@ -96,6 +138,7 @@ describe("CCR Phase 7.2 presentation contract", () => {
       route: "clinical_review",
       routeLabel: "Revisar alternativa clínica ou operacional",
     });
+    expect(model.requestedInputs).not.toContain("fit_availability");
   });
 
   it("never turns Indeterminate into an action recommendation", () => {
@@ -129,7 +172,11 @@ describe("CCR Phase 7.2 presentation contract", () => {
     expect(card).toBeDefined();
     expect(card?.statusLabel).toBe("Decisão compartilhada");
     expect(card?.summary).toContain("motor não escolhe");
-    expect(card?.actions.every((action) => action.kind === "discussion" || action.kind === "information")).toBe(true);
+    expect(
+      card?.actions.every(
+        (action) => action.kind === "discussion" || action.kind === "information",
+      ),
+    ).toBe(true);
   });
 
   it("presents hard exclusion as ClinicalReviewRequired with no automatic recommendation", () => {
