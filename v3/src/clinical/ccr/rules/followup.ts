@@ -1,8 +1,5 @@
 import { RuleDefinitionSchema, type RuleDefinition } from "../../../model/content";
-import {
-  diagnosticColonoscopyAfterPositiveFitAction,
-  offerScreeningStrategyAction,
-} from "../actions";
+import { diagnosticColonoscopyAfterPositiveFitAction } from "../actions";
 import {
   brazilPostFitClockDecisionSupport,
   inadequateColonoscopyDecisionSupport,
@@ -175,7 +172,7 @@ export const internationalPostFitNormalQ10Rule = draftRule(
     requiredKnownFacts: [],
     population: { facts: [] },
     exclusions: [],
-    actions: [offerScreeningStrategyAction],
+    actions: [],
     outcome: "Due",
     qualifyingEventSpec: {
       modality: CCR_IDS.modalities.colonoscopyDiagnostic,
@@ -191,7 +188,7 @@ export const internationalPostFitNormalQ10Rule = draftRule(
     excludes: [],
     guardrails: [
       "The q10 clock applies only when the diagnostic colonoscopy is a high-quality normal examination in the post-FIT-positive pathway and no later positive FIT remains open.",
-      "At the end of the 10-year interval the engine identifies a new screening round; the human still chooses the eligible strategy.",
+      "At the end of the 10-year interval the engine identifies a new screening round; strategy/action is determined by the policy's population/strategy tracks, not this clock track.",
       "Open FIT-positive follow-up remains actionable regardless of age even when population screening would otherwise stop.",
     ],
     sourceRefs: [
