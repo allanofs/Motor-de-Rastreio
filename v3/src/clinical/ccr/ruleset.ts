@@ -1,5 +1,9 @@
 import { RulesetSchema } from "../../model/content";
-import { ccrPhase61Policies, ccrPolicies } from "./policies";
+import {
+  ccrPhase61Policies,
+  ccrPolicies,
+  ccrPhase63Policies,
+} from "./policies";
 import {
   ba45To49Rule,
   baBelow45Rule,
@@ -9,6 +13,7 @@ import {
   susRoutineRules,
 } from "./rules/routine";
 import { ccrPhase62StrategyRules } from "./rules/strategies";
+import { ccrPhase63FollowupRules } from "./rules/followup";
 import { ccrSources } from "./sources";
 import { ccrTerminology } from "./terminology";
 
@@ -34,5 +39,18 @@ export const ccrPhase62Ruleset = RulesetSchema.parse({
   rules: ccrPhase62Rules,
   sources: ccrSources,
   policies: ccrPolicies,
+  terminology: ccrTerminology,
+});
+
+export const ccrPhase63Rules = [
+  ...ccrPhase62Rules,
+  ...ccrPhase63FollowupRules,
+];
+
+export const ccrPhase63Ruleset = RulesetSchema.parse({
+  rulesetVersion: "crc-0.3.0-phase6.3-draft",
+  rules: ccrPhase63Rules,
+  sources: ccrSources,
+  policies: ccrPhase63Policies,
   terminology: ccrTerminology,
 });
