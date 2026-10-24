@@ -133,7 +133,7 @@ describe("Phase 7.4.1 adaptive progressive disclosure", () => {
     expectVisible("#form-actions");
   });
 
-  it("stops average-risk disclosure as soon as a hard exclusion is positive", () => {
+  it("stops downstream average-risk disclosure after a hard exclusion while completing only that gate", () => {
     el("#clear-form").click();
     policy("sus_oficial");
     set("#as-of", "2026-10-24");
@@ -145,6 +145,15 @@ describe("Phase 7.4.1 adaptive progressive disclosure", () => {
     expectVisible("#family-section", false);
     expectVisible("#history-section", false);
     expectVisible("#exam-section", false);
+    expectVisible("#form-actions", false);
+
+    for (const id of [
+      "prior-polyp-surveillance",
+      "colonic-ibd",
+      "hereditary-syndrome",
+    ])
+      set(`#${id}`, "no");
+
     expectVisible("#form-actions");
     submit();
     expect(
@@ -307,7 +316,7 @@ describe("Phase 7.5 DOM interactions after adaptive disclosure", () => {
     ).not.toBeNull();
   });
 
-  it("FIT not_performed hides performed fields and ignores the former positive result", () => {
+  it("FIT not_performed hides performed fields and does not preserve stale positive follow-up", () => {
     set("#history-knowledge", "known");
     const id = exam("fit", positive);
     set(`[data-exam-id="${id}"][data-field="status"]`, "not_performed");
@@ -317,7 +326,8 @@ describe("Phase 7.5 DOM interactions after adaptive disclosure", () => {
         .classList.contains("hidden"),
     ).toBe(true);
     submit();
-    expect(actions()).toContain("FIT");
+    expect(actions()).not.toMatch(/colonoscopia/i);
+    expect(document.querySelector('[data-status="InFollowUp"]')).toBeNull();
   });
 
   it("unknown-status colonoscopy does not resolve FIT+", () => {
