@@ -116,3 +116,5 @@ Ao aprovar, o revisor declara que:
 > Eu, **[NOME DO REVISOR]**, após revisão independente do candidato CCR **[VERSÃO]** em **[DATA]**, aprovo as 43 traduções executáveis como segunda revisão médica (`reviewed_by_2`). Confirmo que os findings R2-01 e R2-02 foram resolvidos e que esta aprovação não autoriza automaticamente `lifecycleStatus=active`, release público ou merge da PR #3.
 
 Se a aprovação for parcial, substituir “as 43 traduções executáveis” pela lista exata de rules/blocos aprovados.
+
+**Importante:** enquanto `R2-01` e `R2-02` permanecerem abertos, qualquer assinatura neste formulário deve ser tratada como revisão em andamento, não como autorização para `reviewed_by_2`.
