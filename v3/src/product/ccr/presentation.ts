@@ -1,4 +1,7 @@
-import { CCR_IDS } from "../../clinical/ccr";
+import {
+  CCR_IDS,
+  offerScreeningStrategyAction,
+} from "../../clinical/ccr";
 import type {
   EvaluatedAction,
   PathwayState,
@@ -9,7 +12,7 @@ import type {
   CcrProductSuccess,
 } from "./integration";
 
-export const CCR_PRESENTATION_CONTRACT_VERSION = "phase7.2" as const;
+export const CCR_PRESENTATION_CONTRACT_VERSION = "phase7.4.1" as const;
 
 const TRACK_LABELS: Record<string, string> = {
   [CCR_IDS.tracks.routine]: "Rastreamento de rotina",
@@ -38,10 +41,16 @@ const STATUS_LABELS: Record<PathwayState["status"], string> = {
   ComputationError: "Não foi possível concluir com segurança",
 };
 
+export type CcrRequestedInput =
+  | "strategy_selection"
+  | "fit_availability"
+  | "colonoscopy_availability";
+
 export type CcrPresentationAction = {
   actionId: string;
   kind: EvaluatedAction["kind"];
   text: string;
+  resourceId?: string;
   operational?: {
     availability: "available" | "unavailable" | "unknown";
     route: "local" | "referral" | "clinical_review" | "clarify_availability";
@@ -76,6 +85,7 @@ export type CcrPresentationModel = {
   releaseGate: CcrProductSuccess["releaseGate"];
   policy: CcrProductSuccess["policy"];
   requiresAttention: boolean;
+  requestedInputs: CcrRequestedInput[];
   sections: CcrPresentationSection[];
 };
 
@@ -122,8 +132,8 @@ function presentAction(action: EvaluatedAction): CcrPresentationAction {
   return {
     actionId: action.actionId,
     kind: action.kind,
-    // Deliberately preserve the governed clinical wording verbatim.
     text: action.text,
+    ...(action.resourceId === undefined ? {} : { resourceId: action.resourceId }),
     ...(action.operational === undefined
       ? {}
       : {
@@ -156,21 +166,50 @@ function presentTrack(
   };
 }
 
+function requestedInputsFor(sections: CcrPresentationSection[]): CcrRequestedInput[] {
+  const requests = new Set<CcrRequestedInput>();
+  const cards = sections.flatMap((section) => section.cards);
+
+  if (
+    cards.some(
+      (card) =>
+        card.missingData.includes(CCR_IDS.concepts.screeningStrategySelection) ||
+        card.actions.some(
+          (action) => action.actionId === offerScreeningStrategyAction.actionId,
+        ),
+    )
+  ) {
+    requests.add("strategy_selection");
+  }
+
+  for (const action of cards.flatMap((card) => card.actions)) {
+    if (action.operational?.availability !== "unknown") continue;
+    if (action.resourceId === CCR_IDS.resources.fit) requests.add("fit_availability");
+    if (action.resourceId === CCR_IDS.resources.colonoscopy)
+      requests.add("colonoscopy_availability");
+  }
+
+  return [...requests];
+}
+
 export function presentCcrProduct(
   result: CcrProductSuccess,
 ): CcrPresentationModel {
+  const sections = result.sections.map((section) => ({
+    id: section.id,
+    label: section.label,
+    cards: section.cards.map((card) =>
+      presentTrack(card.topicId, section.id, card.track),
+    ),
+  }));
+
   return {
     contractVersion: CCR_PRESENTATION_CONTRACT_VERSION,
     rulesetVersion: result.rulesetVersion,
     releaseGate: result.releaseGate,
     policy: result.policy,
     requiresAttention: result.requiresAttention,
-    sections: result.sections.map((section) => ({
-      id: section.id,
-      label: section.label,
-      cards: section.cards.map((card) =>
-        presentTrack(card.topicId, section.id, card.track),
-      ),
-    })),
+    requestedInputs: requestedInputsFor(sections),
+    sections,
   };
 }
