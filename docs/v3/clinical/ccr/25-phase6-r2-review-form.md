@@ -1,9 +1,9 @@
 # 25 — Formulário de segunda revisão médica independente (R2) — CCR
 
-**Candidato-base atual:** `crc-0.5.1-phase6-r1-draft`  
+**Candidato técnico corrigido:** `crc-0.5.2-phase6-r2-prep-draft`  
 **PR:** #3 — Draft
 
-> **BLOQUEADO PARA ASSINATURA FINAL:** aplicar e testar R2-01/R2-02, reconfirmar R1 e somente então entregar a versão corrigida ao segundo médico.
+> **AINDA NÃO ASSINAR COMO R2:** R2-01/R2-02 já foram corrigidos tecnicamente e passaram no CI, mas as 15 regras afetadas precisam primeiro de reconfirmação explícita do revisor R1. Após essa reconfirmação será emitida a versão R1 limpa para o segundo médico.
 
 ## Revisor R2
 
@@ -19,9 +19,11 @@
 - [ ] `21-phase6-6-final-audit.md`
 - [ ] `23-phase6-r1-freeze.md`
 - [ ] `24-phase6-r2-independent-audit.md`
+- [ ] `26-phase6-r2-technical-corrections.md`
+- [ ] versão R1 pós-correção que será emitida após reconfirmação
 - [ ] `v3/src/clinical/ccr/rules/**`
 - [ ] `v3/src/clinical/ccr/resolvers/**`
-- [ ] `v3/src/clinical/ccr/sources.ts`
+- [ ] fontes do candidato canônico
 - [ ] goldens críticos
 
 ## Segurança global
@@ -36,12 +38,14 @@
 ## SUS
 
 - [ ] 50–75 inclusive; FIT q2.
+- [ ] A faixa/intervalo FIT está ancorada na Portaria SAES/MS nº 5.215/2026.
 - [ ] FIT+ -> colonoscopia diagnóstica.
 - [ ] FIT− posterior não encerra FIT+ anterior.
 - [ ] colonoscopia inadequada/incompleta não fecha FIT+.
 - [ ] pós-FIT+ normal: episódio pode fechar, próximo clock SUS não automatizado.
 - [ ] >=76 sem nova rotina, sem apagar follow-up.
 - [ ] HF positiva relevante -> revisão, sem ACG silencioso.
+- [ ] `B12` está corretamente identificada como OCI 2ª edição 2025 e não governa a faixa/intervalo do rastreamento populacional.
 
 ## BA-A
 
@@ -55,25 +59,25 @@
 
 ## Internacional
 
-- [ ] 45–49 Grade B para a decisão de rastrear.
-- [ ] 50–75 Grade A.
+- [ ] 45–49 Grade B para a decisão populacional de rastrear.
+- [ ] 50–75 Grade A para a decisão populacional de rastrear.
 - [ ] 76–85 Grade C seletivo.
 - [ ] >85 fim da rotina sem Grade D inventado.
-- [ ] FIT anual / colonoscopia q10.
+- [ ] FIT anual / colonoscopia q10 são estratégias elegíveis, sem apresentar A/B como graduação individual da modalidade.
 - [ ] FIT+ -> colonoscopia.
 - [ ] pós-FIT normal high-quality -> q10 se average-risk.
 - [ ] ACG apenas Internacional.
 - [ ] regras familiares ACG conferidas.
 
-## Findings obrigatoriamente resolvidos
+## Findings pré-R2
 
-### R2-01
-- [ ] Grade A/B não é apresentado como graduação individual das modalidades FIT/colonoscopia.
+### R2-01 — correção técnica aplicada
+- [ ] Confirmo que Grade A/B/C está ligada ao layer populacional USPSTF e não é apresentada como graduação individual de FIT/colonoscopia.
 
-### R2-02
-- [ ] Portaria SAES/MS nº 5.215/2026 sustenta 50–75/FIT bienal.
-- [ ] `B12` está identificado como protocolo OCI diagnóstico, 2ª edição 2025, e restrito aos locators que realmente sustenta.
-- [ ] sourceRefs SUS restantes foram revalidados.
+### R2-02 — correção técnica aplicada
+- [ ] Confirmo que Portaria SAES/MS nº 5.215/2026 sustenta 50–75/FIT bienal.
+- [ ] Confirmo que `B12` está identificada como OCI 2ª edição 2025 e restrita a usos compatíveis com seu conteúdo.
+- [ ] Confirmei os sourceRefs SUS restantes e o uso da página profissional do INCA para roteamento conservador de risco especial/família.
 
 ## Resultado
 
@@ -90,4 +94,6 @@ Ao aprovar, o revisor declara ser pessoa distinta do R1, ter revisado conteúdo 
 
 ### Texto recomendado
 
-> Eu, **[NOME]**, após revisão independente do candidato CCR **[VERSÃO CORRIGIDA]** em **[DATA]**, aprovo as 43 traduções executáveis como segunda revisão médica (`reviewed_by_2`). Confirmo que R2-01 e R2-02 foram resolvidos e que esta aprovação não autoriza automaticamente `lifecycleStatus=active`, release público ou merge da PR #3.
+> Eu, **[NOME]**, após revisão independente do candidato CCR **[VERSÃO R1 PÓS-CORREÇÃO]** em **[DATA]**, aprovo as 43 traduções executáveis como segunda revisão médica (`reviewed_by_2`). Confirmo que R2-01 e R2-02 foram resolvidos e que esta aprovação não autoriza automaticamente `lifecycleStatus=active`, release público ou merge da PR #3.
+
+Se houver aprovação parcial ou mudanças requeridas, o revisor deve listar explicitamente os blocos/rules afetados em vez de usar o texto de aprovação integral.
