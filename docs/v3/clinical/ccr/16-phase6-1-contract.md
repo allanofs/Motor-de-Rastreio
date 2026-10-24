@@ -98,4 +98,32 @@ A subfase só passa se:
 - V2 permanecer byte-for-byte idêntica;
 - nenhum arquivo de `engine/**` ou `model/**` mudar.
 
-Após esse gate, a próxima etapa é **6.2 — estratégias executáveis e cobertura atual**, sem promover conteúdo clínico antes da revisão regra↔proposição.
+## Resultado do gate
+
+**PASSOU em 24/10/2026.** Commit funcional final da subfase: `052ee0549942c718a9a0e02256917a913d19bee4`.
+
+CI `V3 foundation` da PR #3:
+
+- `npm run typecheck`: verde;
+- `npm run schema:check`: **62/62**;
+- `npm test`: **274/274** em 10 arquivos de teste;
+  - 242 testes preexistentes da Foundation;
+  - 17 testes da Fase 6.0 de representabilidade;
+  - 15 testes do contrato clínico da Fase 6.1;
+- `npm run build`: verde;
+- V2 preservada byte-for-byte: verde.
+
+Nenhum arquivo em `v3/src/engine/**` ou `v3/src/model/**` foi alterado.
+
+## Achados de implementação consolidados
+
+1. **Conteúdo clínico pode existir em `src/clinical/**` sem contaminar a Foundation.** O teste arquitetural passou a exigir que `engine/**` e `model/**` não importem conteúdo clínico, em vez de proibir a existência de conteúdo clínico no repositório.
+2. **Faixas fora da rotina usam `recommend_against` restrito à rotina populacional daquela policy**, com guardrail explícita de que isso não encerra follow-up diagnóstico. `no_formal_recommendation` é corretamente conservador na Foundation e levaria a `ClinicalReviewRequired`, não a `NotApplicable`.
+3. **`NotApplicable` é estado de abstensão e não emite ação automática.** Por isso a interrupção da rotina após 85 anos é auditada por rule/stance/guardrail/trace, e não por uma ação automática `avoid` no plano.
+4. As rules continuam `draft/source_verified`; o sucesso do CI **não constitui revisão clínica da tradução TypeScript**.
+
+## Conclusão
+
+A Fase 6.1 estabelece um contrato clínico executável mínimo e válido sobre a Foundation congelada. O conteúdo ainda não está pronto para release, mas a estrutura de terminologia, fontes, actions, decision support, policies e regras etárias/rotineiras está tipada, auditável e testada sem alteração do engine/schema.
+
+A próxima etapa é **6.2 — estratégias executáveis e cobertura atual**, incluindo seleção humana FIT↔colonoscopia, preservação de cobertura entre modalidades e composição necessária antes de qualquer promoção clínica das rules.
