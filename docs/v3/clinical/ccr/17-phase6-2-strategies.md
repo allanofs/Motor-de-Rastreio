@@ -78,6 +78,23 @@ A Fase 6.2 só passa se:
 - `npm run check` e preservação V2 permanecerem verdes;
 - zero mudança em `engine/**` e `model/**`.
 
-**Status do gate:** implementação aplicada na linha da PR no commit `fe5a57b9ee21523ed15d3fd316d21d0521dde51a`; CI ainda precisa validar a tradução antes de encerrar a subfase.
+## Resultado do gate
 
-A próxima etapa após este gate é Fase 6.3: FIT+ e resolver longitudinal diagnóstico.
+**PASSOU em 24/10/2026.** Implementação na linha da PR: `9dd5a94677299631c9ffcb76e25de0943ea6333c`; correção estrita final: `39792fb41f8c48df54dd6ae8d6cab2f5cec67d06`.
+
+CI `V3 foundation` da PR #3:
+
+- `npm run typecheck`: verde;
+- `npm run schema:check`: **62/62**;
+- `npm test`: **288/288** em 11 arquivos de teste;
+  - 242 testes preexistentes da Foundation;
+  - 17 testes da Fase 6.0;
+  - 15 testes da Fase 6.1;
+  - 14 testes da Fase 6.2;
+- `npm run build`: verde;
+- preservação byte-for-byte da V2: verde;
+- zero alteração em `v3/src/engine/**` e `v3/src/model/**`.
+
+O gate confirma que a escolha humana de estratégia, a cobertura cruzada FIT↔colonoscopia e a distinção screening↔diagnóstico cabem na Foundation congelada sem rastreamento redundante.
+
+A próxima etapa é Fase 6.3: FIT+ e resolver longitudinal diagnóstico.
