@@ -3,54 +3,39 @@
 **Data:** 24/10/2026  
 **Branch:** `v3-ccr-rules-pilot`  
 **PR:** #3 — Draft  
-**Candidato auditado:** `crc-0.5.1-phase6-r1-draft`  
-**Estado de governança na entrada:** 43 regras `reviewed_by_1`, todas ainda `lifecycleStatus=draft`
+**Candidato auditado:** `crc-0.5.1-phase6-r1-draft`
 
-## Objetivo e limite de independência
+Esta auditoria não conta como segunda revisão médica humana e não autoriza `reviewed_by_2`.
 
-Esta rodada refez a checagem da tradução clínica e da evidência com foco em encontrar problemas que a primeira revisão pudesse ter deixado passar. Ela **não conta como a segunda revisão médica humana** e não autoriza `reviewed_by_2`.
+## Findings
 
-## Resultado
+### R2-01 — USPSTF
 
-A lógica clínica principal permaneceu coerente. Dois problemas de evidência/proveniência foram identificados antes de R2:
+As regras específicas de FIT/colonoscopia Internacional replicam Grade A/B no `sourceRef` da modalidade. A USPSTF gradua a recomendação populacional de rastrear por faixa etária, não cada modalidade isoladamente.
 
-### R2-01 — Grade USPSTF
+**Corrigir:** manter A/B nas regras populacionais e remover o Grade das quatro rules específicas de modalidade, sem mudar ações, intervalos ou resolvers.
 
-As quatro regras específicas de FIT/colonoscopia Internacional replicam Grade A/B no `sourceRef` da modalidade. A USPSTF gradua a **recomendação populacional de rastrear por faixa etária**, não cada modalidade individualmente.
+### R2-02 — SUS
 
-**Correção necessária:** manter A/B nas regras populacionais e remover o Grade específico das quatro rules de modalidade, sem mudar ações/intervalos/resolvers.
+`crc-src-B12` representa o **Protocolo de Acesso às OCI em Oncologia, 2ª edição 2025**, de natureza diagnóstica. A landing page republicada em 2026 não o torna uma diretriz de rastreamento 2026.
 
-### R2-02 — fonte SUS
+A fonte normativa apropriada para a rotina é a **Portaria SAES/MS nº 5.215, de 22/10/2026**, publicada no DOU de 23/10/2026. Ela cria o procedimento `02.14.01.032-5` para FIT de rastreamento do CCR e define explicitamente população assintomática de 50–75 anos, periodicidade bienal e separação do uso diagnóstico; também torna sem efeito a Portaria 4.642/2026.
 
-O antigo `crc-src-B12` é o **Protocolo de Acesso às OCI em Oncologia, 2ª edição 2025**, de natureza diagnóstica. Sua landing page foi republicada em 2026, mas isso não o torna a fonte adequada para afirmar rastreamento FIT bienal 50–75.
+**Corrigir:** adicionar a Portaria 5.215 como fonte SUS de rastreamento; migrar os sourceRefs de idade/FIT/periodicidade; corrigir B12 para sua edição real e restringi-lo ao conteúdo diagnóstico que realmente sustenta; revalidar os locators SUS de história familiar/hard exclusions.
 
-A auditoria identificou a fonte normativa correta:
+## Não-blockers
 
-**Portaria SAES/MS nº 5.215, de 22/10/2026 — DOU de 23/10/2026, Seção 1, páginas 73–74.**
+- BA-A 45–49 `SharedDecision`: curadoria explícita.
+- BA-A FIT q2: escolha curatorial dentro do intervalo SBOC 1–2 anos.
+- `recommend_against` fora da rotina: semântica interna; não deve ser exibida como contraindicação diagnóstica absoluta.
 
-Ela inclui o procedimento `02.14.01.032-5` para FIT de rastreamento do CCR e define explicitamente:
+## Gate técnico
 
-- homens e mulheres assintomáticos;
-- 50–75 anos;
-- rastreamento bienal;
-- separação do procedimento usado para investigação diagnóstica;
-- revogação/ineficácia da Portaria 4.642/2026.
-
-**Correção necessária:** adicionar a Portaria 5.215 como fonte SUS de rastreamento; migrar os sourceRefs de idade/FIT/periodicidade; corrigir B12 para sua edição real e restringi-lo ao conteúdo diagnóstico que realmente sustenta; revalidar os locators SUS de história familiar/hard exclusions.
-
-## Itens não bloqueantes adicionais
-
-- BA-A 45–49 `SharedDecision` é curadoria explícita, não transcrição literal da SBOC.
-- BA-A FIT q2 é escolha curatorial conservadora dentro do intervalo SBOC 1–2 anos.
-- `recommend_against` fora da rotina é semântica interna protegida por guardrails e não pode ser exposta como contraindicação diagnóstica absoluta.
-
-## Gate técnico de preparação
-
-Commit `4002daaa172272fef088e5a0ede55eb00ce0c6a0`; workflow `40120075597`: **success**.
+Commit `4002daaa172272fef088e5a0ede55eb00ce0c6a0`, workflow `40120075597`: success.
 
 - 417/417 testes;
 - 21/21 arquivos de teste;
-- `r2Gate.test.ts`: 3/3;
+- `r2Gate.test.ts` 3/3;
 - 62/62 schema checks;
 - typecheck/build ✅;
 - V2 byte-for-byte ✅.
@@ -59,9 +44,9 @@ Commit `4002daaa172272fef088e5a0ede55eb00ce0c6a0`; workflow `40120075597`: **suc
 
 ```text
 R1                               ✅ reviewed_by_1
-Auditoria independente pré-R2   ✅
-R2-01                            ⛔ correção de evidence metadata pendente
-R2-02                            🟡 fonte correta identificada; source migration pendente
+Pré-auditoria R2                 ✅
+R2-01                            ⛔ correção pendente
+R2-02                            🟡 fonte correta identificada; migração pendente
 Segundo médico humano            ⏳
 reviewed_by_2                    ❌
 active                           ❌
@@ -69,13 +54,12 @@ release                          ❌
 merge                            ❌
 ```
 
-## Próxima sequência obrigatória
+## Sequência obrigatória
 
-1. aplicar R2-01 e R2-02 em um novo candidato ainda R1;
-2. reauditar sourceRefs SUS;
-3. rerodar a suíte completa;
-4. obter reconfirmação R1 das mudanças;
-5. entregar o candidato corrigido ao segundo médico com `25-phase6-r2-review-form.md`;
-6. somente então, se aprovado por pessoa distinta, registrar `reviewed_by_2`.
+1. aplicar R2-01/R2-02 em novo candidato ainda R1;
+2. reauditar sourceRefs SUS e rerodar a suíte;
+3. reconfirmar R1 das mudanças;
+4. entregar a versão corrigida ao segundo médico usando `25-phase6-r2-review-form.md`;
+5. somente após aprovação explícita de uma pessoa distinta registrar `reviewed_by_2`.
 
 **Este documento é preparação para R2, não assinatura de segundo revisor.**
