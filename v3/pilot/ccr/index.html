@@ -22,10 +22,7 @@
             necessária para avançar a decisão no referencial selecionado.
           </p>
         </div>
-        <div class="version-box">
-          <span>Ruleset</span>
-          <strong id="ruleset-version">—</strong>
-        </div>
+
       </header>
 
       <div class="workspace">
@@ -46,7 +43,7 @@
                 </select>
               </label>
               <label>
-                Data de referência (asOf)
+                Data de referência
                 <input id="as-of" type="date" required />
               </label>
               <label>
@@ -80,7 +77,7 @@
               <span class="step">3</span>
               <div>
                 <h2>Condições que mudam a rota</h2>
-                <p>Responda apenas o que é conhecido. Uma condição positiva encerra a coleta average-risk.</p>
+                <p>Responda apenas o que é conhecido. Uma condição positiva encerra a coleta de rotina.</p>
               </div>
             </div>
             <div class="field-grid two-columns" id="risk-fields"></div>
@@ -218,7 +215,7 @@
             <div class="section-heading">
               <span class="step">8</span>
               <div>
-                <h2>Disponibilidade para operacionalizar</h2>
+                <h2>Disponibilidade do recurso</h2>
                 <p>Esta informação só é solicitada quando já existe uma ação que depende do recurso. Ela muda a rota operacional, não a evidência clínica.</p>
               </div>
             </div>
@@ -257,11 +254,16 @@
             <p class="empty-kicker">Avaliação em andamento</p>
             <h2 id="journey-title">Comece pelo referencial</h2>
             <p id="journey-next">Escolha o referencial, a data de referência e informe a idade.</p>
+            <h3>Até aqui</h3>
             <ul id="journey-summary" class="journey-summary" aria-label="Informações já confirmadas"></ul>
           </div>
           <div id="error-state" class="error-state hidden"></div>
           <div id="result-state" class="hidden">
             <div id="followup-request" class="followup-request hidden" role="status"></div>
+            <div id="clinical-overview" aria-label="Síntese da avaliação"></div>
+            <details id="technical-details">
+              <summary>Detalhes técnicos</summary>
+              <div class="version-box"><span>Versão do conjunto de regras</span><strong id="ruleset-version">—</strong></div>
             <div class="result-meta">
               <div>
                 <span>Referencial</span>
@@ -273,6 +275,7 @@
               </div>
             </div>
             <div id="result-sections"></div>
+            </details>
           </div>
         </aside>
       </div>

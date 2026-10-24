@@ -352,13 +352,13 @@ describe("Phase 7.5 DOM interactions after adaptive disclosure", () => {
     expect(actions()).toContain("FIT");
   });
 
-  it("focus follows results/errors and add/remove; removing invalidates output", () => {
+  it("focus follows results and add/remove; incomplete acquisition stays pending", () => {
     set("#history-knowledge", "known");
     submit();
     expect(document.activeElement).toBe(el("#result-panel"));
     const id = exam("fit", {});
     expect(document.activeElement).toBe(
-      el(`[data-exam-id="${id}"][data-field="status"]`),
+      el(`[data-exam-id="${id}"][data-field="status"] input:checked`),
     );
     submit();
     el(`[data-remove="${id}"]`).click();
@@ -368,8 +368,8 @@ describe("Phase 7.5 DOM interactions after adaptive disclosure", () => {
     el("#screening-form").dispatchEvent(
       new Event("submit", { cancelable: true }),
     );
-    expect(document.activeElement).toBe(el("#result-panel"));
-    expect(el("#error-state").classList.contains("hidden")).toBe(false);
+    expect(el("#reference-section-body").hidden).toBe(false);
+    expect(el("#error-state").classList.contains("hidden")).toBe(true);
   });
 
   it("date HTML remains literal on rebuild; reset clears patient and events", () => {
@@ -385,3 +385,162 @@ describe("Phase 7.5 DOM interactions after adaptive disclosure", () => {
     expectVisible("#context-section", false);
   });
 });
+
+describe("Phase 7.4.2 guided interview presentation", () => {
+  it("compacts completed steps with summaries and edits only on explicit request", () => {
+    const reference = el("#reference-section");
+    expect(reference.classList.contains("step-complete")).toBe(true);
+    expect(el("#reference-section-body").hidden).toBe(true);
+    expect(reference.querySelector(".step-summary").textContent).toMatch(/60 anos.*24\/10\/2026/);
+    const edit = reference.querySelector(".edit-step");
+    expect(edit.hidden).toBe(false);
+    expect(edit.getAttribute("aria-expanded")).toBe("false");
+    edit.focus(); edit.click();
+    expect(el("#reference-section-body").hidden).toBe(false);
+    expect(reference.classList.contains("step-current")).toBe(true);
+    expect(document.activeElement).toBe(el("#policy"));
+    expect(el("#history-section").classList.contains("guided-future")).toBe(true);
+  });
+
+  it("starts with one current unit and does not present future steps", () => {
+    el("#clear-form").click();
+    expect(el("#reference-section").classList.contains("step-current")).toBe(true);
+    expect(el("#reference-section-body").hidden).toBe(false);
+    expect([...document.querySelectorAll(".step-current")]).toHaveLength(1);
+    set("#policy", getCcrProductPolicyOptions()[0].policyId);
+    set("#as-of", "2026-10-24"); set("#age", "60");
+    expect(el("#reference-section-body").hidden).toBe(true);
+    expect(el("#context-section-body").hidden).toBe(false);
+    expectVisible("#risk-section", false);
+  });
+
+  it("uses labelled native radios with unchanged values, explicit unknown and no default negative", () => {
+    el("#clear-form").click();
+    const group = el("#screening-context");
+    expect(group.tagName).toBe("FIELDSET");
+    expect(group.querySelector("legend").textContent).toMatch(/preventivo/);
+    expect(group.value).toBe("not_asked");
+    expect([...group.querySelectorAll("input")].map(n => n.value)).toEqual(["yes", "no", "unknown"]);
+    expect(group.querySelector("input:checked")).toBeNull();
+    const unknown = group.querySelector('input[value="unknown"]');
+    unknown.focus(); unknown.click();
+    expect(group.value).toBe("unknown");
+    expect(unknown.checked).toBe(true);
+    expect([...group.querySelectorAll("input")].every(n => n.name === "screening-context")).toBe(true);
+    expect(document.querySelector("select#screening-context")).toBeNull();
+    expect(document.querySelector("select#family-history")).toBeNull();
+    expect(document.querySelector("select#policy")).not.toBeNull();
+  });
+
+  it("focus moves to the next unit when a focused radio completes the current step", () => {
+    el("#clear-form").click(); policy("sus_oficial"); set("#as-of", "2026-10-24"); set("#age", "60");
+    const yes = el('#screening-context input[value="yes"]');
+    yes.focus(); yes.click();
+    expect(el("#context-section-body").hidden).toBe(true);
+    expect(el("#risk-section-body").hidden).toBe(false);
+    expect(el("#risk-section-body").contains(document.activeElement)).toBe(true);
+  });
+
+  it("does not collapse a field while its input is being typed", () => {
+    el("#reference-section .edit-step").click();
+    const age = el("#age"); age.focus(); age.value = "6";
+    age.dispatchEvent(new Event("input", { bubbles: true }));
+    expect(el("#reference-section-body").hidden).toBe(false);
+    expect(document.activeElement).toBe(age);
+    age.value = "60"; age.dispatchEvent(new Event("change", { bubbles: true }));
+    expect(el("#reference-section-body").hidden).toBe(false);
+    el("#reference-section .finish-edit").click();
+    expect(el("#reference-section-body").hidden).toBe(true);
+  });
+
+  it("does not require a fabricated exam and allows an explicit finish of the known-history unit", () => {
+    set("#history-knowledge", "known"); set("#history-sufficient", "unknown");
+    expect(el("#exam-section-body").hidden).toBe(false);
+    el("#finish-exams").click();
+    expect(el("#exam-section-body").hidden).toBe(true);
+    expect(el("#exam-section .step-summary").textContent).toContain("0 exame(s)");
+    expect(document.activeElement).toBe(el("#evaluate-button"));
+  });
+
+  it("keeps inputs pending distinct from real clinical review in the primary panel", () => {
+    el("#clear-form").click();
+    expect(el("#empty-state").textContent).toContain("Próxima informação necessária");
+    expect(el("#empty-state").textContent).not.toContain("Revisão clínica necessária");
+    policy("br_ampliado"); set("#as-of", "2026-10-24"); set("#age", "60"); set("#screening-context", "yes");
+    for (const id of ["prior-crc", "prior-polyp-surveillance", "colonic-ibd", "hereditary-syndrome"]) set(`#${id}`, "no");
+    set("#family-history", "no"); set("#history-knowledge", "never_performed");
+    submit();
+    expect(el("#clinical-overview h2").textContent).toBe("Escolha necessária");
+    expect(el("#strategy-section-body").hidden).toBe(false);
+    expectVisible("#availability-section", false);
+  });
+
+  it("opens only FIT availability requested by the Motor, then compacts the response", () => {
+    expectVisible("#availability-section", false);
+    submit();
+    expect(el("#clinical-overview h2").textContent).toBe("Disponibilidade de recurso necessária");
+    expect(el("#clinical-overview").textContent).toContain("disponibilidade do FIT");
+    expect(el("#availability-section-body").hidden).toBe(false);
+    expectVisible("#availability-colonoscopy-wrap", false);
+    el('#availability-fit input[value="available"]').click();
+    expect(el("#result-state").classList.contains("hidden")).toBe(true);
+    expect(el("#availability-section-body").hidden).toBe(true);
+    expect(el("#availability-section .step-summary").textContent).toContain("Disponível");
+    submit(); expectVisible("#followup-request", false);
+    // The returned family-status track still requires real human review: do not erase it.
+    expect(el("#clinical-overview h2").textContent).toBe("Revisão clínica necessária");
+    expect(el("#clinical-overview").textContent).toContain("FIT");
+  });
+
+  it("keeps raw technical summaries and action kinds inside collapsed details, with action text verbatim on the surface", () => {
+    submit();
+    const details = el("#technical-details");
+    expect(details.open).toBe(false);
+    expect(details.querySelector("summary").textContent).toBe("Detalhes técnicos");
+    expect(details.contains(el("#result-sections"))).toBe(true);
+    expect(details.contains(el("#ruleset-version"))).toBe(true);
+    expect(el("#clinical-overview").querySelector(".result-card")).toBeNull();
+    expect(el("#clinical-overview").querySelector(".action-kind")).toBeNull();
+    const source = [...details.querySelectorAll(".action-box > div:not(.operational-note)")].map(n => n.textContent);
+    const shown = [...el("#clinical-overview").querySelectorAll(".primary-guidance p:first-child")].map(n => n.textContent);
+    expect(shown).toEqual([...new Set(source)]);
+    details.open = true; expect(details.open).toBe(true);
+    expect(details.querySelector(".audit-list")).not.toBeNull();
+  });
+
+  it("re-evaluates prior edits without keeping an old strategy or availability request", () => {
+    policy("br_ampliado"); submit(); set("#strategy", "colonoscopy"); submit();
+    expectVisible("#availability-colonoscopy-wrap");
+    el("#reference-section .edit-step").click(); policy("sus_oficial");
+    expect(el("#result-state").classList.contains("hidden")).toBe(true);
+    expect(el("#result-sections").children).toHaveLength(0);
+    expectVisible("#strategy-section", false); expectVisible("#availability-section", false);
+    submit(); expectVisible("#availability-fit-wrap"); expectVisible("#availability-colonoscopy-wrap", false);
+  });
+
+  it("never prints raw English diagnostics on the clinical surface and has no internal result scroll", () => {
+    set("#prior-crc", "yes"); submit();
+    expect(el("#clinical-overview h2").textContent).toBe("Revisão clínica necessária");
+    expect(el("#clinical-overview").textContent).not.toMatch(/At least|active rule|asOf/);
+    expect(el("#reference-section").textContent).not.toContain("asOf");
+    const css = readFileSync(new NodeURL("../../pilot/ccr/styles.css", import.meta.url), "utf8");
+    expect(css).not.toMatch(/overflow\s*:\s*(auto|scroll)/);
+    expect(css).toContain("input:checked");
+    expect(css).toContain(":focus-within");
+  });
+
+  it("does not add clinical imports, IDs, age cutoffs or direct evaluation to the interview view", () => {
+    const source = readFileSync(new NodeURL("../../pilot/ccr/main.ts", import.meta.url), "utf8");
+    expect(source).not.toMatch(/src\/(engine|model|clinical)\//);
+    expect(source).not.toMatch(/CCR_IDS|evaluatePatient|ccrCandidate|age\s*[<>=]+\s*(45|50|75|76)/);
+    expect(source).toContain("model.requestedInputs");
+  });
+});
+
+ it("Enter with incomplete initial inputs advances acquisition without an error or clinical review", () => {
+ el("#clear-form").click(); el("#screening-form").dispatchEvent(new Event("submit", {cancelable:true}));
+ expect(el("#error-state").classList.contains("hidden")).toBe(true);
+ expect(el("#result-state").classList.contains("hidden")).toBe(true);
+ expect(el("#reference-section-body").hidden).toBe(false);
+ expect(el("#empty-state").textContent).toContain("Próxima informação necessária");
+ });

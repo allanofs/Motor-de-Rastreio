@@ -42,7 +42,7 @@ h1 { margin: 0; font-size: clamp(28px, 4vw, 42px); letter-spacing: -.025em; }
 .workspace { display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(380px, .92fr); gap: 24px; align-items: start; }
 .panel { background: #fff; border: 1px solid #e1e6ef; border-radius: 18px; box-shadow: 0 10px 30px rgba(35, 47, 74, .05); }
 .form-panel { padding: 8px 24px 24px; }
-.result-panel { position: sticky; top: 58px; max-height: calc(100vh - 82px); overflow: auto; padding: 24px; }
+.result-panel { position: static; padding: 24px; }
 .form-section { padding: 24px 0; border-bottom: 1px solid #edf0f5; animation: reveal-section .18s ease-out; }
 .form-section:last-of-type { border-bottom: 0; }
 .section-heading { display: flex; gap: 12px; margin-bottom: 18px; }
@@ -155,3 +155,26 @@ input, select, .panel, .card-topline > *, .result-meta > * { min-width: 0; }
   input, select { font-size: 16px; }
   button, summary { min-height: 44px; }
 }
+
+/* Guided interview: only the current acquisition unit is expanded. */
+[hidden], .guided-future { display: none !important; }
+.step-current { border: 2px solid #4056a1; border-radius: 14px; margin: 12px 0; padding: 20px 16px; background: #fafbff; }
+.step-complete { padding: 14px 0; }
+.step-complete .section-heading { margin-bottom: 5px; }
+.step-complete .section-heading p { display: none; }
+.step-complete .step { color: #205f43; background: #edf7f1; }
+.step-summary { margin: 0 0 0 40px; color: #596276; font-size: 13px; line-height: 1.6; overflow-wrap: anywhere; }
+.edit-step { margin-left: auto; flex-shrink: 0; background: #edf1fb; color: #304c9b; }
+.choice-group { border: 0; margin: 0; padding: 0; min-width: 0; }
+.choice-group legend { font-size: 13px; font-weight: 650; color: #40495c; margin-bottom: 8px; }
+.choice-options { display: flex; gap: 8px; flex-wrap: wrap; }
+.choice-options label { display: flex; align-items: center; gap: 8px; min-height: 44px; border: 1px solid #cfd6e3; border-radius: 10px; padding: 10px 12px; background: #fff; cursor: pointer; }
+.choice-options input { width: 18px; height: 18px; min-height: 0; margin: 0; padding: 0; accent-color: #304c9b; flex-shrink: 0; }
+.choice-options label:has(input:checked) { border: 2px solid #304c9b; padding: 9px 11px; font-weight: 800; background: #eef2ff; }
+.choice-options label:focus-within { outline: 3px solid #304c9b; outline-offset: 3px; }
+.primary-guidance { background: #f5f7fc; border-left: 4px solid #304c9b; padding: 6px 14px; margin: 16px 0; border-radius: 8px; line-height: 1.6; }
+#clinical-overview h2 { font-size: 20px; margin-top: 8px; }
+#technical-details { border-top: 1px solid #e1e6ef; padding-top: 16px; margin-top: 24px; }
+#technical-details > summary { font-size: 14px; min-height: 44px; }
+#finish-exams { margin-top: 16px; }
+@media (max-width: 640px) { .choice-options label { flex: 1 1 auto; } .step-current { padding: 16px 12px; } }

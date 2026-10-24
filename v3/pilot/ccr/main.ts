@@ -41,6 +41,9 @@ const HARD_RISK_IDS = [
 const exams: UiExam[] = [];
 const requestedInputs = new Set<CcrRequestedInput>();
 let nextExamId = 1;
+let editingStep: string | undefined;
+let examsReviewed = false;
+let explicitEditing = false;
 
 function element<T extends HTMLElement>(id: string): T {
   const found = document.getElementById(id);
@@ -85,13 +88,67 @@ function answerSelect(id: string, labelText: string): HTMLElement {
   return label;
 }
 
+/** A presentation-only replacement: option values remain unchanged. */
+function makeChoices(select: HTMLSelectElement): void {
+  const label = select.parentElement;
+  if (label?.tagName !== "LABEL") return;
+  const group = document.createElement("fieldset");
+  group.id = select.id;
+  group.className = "choice-group";
+  for (const [key, value] of Object.entries(select.dataset)) group.dataset[key] = value;
+  const legend = document.createElement("legend");
+  legend.textContent = Array.from(label.childNodes)
+    .filter(node => node !== select).map(node => node.textContent).join("").trim();
+  group.append(legend);
+  const initial = select.value;
+  const choices = document.createElement("div");
+  choices.className = "choice-options";
+  for (const item of Array.from(select.options)) {
+    if (["", "not_asked", "unselected"].includes(item.value)) continue;
+    const choice = document.createElement("label");
+    const radio = document.createElement("input");
+    radio.type = "radio";
+    radio.name = select.id || `${select.dataset.examId}-${select.dataset.field}`;
+    radio.value = item.value;
+    radio.checked = item.value === initial;
+    const text = document.createElement("span");
+    text.textContent = item.textContent;
+    choice.append(radio, text);
+    choices.append(choice);
+  }
+  group.append(choices);
+  // The existing draft collector reads semantic values; it never reads display labels.
+  Object.defineProperty(group, "value", {
+    get: () => group.querySelector<HTMLInputElement>("input:checked")?.value
+      ?? (Array.from(select.options).some(item => item.value === "not_asked") ? "not_asked" : initial),
+    set: (value: string) => group.querySelectorAll<HTMLInputElement>("input").forEach(radio => { radio.checked = radio.value === value; }),
+  });
+  const wrap = document.createElement("div");
+  wrap.id = label.id;
+  wrap.className = label.className;
+  wrap.append(group);
+  label.replaceWith(wrap);
+}
+
+function initializeChoices(): void {
+  for (const id of ["screening-context", ...HARD_RISK_IDS, "specialist-care", "family-history", "history-sufficient", "strategy", "availability-fit", "availability-colonoscopy"]) {
+    makeChoices(element<HTMLSelectElement>(id));
+  }
+}
+
+function focusControl(control: HTMLElement | undefined): void {
+  if (!control) return;
+  (control.querySelector<HTMLElement>("input:checked")
+    ?? control.querySelector<HTMLElement>("input, select, button") ?? control).focus();
+}
+
 function initializeRiskFields(): void {
   const container = element<HTMLDivElement>("risk-fields");
   container.replaceChildren(
     answerSelect("prior-crc", "Câncer colorretal prévio?"),
     answerSelect(
       "prior-polyp-surveillance",
-      "Pólipo/adenoma prévio que exige surveillance?",
+      "Pólipo/adenoma prévio que exige vigilância?",
     ),
     answerSelect("colonic-ibd", "Doença inflamatória intestinal colônica relevante?"),
     answerSelect(
@@ -169,123 +226,30 @@ function clearAdaptiveInputs(): void {
   element<HTMLSelectElement>("availability-colonoscopy").value = "";
 }
 
-function journeyItems(): string[] {
-  const items: string[] = [];
-  const policy = selectedPolicy();
-  if (policy !== undefined) items.push(`Referencial: ${policy.label}`);
-  const age = optionalNumber("age");
-  if (age !== undefined) items.push(`Idade: ${age} anos`);
-  const context = selectValue("screening-context");
-  if (context === "yes") items.push("Contexto preventivo confirmado");
-  if (context === "no") items.push("Contexto não preventivo informado");
-  if (context === "unknown") items.push("Contexto preventivo incerto");
-  if (context === "yes" && hardRiskPositive())
-    items.push("Condição especial informada");
-  if (context === "yes" && allHardRisksAnswered() && !hardRiskPositive())
-    items.push("Condições especiais verificadas");
-  const family = selectValue("family-history");
-  if (family === "no") items.push("História familiar negativa informada");
-  if (family === "unknown") items.push("História familiar desconhecida");
-  if (family === "yes" && familyDetailsReady())
-    items.push("História familiar positiva detalhada");
-  const history = selectValue("history-knowledge");
-  if (history === "never_performed")
-    items.push("Nunca realizou rastreamento confirmado");
-  if (history === "unknown") items.push("Histórico de rastreamento desconhecido");
-  if (history === "known") items.push("Histórico de rastreamento conhecido");
-  return items;
-}
-
 function updateJourneyPanel(): void {
   const title = element("journey-title");
   const next = element("journey-next");
   const list = element<HTMLUListElement>("journey-summary");
-  list.replaceChildren(
-    ...journeyItems().map((text) => {
-      const item = document.createElement("li");
-      item.textContent = text;
-      return item;
-    }),
-  );
-
-  if (!baselineComplete()) {
-    title.textContent = "Comece pelo referencial";
-    next.textContent =
-      "Escolha o referencial, a data de referência e informe a idade.";
-    return;
-  }
-
-  const context = selectValue("screening-context");
-  if (context === "not_asked") {
-    title.textContent = "Confirme o contexto da avaliação";
-    next.textContent =
-      "A próxima pergunta verifica se este módulo preventivo é o caminho correto.";
-    return;
-  }
-  if (context !== "yes") {
-    title.textContent = "O Motor já pode se posicionar sobre o escopo";
-    next.textContent =
-      "Avalie agora; perguntas de rastreamento average-risk não serão abertas desnecessariamente.";
-    return;
-  }
-  if (!allHardRisksAnswered()) {
-    title.textContent = hardRiskPositive()
-      ? "Complete apenas o bloco de condições especiais"
-      : "Verifique as condições que mudam a rota";
-    next.textContent = hardRiskPositive()
-      ? "Uma condição especial já foi informada. Complete somente as demais condições deste bloco; história familiar e rotina average-risk permanecerão fechadas."
-      : "Responda às quatro condições antes de abrir a história familiar.";
-    return;
-  }
-  if (hardRiskPositive()) {
-    title.textContent = "Condição especial informada";
-    next.textContent =
-      "Avalie agora. O formulário não continuará coletando dados average-risk sem necessidade.";
-    return;
-  }
-
-  const family = selectValue("family-history");
-  if (family === "not_asked") {
-    title.textContent = "Informe a história familiar";
-    next.textContent = "Só serão pedidos detalhes se a resposta for positiva.";
-    return;
-  }
-  if (!familyDetailsReady()) {
-    title.textContent = "Detalhe apenas a história familiar positiva";
-    next.textContent =
-      "Informe parentes afetados, faixa etária do diagnóstico mais jovem e tipo de achado.";
-    return;
-  }
-
-  const history = selectValue("history-knowledge");
-  if (history === "not_asked") {
-    title.textContent = "Informe o conhecimento do histórico";
-    next.textContent =
-      "Exames anteriores só serão abertos quando o histórico for conhecido.";
-    return;
-  }
-
-  if (requestedInputs.has("strategy_selection")) {
-    title.textContent = "O Motor precisa de uma escolha humana";
-    next.textContent = "Escolha a estratégia solicitada e atualize a avaliação.";
-    return;
-  }
-  if (
-    requestedInputs.has("fit_availability") ||
-    requestedInputs.has("colonoscopy_availability")
-  ) {
-    title.textContent = "A decisão clínica já foi calculada";
-    next.textContent =
-      "Informe somente a disponibilidade do recurso solicitado para definir a rota operacional.";
-    return;
-  }
-
-  title.textContent =
-    history === "known" ? "Revise os exames conhecidos e avalie" : "Pronto para avaliar";
-  next.textContent =
-    history === "known"
-      ? "Adicione apenas os exames que realmente conhece; depois execute a avaliação."
-      : "O Motor já tem os dados necessários para esta etapa.";
+  const eligible = STEP_IDS.filter(id => !element(id).classList.contains("hidden"));
+  const current = editingStep ?? eligible.find(id => !stepComplete(id));
+  list.replaceChildren(...eligible.filter(id => stepComplete(id)).map(id => {
+    const item = document.createElement("li"); item.textContent = stepSummary(id); return item;
+  }));
+  const prompts: Record<string, string> = {
+    "reference-section": "Escolha o referencial, a data de referência e informe a idade.",
+    "context-section": "Confirme se esta avaliação é de rastreamento preventivo.",
+    "risk-section": "Informe as condições que mudam a rota de cuidado.",
+    "family-section": "Informe a história familiar e os detalhes solicitados, se houver.",
+    "history-section": "Informe o conhecimento do histórico e a suficiência dos dados conhecidos.",
+    "exam-section": "Registre somente exames conhecidos. Ao terminar, conclua o registro de exames.",
+    "strategy-section": "Selecione a estratégia solicitada pelo Motor e atualize a avaliação.",
+    "availability-section": "Confirme somente a disponibilidade do recurso solicitado pelo Motor.",
+  };
+  title.textContent = current === "strategy-section" ? "Escolha necessária"
+    : current === "availability-section" ? "Disponibilidade de recurso necessária"
+    : current ? "Próxima informação necessária" : "Pronto para avaliar";
+  next.textContent = current ? prompts[current] ?? "Revise os dados desta etapa."
+    : "Atualize a avaliação para obter a orientação do Motor com os dados informados.";
 }
 
 function updateProgressiveDisclosure(): void {
@@ -345,6 +309,110 @@ function updateProgressiveDisclosure(): void {
   element<HTMLButtonElement>("evaluate-button").textContent =
     requestedInputs.size > 0 ? "Atualizar avaliação" : "Avaliar rastreamento";
   updateJourneyPanel();
+  updateGuidedInterview();
+}
+
+const STEP_IDS = ["reference-section", "context-section", "risk-section", "family-section", "history-section", "exam-section", "strategy-section", "availability-section"] as const;
+
+function stepComplete(id: string): boolean {
+  // Completion of input acquisition only, never a clinical conclusion.
+  switch (id) {
+    case "reference-section": return baselineComplete();
+    case "context-section": return selectValue("screening-context") !== "not_asked";
+    case "risk-section": return allHardRisksAnswered() && (!hardRiskPositive() || selectValue("specialist-care") !== "not_asked");
+    case "family-section": return selectValue("family-history") !== "not_asked" && familyDetailsReady();
+    case "history-section": return selectValue("history-knowledge") !== "not_asked" && (selectValue("history-knowledge") !== "known" || selectValue("history-sufficient") !== "not_asked");
+    case "exam-section": return examsReviewed;
+    case "strategy-section": return selectValue("strategy") !== "unselected";
+    case "availability-section": return ["availability-fit", "availability-colonoscopy"].every(field => element(`${field}-wrap`).classList.contains("hidden") || selectValue(field) !== "");
+    default: return false;
+  }
+}
+
+function stepSummary(id: string): string {
+  const selectedText = (field: string) => {
+    const control = element<HTMLElement>(field);
+    if (control instanceof HTMLSelectElement) return control.selectedOptions[0]?.textContent ?? "";
+    return control.querySelector<HTMLInputElement>("input:checked")?.parentElement?.textContent?.trim() ?? "";
+  };
+  switch (id) {
+    case "reference-section": return `${selectedPolicy()?.label ?? ""} · ${inputValue("age")} anos · ${inputValue("as-of").split("-").reverse().join("/")}`;
+    case "context-section": return selectedText("screening-context");
+    case "risk-section": return HARD_RISK_IDS.map((field, index) => `${["Câncer prévio", "Pólipos", "Doença inflamatória", "Síndrome hereditária"][index]}: ${selectedText(field)}`).join(" · ");
+    case "family-section": return `${selectedText("family-history")}${selectValue("family-history") === "yes" ? ` · 1º grau: ${inputValue("family-fdr")} · 2º grau: ${inputValue("family-sdr")} · ${selectedText("family-age-band")} · ${selectedText("family-finding")}` : ""}`;
+    case "history-section": return `${selectedText("history-knowledge")}${selectValue("history-knowledge") === "known" ? ` · Suficiência: ${selectedText("history-sufficient")}` : ""}`;
+    case "exam-section": return `${exams.length} exame(s) registrado(s)`;
+    case "strategy-section": return selectedText("strategy");
+    case "availability-section": return ["availability-fit", "availability-colonoscopy"].filter(field => !element(`${field}-wrap`).classList.contains("hidden")).map(field => `${field === "availability-fit" ? "FIT" : "Colonoscopia"}: ${selectedText(field)}`).join(" · ");
+    default: return "";
+  }
+}
+
+function initializeGuidedInterview(): void {
+  for (const id of STEP_IDS) {
+    const section = element(id);
+    const heading = section.querySelector<HTMLElement>(".section-heading")!;
+    const body = document.createElement("div"); body.className = "step-body"; body.id = `${id}-body`;
+    for (const child of Array.from(section.children)) if (child !== heading) body.append(child);
+    const summary = document.createElement("p"); summary.className = "step-summary";
+    const edit = document.createElement("button"); edit.type = "button"; edit.className = "edit-step";
+    edit.textContent = "Editar"; edit.setAttribute("aria-controls", body.id);
+    edit.setAttribute("aria-label", `Editar ${heading.querySelector("h2")?.textContent}`);
+    edit.addEventListener("click", () => {
+      editingStep = id; explicitEditing = true; updateGuidedInterview(); updateJourneyPanel();
+      focusControl(body.querySelector<HTMLElement>("fieldset, select, input, button") ?? undefined);
+    });
+    const finishEdit = document.createElement("button");
+    finishEdit.type = "button"; finishEdit.className = "secondary finish-edit";
+    finishEdit.textContent = "Concluir edição"; finishEdit.hidden = true;
+    finishEdit.addEventListener("click", () => {
+      explicitEditing = false; editingStep = undefined;
+      updateProgressiveDisclosure();
+      const activeBody = document.querySelector<HTMLElement>(".step-current .step-body");
+      if (activeBody) focusControl(activeBody.querySelector<HTMLElement>("fieldset, select, input, button") ?? undefined);
+      else element("evaluate-button").focus();
+    });
+    body.append(finishEdit);
+    heading.append(edit); section.append(summary, body);
+  }
+  const done = document.createElement("button"); done.type = "button"; done.className = "secondary";
+  done.id = "finish-exams"; done.textContent = "Concluir registro de exames";
+  done.addEventListener("click", () => { examsReviewed = true; editingStep = undefined; updateGuidedInterview(); updateJourneyPanel(); element("evaluate-button").focus(); });
+  element("exam-section-body").append(done);
+}
+
+function updateGuidedInterview(): void {
+  const eligible = STEP_IDS.filter(id => !element(id).classList.contains("hidden"));
+  if (editingStep && !eligible.includes(editingStep as typeof STEP_IDS[number])) editingStep = undefined;
+  const current = editingStep ?? eligible.find(id => !stepComplete(id));
+  let reachedCurrent = false;
+  let focusedContentClosed = false;
+  for (const id of STEP_IDS) {
+    const section = element(id);
+    const active = id === current;
+    const complete = stepComplete(id);
+    const future = !active && (reachedCurrent || (!complete && current !== undefined));
+    section.classList.toggle("guided-future", future);
+    section.classList.toggle("step-current", active);
+    section.classList.toggle("step-complete", complete && !active);
+    const body = section.querySelector<HTMLElement>(".step-body")!;
+    if (!active && body.contains(document.activeElement)) focusedContentClosed = true;
+    body.hidden = !active;
+    const summary = section.querySelector<HTMLElement>(".step-summary")!;
+    summary.hidden = active || !complete; summary.textContent = complete ? stepSummary(id) : "";
+    const edit = section.querySelector<HTMLButtonElement>(".edit-step")!;
+    section.querySelector<HTMLButtonElement>(".finish-edit")!.hidden = !(active && explicitEditing);
+    edit.hidden = active || !complete; edit.setAttribute("aria-expanded", String(active));
+    const marker = section.querySelector<HTMLElement>(".step")!;
+    marker.textContent = complete && !active ? "✓" : "→";
+    if (active) section.setAttribute("aria-current", "step");
+    else section.removeAttribute("aria-current");
+    if (active) reachedCurrent = true;
+  }
+  if (focusedContentClosed) {
+    if (current) focusControl(element(`${current}-body`).querySelector<HTMLElement>("fieldset, select, input, button") ?? undefined);
+    else if (!element("form-actions").classList.contains("hidden")) element("evaluate-button").focus();
+  }
 }
 
 function makeFitExam(): FitUiExam {
@@ -419,6 +487,7 @@ function renderExamList(): void {
       'input[data-field="date"]',
     );
     if (dateInput !== null) dateInput.value = exam.date ?? "";
+    card.querySelectorAll<HTMLSelectElement>('select[data-field="status"], select[data-field="preparation"], select[data-field="completeness"], select[data-field="resolutionInformation"]').forEach(makeChoices);
     updateExamDisclosure(card, exam);
     list.append(card);
   }
@@ -442,11 +511,11 @@ function renderExamList(): void {
     });
 
   list
-    .querySelectorAll<HTMLInputElement | HTMLSelectElement>(
+    .querySelectorAll<HTMLElement & { value: string }>(
       "[data-exam-id][data-field]",
     )
     .forEach((control) => {
-      control.addEventListener("change", () => {
+      const saveExam = () => {
         const id = control.dataset.examId;
         const field = control.dataset.field;
         const exam = exams.find((candidate) => candidate.id === id);
@@ -460,7 +529,9 @@ function renderExamList(): void {
           if (field === "status")
             updateExamDisclosure(control.closest("article")!, exam);
         }
-      });
+      };
+      control.addEventListener("input", saveExam);
+      control.addEventListener("change", saveExam);
     });
 }
 
@@ -468,7 +539,7 @@ function updateExamDisclosure(card: HTMLElement, exam: UiExam): void {
   card.querySelectorAll<HTMLElement>("[data-field]").forEach((control) => {
     if (control.dataset.field === "status") return;
     control
-      .closest("label")
+      .closest(".exam-fields > label, .exam-fields > div")
       ?.classList.toggle("hidden", exam.status !== "performed");
   });
 }
@@ -479,6 +550,7 @@ function invalidateResults(clearRequests = true): void {
     !element("error-state").classList.contains("hidden");
   if (clearRequests) requestedInputs.clear();
   clearResults();
+  if (hadOutput) element("clinical-overview").replaceChildren();
   if (hadOutput)
     element("result-notice").textContent =
       "Dados alterados. Avalie novamente para atualizar o resultado.";
@@ -564,6 +636,8 @@ function collectDraft(): Record<string, unknown> {
 }
 
 function clearResults(): void {
+  element("clinical-overview").replaceChildren();
+  element("result-sections").replaceChildren();
   element("empty-state").classList.remove("hidden");
   element("error-state").classList.add("hidden");
   element("result-state").classList.add("hidden");
@@ -585,7 +659,13 @@ function showError(title: string, issues: string[]): void {
     item.textContent = issue;
     list.append(item);
   }
-  target.append(heading, list);
+  const explanation = document.createElement("p");
+  explanation.textContent = "Verifique os dados informados antes de tentar novamente.";
+  const details = document.createElement("details");
+  const summary = document.createElement("summary");
+  summary.textContent = "Detalhes técnicos do erro";
+  details.append(summary, list);
+  target.append(heading, explanation, details);
 }
 
 function renderAction(card: CcrPresentationCard, container: HTMLElement): void {
@@ -651,6 +731,73 @@ function renderCard(card: CcrPresentationCard): HTMLElement {
   return article;
 }
 
+function renderOverview(model: ReturnType<typeof presentCcrProduct>): void {
+  const target = element("clinical-overview");
+  target.replaceChildren();
+  const cards = model.sections.flatMap(section => section.cards);
+  const has = (status: CcrPresentationCard["status"]) => cards.some(card => card.status === status);
+  const title = document.createElement("h2");
+  const message = document.createElement("p");
+  // Only presentation of existing states/requests; no clinical eligibility inference.
+  if (model.requestedInputs.includes("strategy_selection")) {
+    title.textContent = "Escolha necessária";
+    message.textContent = "Selecione a estratégia solicitada para continuar a avaliação.";
+  } else if (model.requestedInputs.length > 0) {
+    title.textContent = "Disponibilidade de recurso necessária";
+    message.textContent = model.requestedInputs.includes("fit_availability")
+      ? "Precisamos confirmar a disponibilidade do FIT."
+      : "Precisamos confirmar a disponibilidade da colonoscopia.";
+  } else if (has("Conflict") || has("ComputationError")) {
+    title.textContent = "Resolver primeiro";
+    message.textContent = "Não foi possível concluir com segurança. Confira os detalhes da avaliação.";
+  } else if (has("ClinicalReviewRequired")) {
+    title.textContent = "Revisão clínica necessária";
+    message.textContent = "O Motor não consegue determinar com segurança uma orientação automática para todos os caminhos deste cenário."
+      + (has("Indeterminate") ? " Também há informações pendentes; confira os detalhes." : "");
+  } else if (has("Indeterminate")) {
+    title.textContent = "Próxima informação necessária";
+    message.textContent = "Faltam informações para concluir todos os caminhos desta avaliação. Consulte os detalhes.";
+  } else if (has("SharedDecision")) {
+    title.textContent = "Decisão compartilhada";
+    message.textContent = "A orientação requer discussão e escolha humana.";
+  } else {
+    title.textContent = "Avaliação concluída";
+    message.textContent = has("PendingResult") ? "Há resultado pendente antes de concluir o acompanhamento."
+      : has("HandedOff") ? "Cuidado assumido por outro serviço."
+      : has("Current") ? "Em dia / acompanhar, conforme os caminhos avaliados."
+      : cards.every(card => card.status === "NotApplicable") ? "Sem ação de rotina neste referencial para os caminhos avaliados."
+      : "Confira as orientações disponíveis abaixo.";
+  }
+  target.append(title, message);
+  const statuses = document.createElement("ul");
+  const labels = new Set(cards.map(card => card.statusLabel));
+  // Retain attention states without exposing parallel internal domains as primary cards.
+  for (const label of labels) {
+    const item = document.createElement("li"); item.textContent = label; statuses.append(item);
+  }
+  const statusDetails = document.createElement("details");
+  const statusSummary = document.createElement("summary");
+  statusSummary.textContent = "Estados de acompanhamento";
+  statusDetails.append(statusSummary, statuses);
+  target.append(statusDetails);
+  const seen = new Set<string>();
+  for (const card of cards) {
+    const actions = card.actions.filter(action => {
+      const key = JSON.stringify([action.actionId, action.text, action.operational]);
+      if (seen.has(key)) return false; seen.add(key); return true;
+    });
+    // Clinical text is transported verbatim; technical kinds remain in the audit cards.
+    for (const action of actions) {
+      const box = document.createElement("div"); box.className = "primary-guidance";
+      const text = document.createElement("p"); text.textContent = action.text; box.append(text);
+      if (action.operational) {
+        const route = document.createElement("p"); route.textContent = action.operational.routeLabel; box.append(route);
+      }
+      target.append(box);
+    }
+  }
+}
+
 function firstRequestedControl(): HTMLElement | undefined {
   if (requestedInputs.has("strategy_selection")) return element("strategy");
   if (requestedInputs.has("fit_availability")) return element("availability-fit");
@@ -671,12 +818,12 @@ function renderFollowupRequest(): void {
   const title = document.createElement("strong");
   const text = document.createElement("p");
   if (requestedInputs.has("strategy_selection")) {
-    title.textContent = "Próxima informação necessária: escolha de estratégia";
+    title.textContent = "Escolha necessária: estratégia";
     text.textContent =
       "O Motor não escolhe a modalidade autonomamente. Registre a escolha humana e atualize a avaliação.";
   } else {
     title.textContent =
-      "Próxima informação necessária: disponibilidade do recurso";
+      "Disponibilidade de recurso necessária";
     text.textContent =
       "A indicação clínica já foi calculada. Informe apenas a disponibilidade solicitada para definir a rota operacional.";
   }
@@ -687,7 +834,10 @@ function renderFollowupRequest(): void {
   button.addEventListener("click", () => {
     const control = firstRequestedControl();
     control?.scrollIntoView({ behavior: "smooth", block: "center" });
-    control?.focus();
+    const section = control?.closest<HTMLElement>(".form-section");
+    if (section) editingStep = section.id;
+    updateGuidedInterview();
+    focusControl(control);
   });
   target.append(title, text, button);
 }
@@ -707,6 +857,7 @@ function renderSuccess(
   element("result-version").textContent = model.rulesetVersion;
   element("ruleset-version").textContent = model.rulesetVersion;
   renderFollowupRequest();
+  renderOverview(model);
 
   const target = element<HTMLDivElement>("result-sections");
   target.replaceChildren();
@@ -723,6 +874,14 @@ function renderSuccess(
 
 function evaluateForm(event: SubmitEvent): void {
   event.preventDefault();
+  // Enter during acquisition is a request to advance, not a clinical failure.
+  if (!canEvaluateCurrentPath()) {
+    invalidateResults(false);
+    updateProgressiveDisclosure();
+    const current = document.querySelector<HTMLElement>(".step-current .step-body");
+    if (current) focusControl(current.querySelector<HTMLElement>("fieldset, select, input, button") ?? undefined);
+    return;
+  }
   const result = evaluateCcrProductDraft(collectDraft());
   if (!result.ok) {
     requestedInputs.clear();
@@ -733,6 +892,9 @@ function evaluateForm(event: SubmitEvent): void {
     element("result-panel").focus();
     return;
   }
+  examsReviewed = true;
+  explicitEditing = false;
+  editingStep = undefined;
   renderSuccess(result);
   element("result-notice").textContent =
     requestedInputs.size > 0
@@ -743,9 +905,13 @@ function evaluateForm(event: SubmitEvent): void {
 
 function resetPilot(): void {
   element<HTMLFormElement>("screening-form").reset();
+  element("screening-form").querySelectorAll<HTMLInputElement>('input[type="radio"]').forEach(radio => { radio.checked = false; });
   exams.splice(0, exams.length);
   requestedInputs.clear();
   nextExamId = 1;
+  examsReviewed = false;
+  explicitEditing = false;
+  editingStep = undefined;
   renderExamList();
   clearResults();
   element("result-notice").textContent =
@@ -757,29 +923,31 @@ function resetPilot(): void {
 
 initializeRiskFields();
 initializePolicies();
+initializeChoices();
+initializeGuidedInterview();
 renderExamList();
 element("ruleset-version").textContent = "crc-0.5.5-phase6-active";
 updateProgressiveDisclosure();
 
 element<HTMLButtonElement>("add-fit").addEventListener("click", () => {
+  editingStep = "exam-section";
+  examsReviewed = false;
   exams.push(makeFitExam());
   renderExamList();
   clearAdaptiveInputs();
   invalidateResults(false);
   updateProgressiveDisclosure();
-  element("exam-list")
-    .lastElementChild?.querySelector<HTMLSelectElement>("select")
-    ?.focus();
+  focusControl(element("exam-list").lastElementChild?.querySelector<HTMLElement>("fieldset, select") ?? undefined);
 });
 element<HTMLButtonElement>("add-colonoscopy").addEventListener("click", () => {
+  editingStep = "exam-section";
+  examsReviewed = false;
   exams.push(makeColonoscopyExam());
   renderExamList();
   clearAdaptiveInputs();
   invalidateResults(false);
   updateProgressiveDisclosure();
-  element("exam-list")
-    .lastElementChild?.querySelector<HTMLSelectElement>("select")
-    ?.focus();
+  focusControl(element("exam-list").lastElementChild?.querySelector<HTMLElement>("fieldset, select") ?? undefined);
 });
 element<HTMLButtonElement>("clear-form").addEventListener("click", resetPilot);
 element<HTMLFormElement>("screening-form").addEventListener("submit", evaluateForm);
@@ -788,12 +956,16 @@ const form = element<HTMLFormElement>("screening-form");
 function handleMutation(event: Event): void {
   const target = event.target;
   if (!(target instanceof HTMLElement)) return;
+  if (target.closest("#exam-section")) examsReviewed = false;
   const adaptive = target.closest("#strategy-section, #availability-section");
   if (adaptive === null) clearAdaptiveInputs();
   else if (target.closest("#strategy-section") !== null) {
     element<HTMLSelectElement>("availability-fit").value = "";
     element<HTMLSelectElement>("availability-colonoscopy").value = "";
   }
+  const section = target.closest<HTMLElement>(".form-section");
+  if (section) editingStep = section.id;
+  if (!explicitEditing && event.type === "change" && section && stepComplete(section.id)) editingStep = undefined;
   invalidateResults(false);
   updateProgressiveDisclosure();
 }
