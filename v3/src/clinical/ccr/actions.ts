@@ -17,6 +17,15 @@ export const colonoscopyScreeningAction = ActionDefinitionSchema.parse({
   unavailableRoute: "clinical_review",
 });
 
+export const diagnosticColonoscopyAfterPositiveFitAction = ActionDefinitionSchema.parse({
+  actionId: "crc-action-diagnostic-colonoscopy-after-fit-positive",
+  kind: "referral",
+  text:
+    "Providenciar colonoscopia diagnóstica adequada para avaliação do FIT positivo; não substituir o seguimento por repetição de FIT.",
+  resourceId: CCR_IDS.resources.colonoscopy,
+  unavailableRoute: "referral",
+});
+
 export const offerScreeningStrategyAction = ActionDefinitionSchema.parse({
   actionId: "crc-action-offer-screening-strategy",
   kind: "recommendation",
@@ -55,6 +64,7 @@ export const avoidRoutineAfter85Action = ActionDefinitionSchema.parse({
 export const ccrActions = [
   fitScreeningAction,
   colonoscopyScreeningAction,
+  diagnosticColonoscopyAfterPositiveFitAction,
   offerScreeningStrategyAction,
   sharedDecisionAction,
   clinicalReviewAction,
