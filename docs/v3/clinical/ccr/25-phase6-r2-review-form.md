@@ -6,7 +6,7 @@
 
 > Este formulário não deve ser preenchido pelo autor/revisor R1. O segundo revisor precisa ser uma pessoa diferente e deve revisar o conteúdo clínico, não apenas confirmar que os testes passam.
 
-> **Estado atual:** não assinar ainda. `R2-01` ainda precisa de correção de metadado USPSTF e `R2-02` já teve a fonte normativa adequada identificada (Portaria SAES/MS nº 5.215/2026), mas a migração dos `sourceRefs` e a reauditoria das fontes SUS ainda precisam ser aplicadas. Depois disso será criado/revalidado o candidato corrigido e a R1 deverá ser reconfirmada antes da assinatura R2.
+> **Estado atual:** não assinar ainda. `R2-01` precisa de correção de metadado USPSTF. Para `R2-02`, a auditoria identificou a fonte normativa adequada — **Portaria SAES/MS nº 5.215/2026** — mas os `sourceRefs` SUS ainda precisam ser migrados, `B12` corrigido para sua edição real de 2025 e os locators SUS revalidados. Depois dessas correções, o candidato deverá passar novamente pela suíte e pela reconfirmação R1 antes da assinatura R2.
 
 ## Identificação do revisor R2
 
