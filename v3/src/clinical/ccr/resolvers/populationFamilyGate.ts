@@ -53,14 +53,15 @@ export const populationFamilyGateResolver64: DomainResolver = {
         ["Complex family history is not forced into the average-risk policy."],
       );
 
-    if (profile.kind === "incomplete") {
-      // The age-based population indication remains true, but the final strategy is withheld elsewhere.
-      return internationalStrategyChoiceResolver63.resolve(input);
-    }
-
-    if (profile.kind === "unknown") {
-      // Preserve the minimum age-based USPSTF indication; modality tracks will abstain.
-      return internationalStrategyChoiceResolver63.resolve(input);
+    if (profile.kind === "incomplete" || profile.kind === "unknown") {
+      const base = internationalStrategyChoiceResolver63.resolve(input);
+      return noAction(
+        structuredClone(base.state) as DomainResolution["state"],
+        [],
+        [
+          "The minimum age-based screening indication remains visible, but strategy selection is withheld until family history is clarified because it may change modality or interval.",
+        ],
+      );
     }
 
     return internationalStrategyChoiceResolver63.resolve(input);
