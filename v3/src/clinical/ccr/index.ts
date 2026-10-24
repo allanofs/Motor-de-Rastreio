@@ -23,4 +23,5 @@ export * from "./reviewedCandidate";
 export * from "./r2PreparedCandidate";
 export * from "./r1ReconfirmedCandidate";
 export * from "./r2ReviewedCandidate";
+export * from "./activeCandidate";
 export * from "./candidate";
