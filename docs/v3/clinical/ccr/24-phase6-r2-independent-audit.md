@@ -25,11 +25,19 @@ Fontes oficiais do Ministério da Saúde/INCA publicadas em 2026 continuam corro
 - periodicidade bienal;
 - FIT como triagem com colonoscopia após resultado positivo.
 
+A auditoria localizou ainda uma fonte normativa mais apropriada para a regra de rotina:
+
+**Portaria SAES/MS nº 5.215, de 22 de outubro de 2026**, publicada no DOU de 23/10/2026, Seção 1, páginas 73–74. A Portaria torna sem efeito a SAES/MS nº 4.642/2026 e inclui o procedimento `02.14.01.032-5 - Pesquisa de Sangue Oculto nas Fezes por Teste Imunoquímico Fecal (FIT) para Rastreamento do Câncer Colorretal`, cuja descrição define explicitamente rastreamento **bienal**, em homens e mulheres **assintomáticos de 50 a 75 anos**, e distingue esse uso do exame destinado à investigação diagnóstica.
+
+O protocolo OCI atualmente referenciado como `B12` é de natureza diagnóstica e o conteúdo acessível identifica **2ª edição – 2025 – versão eletrônica**. Sua landing page foi republicada/atualizada em 2026, mas isso não transforma a edição interna em uma guideline de rastreamento 2026. Portanto ele não deve permanecer como fonte principal da regra SUS de FIT bienal 50–75.
+
 Referências públicas rechecadas:
 
-- Ministério da Saúde — protocolo OCI/oncologia, landing page publicada em 27/08/2026;
+- Portaria SAES/MS nº 5.215/2026 — DOU de 23/10/2026;
+- CONASEMS — legislação diária de 23/10/2026 confirmando a Portaria 5.215 e a revogação/ineficácia da 4.642;
 - INCA — “SUS inclui teste de alta tecnologia para rastreamento de câncer colorretal”, 10/08/2026;
-- INCA/MS — comunicações de implantação nacional do FIT em 2026.
+- INCA — “SUS adota novo exame para detectar câncer de intestino antes de sintomas”, 21/05/2026;
+- Ministério da Saúde — comunicações de implantação nacional do FIT em outubro de 2026.
 
 ### SBOC 2026
 
@@ -76,8 +84,8 @@ Rechecado:
 
 | Bloco | Resultado pré-R2 |
 |---|---|
-| SUS 50–75 / FIT q2 | clinicamente corroborado; **proveniência B12 requer reconciliação documental** |
-| SUS FIT+ -> colonoscopia | coerente |
+| SUS 50–75 / FIT q2 | clinicamente corroborado; **fonte normativa correta identificada: Portaria 5.215/2026** |
+| SUS FIT+ -> colonoscopia | coerente; protocolo OCI pode continuar como fonte diagnóstica quando usado para esse propósito |
 | SUS pós-colonoscopia normal | abstensão conservadora coerente |
 | BA-A 45–49 shared decision | coerente como **decisão curatorial**, não como transcrição literal da SBOC |
 | BA-A FIT q2 | coerente como escolha curatorial conservadora dentro do intervalo SBOC 1–2 anos |
@@ -122,41 +130,33 @@ Isso é um ajuste de metadado de evidência, não um clinical diff de comportame
 
 ## 5. Finding R2-02 — proveniência/versionamento de B12
 
-**Classificação:** reconciliação documental requerida antes de R2 final.  
-**Impacto clínico de output:** nenhum observado; núcleo clínico corroborado por fontes oficiais 2026.  
+**Classificação:** direção de resolução identificada; correção de sourceRefs requerida antes de R2 final.  
+**Impacto clínico de output:** nenhum observado.  
 **Impacto de auditabilidade:** real.
 
-### Problema
+### Conclusão da investigação
 
-`crc-src-B12` é descrita no bundle como:
+O documento OCI atualmente representado por `crc-src-B12` é **2ª edição – 2025 – versão eletrônica** e é um protocolo de acesso/avaliação diagnóstica. A publicação da landing page em 27/08/2026 não justifica descrevê-lo como se a edição interna fosse uma diretriz de rastreamento de 2026.
 
-- publicação 2026;
-- versão “publicado em 27/08/2026”;
-- protocolo OCI em oncologia.
+Para a regra de **rastreamento SUS 50–75 com FIT bienal**, a fonte normativa mais precisa agora é a **Portaria SAES/MS nº 5.215, de 22/10/2026**, publicada no DOU em 23/10/2026. Ela explicitamente:
 
-A landing page oficial realmente foi publicada em 27/08/2026. Porém uma representação indexada/download do PDF acessível durante a auditoria identifica uma edição anterior no conteúdo do arquivo. Isso precisa ser reconciliado para que o `Source` descreva exatamente o documento que o locator pretende citar.
+- cria o procedimento FIT para rastreamento do CCR;
+- limita o procedimento a homens e mulheres assintomáticos de 50–75 anos;
+- define periodicidade bienal;
+- separa rastreamento de investigação diagnóstica;
+- torna sem efeito a Portaria SAES/MS nº 4.642/2026.
 
-### Evidência clínica paralela
+### Correção recomendada
 
-Mesmo com essa inconsistência de proveniência, comunicações oficiais MS/INCA de 2026 confirmam de forma independente:
+- representar a Portaria 5.215/2026 como nova fonte SUS de rastreamento;
+- migrar para ela os `sourceRefs` de idade/FIT/periodicidade da rotina SUS;
+- corrigir `B12` para refletir sua edição real de 2025 e mantê-la somente onde seu conteúdo diagnóstico realmente sustenta o locator (por exemplo, avaliação diagnóstica/colonoscopia diante de teste fecal positivo, se essa referência continuar necessária);
+- não usar `B12` para afirmar FIT bienal 50–75;
+- reauditar os sourceRefs de história familiar/hard exclusions SUS: se B12 não sustentar textualmente a proposição, utilizar fonte brasileira adequada ou manter a decisão como curadoria/abstensão claramente documentada, sem locator fictício.
 
-- FIT;
-- assintomáticos 50–75;
-- realização bienal;
-- colonoscopia após triagem positiva.
+Essa mudança é de proveniência/evidência; não há justificativa para mudar o engine ou a conduta já testada.
 
-Portanto o finding não invalida a conduta implementada; ele impede apenas uma assinatura R2 limpa enquanto a fonte B12 estiver documentalmente ambígua.
-
-### Resolução aceitável
-
-Uma destas opções:
-
-1. confirmar o PDF/edição exata servida pela landing page de 27/08/2026 e ajustar `publicationYear/version/locator` se necessário; ou
-2. substituir/complementar B12 por uma fonte oficial 2026 cuja versão e conteúdo estejam inequivocamente identificáveis, preservando os mesmos comportamentos clínicos.
-
-Não alterar o engine por causa disso.
-
-## 6. Itens que NÃO foram considerados blockers
+## 6. Itens que NÃO foram considerados blockers adicionais
 
 ### BA-A 45–49
 
@@ -195,8 +195,8 @@ O novo `r2Gate.test.ts` impede regressão de governança: enquanto não houver a
 ```text
 43 regras reviewed_by_1        ✅
 Auditoria independente pré-R2  ✅
-Finding R2-01                   ⛔ corrigir metadado de Grade USPSTF
-Finding R2-02                   ⛔ reconciliar proveniência B12
+R2-01                           ⛔ corrigir Grade metadata de modalidade
+R2-02                           🟡 fonte normativa correta identificada; aplicar source migration
 Segundo médico identificado     ⏳
 Assinatura/decisão R2 humana    ⏳
 reviewed_by_2                   ❌ NÃO registrar ainda
@@ -207,11 +207,12 @@ merge PR #3                     ❌
 
 ## 9. Próximo passo correto
 
-1. resolver R2-01 e R2-02;
-2. rodar novamente schemas + goldens + regressão completa;
-3. manter o candidato em `reviewed_by_1` após qualquer ajuste até nova confirmação R1 das mudanças;
-4. entregar `25-phase6-r2-review-form.md` a um médico independente;
-5. somente após aprovação explícita do segundo médico, registrar reviewer/data distintos e produzir `reviewed_by_2` em uma nova versão de governança;
-6. ainda assim, ativação/release/merge continuam decisões separadas.
+1. aplicar R2-01 e a migração de fonte R2-02 em um novo candidato ainda R1;
+2. reauditar todos os sourceRefs SUS tocados pela mudança;
+3. rodar schemas + goldens + regressão completa;
+4. obter reconfirmação R1 das mudanças de evidência/proveniência;
+5. entregar o candidato corrigido e `25-phase6-r2-review-form.md` a um médico independente;
+6. somente após aprovação explícita do segundo médico, registrar reviewer/data distintos e produzir `reviewed_by_2` em uma nova versão de governança;
+7. ativação/release/merge continuam decisões separadas.
 
-**Governança:** este documento é uma auditoria de preparação para R2. Ele não deve ser usado como assinatura do segundo revisor. O formulário R2 permanece explicitamente bloqueado enquanto R2-01/R2-02 estiverem abertos. O gate técnico de preparação passou integralmente.
+**Governança:** este documento é uma auditoria de preparação para R2. Ele não deve ser usado como assinatura do segundo revisor.
