@@ -359,7 +359,7 @@ describe("history knowledge and semantic safety", () => {
     );
     const topic = result.plan.topics[0];
     expect(topic?.tracks[0]?.state.status).toBe("Indeterminate");
-    expect(topic?.tracks[0]?.trace.issues).toContain("future-fit:date_after_asOf");
+    expect(topic?.tracks[0]?.trace.issues).toContain("future-fit:future_date");
   });
 
   it("case 058 rejects never_performed when a performed CCR exam is present", () => {
@@ -458,7 +458,7 @@ describe("temporal precision and event-order invariants", () => {
   });
 
   it("case 039 can remain Current under the wider biennial SUS window", () => {
-    const p = patient({ exams: [fit("fit-year-only", "2025", "negative")] });
+    const p = patient({ exams: [fit("fit-year-only", "2025", "negative")], facts: [...baseFacts] });
     expect(findTrack(run(policies.sus, p), CCR_IDS.tracks.routine).state.status).toBe("Current");
   });
 
@@ -492,8 +492,8 @@ describe("temporal precision and event-order invariants", () => {
       policies.sus,
       patient({
         exams: [
-          fit("fit-pos", "2026-03", "positive"),
-          colonoscopy("colono", "2026", { diagnostic: true }),
+          fit("fit-pos", "2025-03", "positive"),
+          colonoscopy("colono", "2025", { diagnostic: true }),
         ],
       }),
     );
