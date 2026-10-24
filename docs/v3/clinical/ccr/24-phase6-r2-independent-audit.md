@@ -170,7 +170,27 @@ A SBOC informa 1–2 anos. BA-A escolhe 2 anos como default conservador e docume
 
 O schema usa essa stance para representar `NotApplicable` de nova rotina sem cair em `ClinicalReviewRequired`. Os guardrails deixam explícito que isso não é contraindicação diagnóstica nem cancela follow-up aberto. O segundo revisor deve confirmar que essa semântica interna é aceitável para o produto e não será apresentada ao usuário como uma contraindicação clínica absoluta.
 
-## 7. Estado de R2 após esta auditoria
+## 7. Gate técnico desta auditoria
+
+Commit auditado antes desta atualização documental:
+
+`4002daaa172272fef088e5a0ede55eb00ce0c6a0`
+
+Workflow `V3 foundation` (`40120075597`): **success**.
+
+Resultados:
+
+- **417/417 testes totais**;
+- **21/21 arquivos de teste**;
+- `r2Gate.test.ts`: **3/3**;
+- **62/62 schema checks**;
+- typecheck: ✅;
+- build: ✅;
+- V2 byte-for-byte: ✅.
+
+O novo `r2Gate.test.ts` impede regressão de governança: enquanto não houver autorização humana independente, todas as 43 regras canônicas devem permanecer `reviewed_by_1`, `lifecycleStatus=draft`, com apenas o reviewer R1 registrado.
+
+## 8. Estado de R2 após esta auditoria
 
 ```text
 43 regras reviewed_by_1        ✅
@@ -185,7 +205,7 @@ release público                 ❌
 merge PR #3                     ❌
 ```
 
-## 8. Próximo passo correto
+## 9. Próximo passo correto
 
 1. resolver R2-01 e R2-02;
 2. rodar novamente schemas + goldens + regressão completa;
