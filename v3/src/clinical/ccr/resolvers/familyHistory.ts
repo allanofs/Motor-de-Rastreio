@@ -1,9 +1,14 @@
-import type { ClinicalFact } from "../../../model/patient";
 import {
   CCR_FAMILY_DETAIL_KEYS,
   CCR_FAMILY_VALUES,
   CCR_IDS,
 } from "../terminology";
+
+type FamilyFactLike = {
+  readonly conceptId: string;
+  readonly presence: string;
+  readonly details?: Readonly<Record<string, string | number | boolean>>;
+};
 
 export type FamilyProfile =
   | { kind: "none" }
@@ -14,24 +19,20 @@ export type FamilyProfile =
   | { kind: "one-fdr-60-plus" }
   | { kind: "one-sdr-only" };
 
-function familyFact(facts: readonly ClinicalFact[]): ClinicalFact | undefined {
+function familyFact(
+  facts: readonly FamilyFactLike[],
+): FamilyFactLike | undefined {
   return facts.find(
     (fact) => fact.conceptId === CCR_IDS.concepts.familyHistoryRelevant,
   );
 }
 
-function detailNumber(
-  fact: Extract<ClinicalFact, { presence: "yes" }>,
-  key: string,
-): number | undefined {
+function detailNumber(fact: FamilyFactLike, key: string): number | undefined {
   const value = fact.details?.[key];
   return typeof value === "number" && Number.isFinite(value) ? value : undefined;
 }
 
-function detailString(
-  fact: Extract<ClinicalFact, { presence: "yes" }>,
-  key: string,
-): string | undefined {
+function detailString(fact: FamilyFactLike, key: string): string | undefined {
   const value = fact.details?.[key];
   return typeof value === "string" ? value : undefined;
 }
@@ -43,7 +44,7 @@ function nonNegativeInteger(value: number | undefined): number | undefined {
 }
 
 export function classifyFamilyHistory(
-  facts: readonly ClinicalFact[],
+  facts: readonly FamilyFactLike[],
 ): FamilyProfile {
   const fact = familyFact(facts);
   if (fact === undefined) return { kind: "unknown" };
