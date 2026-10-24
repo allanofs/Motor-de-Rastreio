@@ -18,4 +18,5 @@ export * from "./resolvers/populationFamilyGate";
 export * from "./resolvers/phase64";
 export * from "./policies";
 export * from "./ruleset";
+export * from "./reviewedCandidate";
 export * from "./candidate";
