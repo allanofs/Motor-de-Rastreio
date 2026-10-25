@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { evaluatePatient } from "../../src/engine/evaluatePatient";
+import {
+  RuleDefinitionSchema,
+  RulesetSchema,
+  type RuleDefinition,
+  type Ruleset,
+} from "../../src/model/content";
 import { parseCalendarDate as day } from "../../src/model/dates";
 import { PatientSchema } from "../../src/model/patient";
 import {
@@ -116,13 +122,36 @@ function patient(input: {
   });
 }
 
+function activateR1BehaviorPreview(rule: RuleDefinition): RuleDefinition {
+  if (!hotfixRuleIds.has(rule.ruleId)) return structuredClone(rule);
+  return RuleDefinitionSchema.parse({
+    ...rule,
+    lifecycleStatus: "active",
+  });
+}
+
+/**
+ * Test-only execution preview. The real R1 snapshot intentionally remains draft.
+ * Promoting the three changed rules here is solely to verify that the reviewed
+ * executable translation still produces the intended behavior; it is not a
+ * governance event and does not alter candidate.ts or any persisted snapshot.
+ */
+function behaviorPreviewRuleset(): Ruleset {
+  return RulesetSchema.parse({
+    ...ccrPhase6H1R1Ruleset,
+    rules: ccrPhase6H1R1Ruleset.rules.map(activateR1BehaviorPreview),
+  });
+}
+
+const behaviorPreview = behaviorPreviewRuleset();
+
 function run(
   family: "sus_oficial" | "br_ampliado" | "internacional",
   p: ReturnType<typeof patient>,
 ) {
   return evaluatePatient({
     patient: p,
-    ruleset: ccrPhase6H1R1Ruleset,
+    ruleset: behaviorPreview,
     policyId: policyId(family),
     asOf,
     extensions: ccrPhase6H1R1Resolvers,
@@ -174,7 +203,7 @@ describe("Phase 6.H1 R1 governance", () => {
   });
 });
 
-describe("Phase 6.H1 R1 clinical behavior", () => {
+describe("Phase 6.H1 R1 clinical behavior via test-only active preview", () => {
   it("keeps explicit negative family history out of clinical review in all three policies", () => {
     for (const family of ["sus_oficial", "br_ampliado", "internacional"] as const) {
       const p =
