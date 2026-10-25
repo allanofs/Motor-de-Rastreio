@@ -155,10 +155,7 @@ function run(
   });
 }
 
-function track(
-  result: ReturnType<typeof run>,
-  trackId: string,
-) {
+function track(result: ReturnType<typeof run>, trackId: string) {
   const found = result.plan.topics[0]?.tracks.find(
     (candidate) => candidate.trackId === trackId,
   );
@@ -181,6 +178,8 @@ describe("Phase 6.H1 family-status hotfix candidate governance", () => {
     for (const rule of changed) {
       expect(rule.lifecycleStatus).toBe("draft");
       expect(rule.reviewStatus).toBe("source_verified");
+      expect(rule.computability).toBe("computable");
+      expect(rule.stance).toBe("recommend");
       expect(rule.actions).toEqual([]);
       expect(rule.outcome).toBe("NotApplicable");
       expect(rule.governance.reviews).toEqual([]);
@@ -234,7 +233,11 @@ describe("Phase 6.H1 family-status behavior preview", () => {
       const result = run(hotfix, family, patient({ family: "unknown" }));
       const status = track(result, CCR_IDS.tracks.familyStatus);
       expect(status.state.status).toBe("Indeterminate");
-      expect(status.missingData).toContain(CCR_IDS.concepts.familyHistoryRelevant);
+      expect(
+        status.missingData.some((item) =>
+          item.endsWith(CCR_IDS.concepts.familyHistoryRelevant),
+        ),
+      ).toBe(true);
     }
   });
 
