@@ -8,18 +8,22 @@
   },
   "scripts": {
     "dev": "vite --host 127.0.0.1",
+    "dev:ccr-pilot": "vite --config vite.ccr-pilot.config.ts",
     "typecheck": "tsc --noEmit",
+    "typecheck:ccr-pilot": "tsc --noEmit -p tsconfig.ccr-pilot.json",
     "test": "vitest run",
     "test:dates": "vitest run tests/dates.test.ts",
     "schema:check": "vitest run tests/schemas.test.ts tests/content.test.ts tests/policyIsolation.test.ts",
     "build": "vite build",
-    "check": "npm run typecheck && npm run schema:check && npm test && npm run build"
+    "build:ccr-pilot": "vite build --config vite.ccr-pilot.config.ts",
+    "check": "npm run typecheck && npm run typecheck:ccr-pilot && npm run schema:check && npm test && npm run build && npm run build:ccr-pilot"
   },
   "dependencies": {
     "zod": "4.6.7"
   },
   "devDependencies": {
     "@types/node": "26.6.5",
+    "happy-dom": "21.0.4",
     "typescript": "7.0.2",
     "vite": "8.3.5",
     "vitest": "5.0.5"

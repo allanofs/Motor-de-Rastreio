@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex,nofollow" />
+    <title>Motor de Rastreio V3 — Piloto CCR</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./polish.css" />
+  </head>
+  <body>
+    <div class="release-banner" role="status">
+      PILOTO LOCAL DE INTEGRAÇÃO — NÃO AUTORIZADO PARA USO CLÍNICO REAL OU LIBERAÇÃO PÚBLICA
+    </div>
+
+    <main class="app-shell">
+      <header class="hero">
+        <div>
+          <p class="eyebrow">Motor de Rastreio V3</p>
+          <h1>Rastreamento de câncer colorretal</h1>
+          <p class="hero-copy">
+            Interface adaptativa de referência. O Motor revela apenas a próxima informação
+            necessária para avançar a decisão no referencial selecionado.
+          </p>
+        </div>
+
+      </header>
+
+      <div class="workspace">
+        <form id="screening-form" class="panel form-panel" autocomplete="off" novalidate>
+          <section class="form-section" id="reference-section">
+            <div class="section-heading">
+              <span class="step">1</span>
+              <div>
+                <h2>Referencial e pessoa</h2>
+                <p>Defina o referencial, a data clínica e a idade antes de avançar.</p>
+              </div>
+            </div>
+            <div class="field-grid two-columns">
+              <label>
+                Referencial clínico
+                <select id="policy" required>
+                  <option value="">Selecione…</option>
+                </select>
+              </label>
+              <label>
+                Data de referência
+                <input id="as-of" type="date" required />
+              </label>
+              <label>
+                Idade em anos completos
+                <input id="age" type="number" min="0" max="150" inputmode="numeric" />
+              </label>
+            </div>
+          </section>
+
+          <section class="form-section hidden" id="context-section">
+            <div class="section-heading">
+              <span class="step">2</span>
+              <div>
+                <h2>Contexto preventivo</h2>
+                <p>O Motor não faz triagem de sintomas ou urgência.</p>
+              </div>
+            </div>
+            <label>
+              Esta avaliação é de rastreamento preventivo?
+              <select id="screening-context">
+                <option value="not_asked">Selecione…</option>
+                <option value="yes">Sim</option>
+                <option value="no">Não / requer avaliação clínica</option>
+                <option value="unknown">Incerto</option>
+              </select>
+            </label>
+          </section>
+
+          <section class="form-section hidden" id="risk-section">
+            <div class="section-heading">
+              <span class="step">3</span>
+              <div>
+                <h2>Condições que mudam a rota</h2>
+                <p>Responda apenas o que é conhecido. Uma condição positiva encerra a coleta de rotina.</p>
+              </div>
+            </div>
+            <div class="field-grid two-columns" id="risk-fields"></div>
+            <div id="specialist-care-wrap" class="conditional-box hidden">
+              <label>
+                Outro profissional ou serviço já assumiu este caminho de cuidado?
+                <select id="specialist-care">
+                  <option value="not_asked">Não perguntado</option>
+                  <option value="no">Não</option>
+                  <option value="yes">Sim</option>
+                  <option value="unknown">Incerto / não sei</option>
+                </select>
+              </label>
+            </div>
+          </section>
+
+          <section class="form-section hidden" id="family-section">
+            <div class="section-heading">
+              <span class="step">4</span>
+              <div>
+                <h2>História familiar</h2>
+                <p>Detalhes aparecem somente quando a resposta é positiva.</p>
+              </div>
+            </div>
+            <label>
+              Algum familiar teve câncer colorretal ou pólipo avançado?
+              <select id="family-history">
+                <option value="not_asked">Selecione…</option>
+                <option value="no">Não</option>
+                <option value="yes">Sim</option>
+                <option value="unknown">Não sei</option>
+              </select>
+            </label>
+            <div id="family-details" class="conditional-box hidden" aria-hidden="true">
+              <div class="field-grid two-columns">
+                <label>
+                  Nº de familiares de 1º grau afetados
+                  <input id="family-fdr" type="number" min="0" max="20" />
+                </label>
+                <label>
+                  Nº de familiares de 2º grau afetados
+                  <input id="family-sdr" type="number" min="0" max="20" />
+                </label>
+                <label>
+                  Idade do diagnóstico mais jovem
+                  <select id="family-age-band">
+                    <option value="">Não informado</option>
+                    <option value="under-60">&lt; 60 anos</option>
+                    <option value="60-or-older">≥ 60 anos</option>
+                    <option value="unknown">Não sei</option>
+                  </select>
+                </label>
+                <label>
+                  Idade exata/aproximada, se conhecida
+                  <input id="family-age-years" type="number" min="0" max="120" />
+                </label>
+                <label class="span-two">
+                  Achado no familiar
+                  <select id="family-finding">
+                    <option value="">Não informado</option>
+                    <option value="crc">Câncer colorretal</option>
+                    <option value="advanced-polyp">Pólipo avançado</option>
+                    <option value="polyp-unknown-type">Pólipo de tipo desconhecido</option>
+                    <option value="unknown">Não sei</option>
+                  </select>
+                </label>
+              </div>
+            </div>
+          </section>
+
+          <section class="form-section hidden" id="history-section">
+            <div class="section-heading">
+              <span class="step">5</span>
+              <div>
+                <h2>Histórico de rastreamento</h2>
+                <p>“Nunca realizou” só deve ser usado quando isso foi realmente confirmado.</p>
+              </div>
+            </div>
+            <div class="field-grid two-columns">
+              <label>
+                Conhecimento do histórico CCR
+                <select id="history-knowledge">
+                  <option value="not_asked">Selecione…</option>
+                  <option value="known">Histórico conhecido</option>
+                  <option value="never_performed">Nunca realizou rastreamento CCR</option>
+                  <option value="unknown">Histórico desconhecido</option>
+                </select>
+              </label>
+              <label id="history-sufficient-wrap" class="hidden">
+                O histórico conhecido é suficiente para avaliar o status atual?
+                <select id="history-sufficient">
+                  <option value="not_asked">Não perguntado</option>
+                  <option value="yes">Sim</option>
+                  <option value="no">Não</option>
+                  <option value="unknown">Incerto</option>
+                </select>
+              </label>
+            </div>
+          </section>
+
+          <section class="form-section hidden" id="exam-section">
+            <div class="section-heading">
+              <span class="step">6</span>
+              <div>
+                <h2>Exames conhecidos</h2>
+                <p>Adicione somente eventos realmente conhecidos; eles ficam apenas em memória nesta sessão.</p>
+              </div>
+            </div>
+            <div class="inline-actions">
+              <button type="button" class="secondary" id="add-fit">+ Adicionar FIT</button>
+              <button type="button" class="secondary" id="add-colonoscopy">+ Adicionar colonoscopia</button>
+            </div>
+            <div id="exam-list" class="exam-list"></div>
+          </section>
+
+          <section class="form-section hidden requested-section" id="strategy-section">
+            <div class="section-heading">
+              <span class="step">7</span>
+              <div>
+                <h2>Escolha de estratégia</h2>
+                <p>O Motor identificou que a estratégia precisa ser escolhida por uma pessoa; ele não escolhe FIT versus colonoscopia autonomamente.</p>
+              </div>
+            </div>
+            <label>
+              Estratégia selecionada
+              <select id="strategy">
+                <option value="unselected">Ainda não selecionada</option>
+                <option value="fit">FIT</option>
+                <option value="colonoscopy">Colonoscopia primária</option>
+              </select>
+            </label>
+          </section>
+
+          <section class="form-section hidden requested-section" id="availability-section">
+            <div class="section-heading">
+              <span class="step">8</span>
+              <div>
+                <h2>Disponibilidade do recurso</h2>
+                <p>Esta informação só é solicitada quando já existe uma ação que depende do recurso. Ela muda a rota operacional, não a evidência clínica.</p>
+              </div>
+            </div>
+            <div class="field-grid two-columns">
+              <label id="availability-fit-wrap" class="hidden">
+                FIT
+                <select id="availability-fit">
+                  <option value="">Não informado</option>
+                  <option value="available">Disponível</option>
+                  <option value="unavailable">Indisponível</option>
+                  <option value="unknown">Desconhecido</option>
+                </select>
+              </label>
+              <label id="availability-colonoscopy-wrap" class="hidden">
+                Colonoscopia
+                <select id="availability-colonoscopy">
+                  <option value="">Não informado</option>
+                  <option value="available">Disponível</option>
+                  <option value="unavailable">Indisponível</option>
+                  <option value="unknown">Desconhecido</option>
+                </select>
+              </label>
+            </div>
+          </section>
+
+          <div class="form-actions hidden" id="form-actions">
+            <button type="submit" class="primary" id="evaluate-button">Avaliar rastreamento</button>
+            <button type="button" class="tertiary" id="clear-form">Limpar</button>
+          </div>
+        </form>
+
+        <aside id="result-panel" class="panel result-panel" tabindex="-1" aria-label="Resultado da avaliação">
+          <p id="result-notice" role="status" aria-live="polite"></p>
+          <div id="empty-state" class="empty-state">
+            <div class="empty-icon">◎</div>
+            <p class="empty-kicker">Avaliação em andamento</p>
+            <h2 id="journey-title">Comece pelo referencial</h2>
+            <p id="journey-next">Escolha o referencial, a data de referência e informe a idade.</p>
+            <h3>Até aqui</h3>
+            <ul id="journey-summary" class="journey-summary" aria-label="Informações já confirmadas"></ul>
+          </div>
+          <div id="error-state" class="error-state hidden"></div>
+          <div id="result-state" class="hidden">
+            <div id="followup-request" class="followup-request hidden" role="status"></div>
+            <div id="clinical-overview" aria-label="Síntese da avaliação"></div>
+            <details id="technical-details">
+              <summary>Detalhes técnicos</summary>
+              <div class="version-box"><span>Versão do conjunto de regras</span><strong id="ruleset-version">—</strong></div>
+            <div class="result-meta">
+              <div>
+                <span>Referencial</span>
+                <strong id="result-policy">—</strong>
+              </div>
+              <div>
+                <span>Versão clínica</span>
+                <strong id="result-version">—</strong>
+              </div>
+            </div>
+            <div id="result-sections"></div>
+            </details>
+          </div>
+        </aside>
+      </div>
+    </main>
+
+    <template id="exam-template"></template>
+    <script type="module" src="./main.ts"></script>
+    <script type="module" src="./polish.ts"></script>
+  </body>
+</html>
