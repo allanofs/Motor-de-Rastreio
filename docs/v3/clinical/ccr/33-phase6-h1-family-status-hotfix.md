@@ -1,6 +1,6 @@
 # 33 — Fase 6.H1: hotfix clínico do family-status
 
-**Data:** 25/10/2026. **Branch:** `v3-ccr-family-status-hotfix`. **Issue:** #5.
+**Data:** 25/10/2026. **Branch:** `v3-ccr-family-status-hotfix`. **Issue:** #5. **PR:** #6 (Draft).
 
 ## Motivo
 
@@ -10,9 +10,15 @@ O defeito não estava na UI nem na normalização do formulário. A UI registrav
 
 ## Causa raiz
 
-As três regras `family-status` do snapshot ativo (`crc.sus.family-status`, `crc.ba-a.family-status`, `crc.intl.family-status`) tinham como estado genérico `ClinicalReviewRequired`.
+As três regras `family-status` do snapshot ativo (`crc.sus.family-status`, `crc.ba-a.family-status`, `crc.intl.family-status`) eram definidas como `partially_computable`, `no_formal_recommendation` e `ClinicalReviewRequired`.
 
-O engine deliberadamente não permite que um `DomainResolver` sobreponha um estado genérico que já seja `ClinicalReviewRequired`. Portanto, o `familyStatusResolver64`, embora codificasse corretamente:
+No Foundation atual há duas barreiras antes do resolver:
+
+1. regras `partially_computable` já são convertidas em `ClinicalReviewRequired` no cálculo genérico;
+2. `no_formal_recommendation` também é convertido em `ClinicalReviewRequired`;
+3. por segurança, o engine não permite que um `DomainResolver` sobreponha um estado genérico que já seja `ClinicalReviewRequired`.
+
+Assim, o `familyStatusResolver64`, embora codificasse corretamente:
 
 - negativo -> `NotApplicable`;
 - desconhecido/incompleto -> `Indeterminate`;
@@ -20,7 +26,7 @@ O engine deliberadamente não permite que um `DomainResolver` sobreponha um esta
 - padrão Internacional estreito -> delegação aos tracks familiares dedicados;
 - padrão complexo -> `ClinicalReviewRequired`;
 
-não era executado quando a regra-base já havia abstido.
+não conseguia executar a classificação final.
 
 ## Correção proposta
 
@@ -30,8 +36,10 @@ Foi criado um candidato separado:
 
 `crc-0.5.6-phase6-h1-family-status-draft`
 
-O candidato transforma somente as três regras `family-status` em **scaffolds neutros de resolver**:
+O candidato transforma somente as três regras `family-status` em **scaffolds neutros e resolver-safe**:
 
+- `computability: computable`;
+- `stance: recommend`;
 - `outcome: NotApplicable`;
 - `actions: []`;
 - `lifecycleStatus: draft`;
@@ -39,7 +47,7 @@ O candidato transforma somente as três regras `family-status` em **scaffolds ne
 - revisões humanas das três regras removidas, pois o comportamento executável foi alterado;
 - `sourceRefs` preservados.
 
-Com isso, o resolver existente volta a ser a camada que determina o estado final de acordo com a classificação da história familiar.
+`stance: recommend` não emite recomendação nesse scaffold: não há ação genérica e o outcome genérico é `NotApplicable`. Ele é usado apenas para atravessar a semântica atual do Foundation e permitir que o resolver governado determine o estado clínico final.
 
 ## O que NÃO mudou
 
@@ -48,12 +56,12 @@ Com isso, o resolver existente volta a ser a camada que determina o estado final
 - policies: nenhuma alteração;
 - terminologia: nenhuma alteração;
 - resolvers clínicos: nenhuma alteração;
-- regras que não sejam as três `family-status`: byte-for-byte preservadas no candidato;
+- regras que não sejam as três `family-status`: preservadas no candidato;
 - snapshot ativo `crc-0.5.5-phase6-active`: preservado;
-- `candidate.ts`: não apontado para o hotfix;
+- `candidate.ts`: continua apontando para `crc-0.5.5-phase6-active`;
 - nenhuma ativação, merge, deploy ou liberação pública.
 
-## Regressões obrigatórias
+## Regressões executáveis
 
 A suíte dedicada `familyStatusHotfix.test.ts` cobre:
 
@@ -68,11 +76,22 @@ A suíte dedicada `familyStatusHotfix.test.ts` cobre:
 9. as três regras alteradas voltam a `draft/source_verified` e preservam suas fontes;
 10. todas as demais regras permanecem idênticas ao snapshot ativo.
 
+## Gate automatizado
+
+GitHub Actions no HEAD `07b035d68814cc284db2edd68fbd49a4030ecdeb`:
+
+- typecheck: ✅
+- schema checks: ✅ 62/62
+- suíte total: ✅ 444/444 em 27 arquivos
+- `familyStatusHotfix.test.ts`: ✅ 6/6
+- build: ✅
+- V2 byte-for-byte: ✅
+
 ## Governança
 
-Este arquivo **não autoriza ativação**.
+Este hotfix automatizado **não autoriza ativação**.
 
-Como houve alteração de comportamento clínico executável, as três regras precisam passar novamente por revisão humana conforme o modelo de governança do projeto. O preview de teste promove as regras apenas com um identificador explicitamente sintético (`phase6-h1-test-preview-only-not-a-clinical-review`) para permitir regressão automatizada; isso não conta como R1 ou R2 real.
+Como houve alteração de comportamento clínico executável, as três regras precisam passar novamente por revisão humana conforme o modelo de governança do projeto. O preview de teste promove as regras apenas com o identificador explicitamente sintético `phase6-h1-test-preview-only-not-a-clinical-review`; isso não conta como R1 ou R2 real.
 
 Após revisão humana adequada, deve ser criado um snapshot governado subsequente e somente então o entrypoint canônico `candidate.ts` poderá apontar para a versão corrigida.
 
