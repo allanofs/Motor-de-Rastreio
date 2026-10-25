@@ -9,8 +9,8 @@ const STEP_IDS = [
   "availability-section",
 ] as const;
 
-let syncing = false;
 let initialized = false;
+let polishQueued = false;
 
 function element<T extends HTMLElement>(id: string): T | null {
   return document.getElementById(id) as T | null;
@@ -125,20 +125,7 @@ function humanStepSummary(id: string): string {
 }
 
 function journeySummary(id: string): string {
-  switch (id) {
-    case "reference-section":
-      return "Referencial e pessoa definidos";
-    case "context-section":
-    case "risk-section":
-    case "family-section":
-    case "history-section":
-    case "exam-section":
-    case "strategy-section":
-    case "availability-section":
-      return humanStepSummary(id);
-    default:
-      return "";
-  }
+  return id === "reference-section" ? "Referencial e pessoa definidos" : humanStepSummary(id);
 }
 
 function syncChoiceLabels(): void {
@@ -183,9 +170,10 @@ function syncJourneyPanel(): void {
     }));
   }
   const heading = list.previousElementSibling;
-  if (heading instanceof HTMLElement && heading.tagName === "H3")
-    heading.hidden = summaries.length === 0;
-
+  if (heading instanceof HTMLElement && heading.tagName === "H3") {
+    const shouldHide = summaries.length === 0;
+    if (heading.hidden !== shouldHide) heading.hidden = shouldHide;
+  }
   const title = element("journey-title");
   if (summaries.length === 0 && element("reference-section")?.classList.contains("step-current"))
     setTextIfChanged(title, "Comece pelo referencial");
@@ -244,14 +232,14 @@ function ensureExamCompact(card: HTMLElement): void {
     edit.addEventListener("click", () => {
       card.classList.remove("exam-card-collapsed");
       syncExamCards();
-      const control = card.querySelector<HTMLElement>("input, select, fieldset input");
-      control?.focus();
+      card.querySelector<HTMLElement>("input, select, fieldset input")?.focus();
     });
     compact.append(text, edit);
     card.querySelector("header")?.after(compact);
   }
   setTextIfChanged(compact.querySelector<HTMLElement>(".exam-compact-summary"), examSummary(card));
-  compact.hidden = !card.classList.contains("exam-card-collapsed");
+  const shouldHide = !card.classList.contains("exam-card-collapsed");
+  if (compact.hidden !== shouldHide) compact.hidden = shouldHide;
 }
 
 function syncExamCards(): void {
@@ -266,51 +254,49 @@ function collapseExistingExamCards(): void {
 }
 
 function syncPolish(): void {
-  if (syncing) return;
-  syncing = true;
-  try {
-    syncChoiceLabels();
-    syncStepSummaries();
-    syncJourneyPanel();
-    syncClinicalCopy();
-    syncHero();
-    syncExamCards();
-  } finally {
-    syncing = false;
-  }
+  syncChoiceLabels();
+  syncStepSummaries();
+  syncJourneyPanel();
+  syncClinicalCopy();
+  syncHero();
+  syncExamCards();
+}
+
+function requestPolish(): void {
+  if (polishQueued) return;
+  polishQueued = true;
+  queueMicrotask(() => {
+    polishQueued = false;
+    syncPolish();
+  });
 }
 
 function initialize(): void {
-  if (initialized || !document.querySelector(".step-summary")) return;
+  if (initialized) return;
+  if (!document.querySelector(".step-summary")) {
+    setTimeout(initialize, 0);
+    return;
+  }
   initialized = true;
 
   document.addEventListener("click", event => {
     const target = event.target;
     if (!(target instanceof HTMLElement)) return;
     if (target.closest("#exam-section .edit-step"))
-      queueMicrotask(() => { collapseExistingExamCards(); syncPolish(); });
+      queueMicrotask(() => { collapseExistingExamCards(); requestPolish(); });
     if (target.closest("#add-fit, #add-colonoscopy"))
       queueMicrotask(() => {
         document.querySelector<HTMLElement>("#exam-list .exam-card:last-child")?.classList.remove("exam-card-collapsed");
-        syncPolish();
+        requestPolish();
       });
-    queueMicrotask(syncPolish);
+    requestPolish();
   });
-  document.addEventListener("input", () => queueMicrotask(syncPolish));
-  document.addEventListener("change", () => queueMicrotask(syncPolish));
-  document.addEventListener("submit", () => queueMicrotask(syncPolish));
-
-  const observer = new MutationObserver(() => queueMicrotask(syncPolish));
-  observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["class", "hidden"] });
+  document.addEventListener("input", requestPolish);
+  document.addEventListener("change", requestPolish);
+  document.addEventListener("submit", requestPolish);
   syncPolish();
 }
 
 if (document.readyState === "loading")
-  document.addEventListener("DOMContentLoaded", () => queueMicrotask(initialize), { once: true });
-else queueMicrotask(initialize);
-
-const bootObserver = new MutationObserver(() => {
-  if (!initialized && document.querySelector(".step-summary")) initialize();
-  if (initialized) bootObserver.disconnect();
-});
-bootObserver.observe(document.documentElement, { childList: true, subtree: true });
+  document.addEventListener("DOMContentLoaded", initialize, { once: true });
+else initialize();
