@@ -208,7 +208,10 @@ describe("Phase 6.H1 family-status behavior preview", () => {
 
   it("reproduces the active-snapshot defect and removes spurious review for explicit negative family history", () => {
     for (const family of ["sus_oficial", "br_ampliado", "internacional"] as const) {
-      const p = patient({ family: "no", strategy: family === "sus_oficial" ? undefined : "fit" });
+      const p =
+        family === "sus_oficial"
+          ? patient({ family: "no" })
+          : patient({ family: "no", strategy: "fit" });
       const before = run(
         ccrPhase6ActiveRuleset,
         family,
