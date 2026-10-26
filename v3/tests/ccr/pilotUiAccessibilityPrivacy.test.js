@@ -21,6 +21,10 @@ const reportUiSource = readFileSync(
   new NodeURL("../../pilot/ccr/reportUi.ts", import.meta.url),
   "utf8",
 );
+const pilotDraftSource = readFileSync(
+  new NodeURL("../../pilot/ccr/pilotDraft.ts", import.meta.url),
+  "utf8",
+);
 const styles = readFileSync(
   new NodeURL("../../pilot/ccr/styles.css", import.meta.url),
   "utf8",
@@ -133,7 +137,7 @@ describe("Phase 7.5 accessibility structure", () => {
 
 describe("Phase 7.5 pilot privacy/static network gate", () => {
   it("does not introduce browser persistence, analytics or patient-data transport APIs", () => {
-    const source = `${mainSource}\n${polishSource}\n${reportUiSource}`;
+    const source = `${mainSource}\n${polishSource}\n${reportUiSource}\n${pilotDraftSource}`;
     expect(source).not.toMatch(/\b(localStorage|sessionStorage|indexedDB)\b/);
     expect(source).not.toMatch(/\b(XMLHttpRequest|WebSocket|EventSource)\b/);
     expect(source).not.toMatch(/navigator\.sendBeacon/);
