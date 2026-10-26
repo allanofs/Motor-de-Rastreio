@@ -148,17 +148,18 @@ export const specificBreastCareActiveRule = mamaDraftRule(
     },
     exclusions: [],
     actions: [breastSpecificCareActiveAction],
-    outcome: "InFollowUp",
+    outcome: "ClinicalReviewRequired",
     decisionSupport: [],
     supersedes: [],
     excludes: [],
     guardrails: [
       "Active specific breast care prevents silent restart of routine screening.",
+      "The engine abstains with ClinicalReviewRequired; the future Mama product boundary may present this track as specific care active without inventing management details.",
       "This state does not encode the specialist management plan.",
     ],
     sourceRefs: sourceRefsFor(MAMA_PROPOSITION_IDS.abnormalScreenNeedsFollowup),
   },
-  "M3 representational rule: active breast-specific care remains outside routine-screening automation.",
+  "M3 representational rule: active breast-specific care remains outside routine-screening automation; product presentation may map the specific-care track to a dedicated boundary state.",
 );
 
 export const mamaM3HardExitRules = [
