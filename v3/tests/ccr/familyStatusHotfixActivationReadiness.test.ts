@@ -13,16 +13,20 @@ import {
 
 const hotfixRuleIds = new Set<string>(CCR_H1_FAMILY_STATUS_RULE_IDS);
 
-describe("Phase 6.H1 activation readiness", () => {
-  it("keeps the R2-reviewed H1 snapshot non-canonical until an explicit activation decision", () => {
+describe("Phase 6.H1 activation readiness audit", () => {
+  it("preserves the R2-reviewed H1 snapshot as non-active audit history after canonical activation", () => {
     expect(CCR_H1_R2_RULESET_VERSION).toBe(
       "crc-0.5.8-phase6-h1-r2-reviewed-draft",
     );
-    expect(CCR_CANDIDATE_RULESET_VERSION).toBe("crc-0.5.5-phase6-active");
-    expect(ccrCandidateRuleset.rulesetVersion).toBe("crc-0.5.5-phase6-active");
+    expect(CCR_CANDIDATE_RULESET_VERSION).toBe(
+      "crc-0.5.9-phase6-h1-active",
+    );
+    expect(ccrCandidateRuleset.rulesetVersion).toBe(
+      "crc-0.5.9-phase6-h1-active",
+    );
   });
 
-  it("has all 43 rules reviewed_by_2, with only the three H1 rules still draft", () => {
+  it("keeps all 43 R2 rules reviewed_by_2, with only the three H1 rules draft in the historical R2 snapshot", () => {
     expect(ccrPhase6H1R2Ruleset.rules).toHaveLength(43);
 
     for (const rule of ccrPhase6H1R2Ruleset.rules) {
