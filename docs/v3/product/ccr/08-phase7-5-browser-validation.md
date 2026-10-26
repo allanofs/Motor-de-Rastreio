@@ -203,6 +203,27 @@ The visible journey preserved both unknown states explicitly (`História familia
 
 Technical details showed `História familiar` as `Falta informação / Indeterminate`, with additional downstream indeterminate technical tracks. This scenario validates the compound indeterminate route. Because both family history and screening history were unknown simultaneously, it does not isolate family-history unknown as the sole missing variable; that narrower distinction remains covered by automated tests and may be re-exercised manually if needed.
 
+### Known-exam add/edit/remove lifecycle — confirmed
+
+Real-browser SUS testing exercised the known-exam journey across multiple successive states.
+
+Observed journey counts changed across the sequence:
+
+`1 exame conhecido registrado -> 2 exames conhecidos registrados -> 2 exames conhecidos registrados -> 1 exame conhecido registrado`
+
+Observed recalculation behavior included:
+
+- a state with one known exam and unresolved/uncertain inputs safely produced **Próxima informação necessária** rather than inventing a routine conclusion;
+- after two known exams were present, ambiguous or non-qualifying combinations remained indeterminate and exposed resolver clarification in technical details rather than being silently coerced;
+- a positive FIT followed by a diagnostic colonoscopy with a non-normal final result exited the automatic routine pilot and produced a specific-review/attention path in technical details;
+- after the colonoscopy record was removed while the positive FIT remained, the journey immediately returned to **Disponibilidade de recurso necessária** for colonoscopy;
+- the visible exam count updated back to `1 exame conhecido registrado` after removal;
+- the product did not retain the removed colonoscopy as an active resolving event.
+
+This confirms the core CRUD/recalculation requirement for the Phase 7.5 manual pass: known records can be added, represented in collapsed journey summaries, edited into materially different clinical states, removed, and the downstream evaluation is rebuilt from the final record set rather than stale record state.
+
+The screenshots also demonstrate appropriate safe-failure behavior for contradictory/temporally invalid/clarification-required exam combinations. Those states were not treated as routine-negative evidence.
+
 ## Runtime defect found and fixed during browser validation
 
 The first Phase 7.4.3 browser attempt rendered but became effectively unresponsive to clicks.
@@ -261,6 +282,7 @@ During strategy editing, the route and final result invalidate correctly, but th
 10. Resource availability remains strategy-specific.
 11. Editing an upstream strategy invalidates stale downstream resource state and reconstructs the correct route.
 12. Unknown clinical/history inputs remain explicitly unknown and produce an indeterminate product boundary rather than being coerced to negative.
+13. Known-exam add/edit/remove operations recalculate downstream state from the current record set, including return to colonoscopy availability after removal of a diagnostic colonoscopy from an unresolved FIT-positive episode.
 
 ### Remaining observations to inspect
 
@@ -290,12 +312,9 @@ Completed on current branch:
 - International/USPSTF average-risk strategy -> selected colonoscopy availability -> `Rastreamento indicado` ✅
 - editing completed strategy invalidates colonoscopy availability and reconstructs FIT availability/results ✅
 - compound unknown family-history + unknown screening-history route -> `Próxima informação necessária` ✅
+- known-exam add/edit/collapse/remove lifecycle with downstream recalculation ✅
 
-Still required:
-
-- add, edit, collapse and remove FIT and colonoscopy records in real browser;
-- inspect/fix or explicitly accept Issue #9 before Phase 7.5 closure;
-- inspect/fix Issue #10 before Phase 7.5 closure.
+No additional routine clinical-flow scenario is mandatory before Phase 7.5 closure unless a new defect is found during the remaining interaction/responsive/privacy audit.
 
 ### Keyboard and focus
 
@@ -341,4 +360,4 @@ The automation-boundary work adds an additional report requirement: the report m
 
 Do not mark Phase 7.5 complete based only on DOM tests, screenshots or successful CI.
 
-Completion requires a documented real-browser pass of the remaining flow, keyboard, responsive and runtime-privacy checks above, with defects either fixed or explicitly accepted/documented.
+Completion requires a documented real-browser pass of the remaining keyboard, responsive and runtime-privacy checks above, with Issues #9 and #10 either fixed or explicitly accepted/documented.
