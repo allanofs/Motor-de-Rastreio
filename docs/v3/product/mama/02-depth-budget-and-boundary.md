@@ -1,6 +1,6 @@
 # Mama — M0: Depth Budget e Boundary of Automation
 
-Status: **Draft de produto clínico**.
+Status: **Aprovado em 2026-10-26 como limite de automação da primeira versão.**
 
 Este documento aplica a arquitetura aprovada de `Depth Budget / Boundary of Automation` ao segundo módulo do Motor.
 
@@ -202,11 +202,4 @@ Não copiar a infraestrutura do CCR.
 
 # Gate de M0
 
-M0 será considerado pronto para aprovação humana quando:
-
-- a matriz de referenciais estiver documentada;
-- o núcleo de rotina estiver separado dos hard exits;
-- a profundidade máxima do primeiro release estiver explícita;
-- as divergências SUS vs sociedades brasileiras vs USPSTF estiverem preservadas;
-- as pendências que exigem revisão clínica estiverem listadas;
-- nenhuma regra executável tiver sido criada prematuramente.
+M0 foi aprovada explicitamente pelo responsável do projeto em 2026-10-26. O Depth Budget acima passa a ser vinculante para a M1 e fases posteriores. Qualquer expansão para BI-RADS, US/RM, biópsia, genética, vigilância ou tratamento exige novo gate explícito de escopo.
