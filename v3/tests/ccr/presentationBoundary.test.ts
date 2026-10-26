@@ -90,4 +90,23 @@ describe("CCR Phase B presentation boundary", () => {
         ),
     ).toBe(true);
   });
+
+  it("puts the boundary-trigger track first in technical presentation without deleting non-trigger trace", () => {
+    const model = present(
+      draft({
+        priorCrc: "yes",
+        familyHistory: "not_asked",
+        historyKnowledge: "not_asked",
+      }),
+    );
+
+    expect(model.automationBoundary.code).toBe("SPECIFIC_ATTENTION_REQUIRED");
+    expect(model.automationBoundary.triggerTrackIds).toContain(
+      CCR_IDS.tracks.specialRisk,
+    );
+
+    const cards = model.sections.flatMap((section) => section.cards);
+    expect(cards[0]?.trackId).toBe(CCR_IDS.tracks.specialRisk);
+    expect(cards.some((card) => card.trackId === CCR_IDS.tracks.familyStatus)).toBe(true);
+  });
 });
