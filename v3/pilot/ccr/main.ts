@@ -6,6 +6,7 @@ import {
   type CcrRequestedInput,
 } from "../../src/product/ccr";
 import { collectCcrPilotDraft } from "./pilotDraft";
+import { pilotExams as exams } from "./pilotExamState";
 
 type FitUiExam = {
   kind: "fit";
@@ -36,7 +37,6 @@ const HARD_RISK_IDS = [
   "hereditary-syndrome",
 ] as const;
 
-const exams: UiExam[] = [];
 const requestedInputs = new Set<CcrRequestedInput>();
 let nextExamId = 1;
 let editingStep: string | undefined;
@@ -823,7 +823,7 @@ function evaluateForm(event: SubmitEvent): void {
     if (current) focusControl(current.querySelector<HTMLElement>("fieldset, select, input, button") ?? undefined);
     return;
   }
-  const result = evaluateCcrProductDraft(collectCcrPilotDraft());
+  const result = evaluateCcrProductDraft(collectCcrPilotDraft(exams));
   if (!result.ok) {
     requestedInputs.clear();
     updateProgressiveDisclosure();
