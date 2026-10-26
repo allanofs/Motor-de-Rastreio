@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { IdSchema } from "../../src/model/common";
-import * as mama from "../../src/clinical/mama";
+import * as mamaDomain from "../../src/clinical/mama/domain";
+import * as mamaTerminologyModule from "../../src/clinical/mama/terminology";
 import {
   MAMA_HARD_EXIT_CONCEPTS,
   MAMA_IDS,
@@ -39,6 +40,7 @@ describe("Mama M1 domain representability", () => {
         MAMA_IDS.concepts.suspiciousBreastSymptoms,
         MAMA_IDS.concepts.priorBreastCancer,
         MAMA_IDS.concepts.highRiskGeneticContext,
+        MAMA_IDS.concepts.knownHighRiskFamilialContext,
         MAMA_IDS.concepts.priorHighRiskChestRadiation,
         MAMA_IDS.concepts.priorHighRiskBreastLesion,
         MAMA_IDS.concepts.specificBreastCareActive,
@@ -65,8 +67,11 @@ describe("Mama M1 domain representability", () => {
     ]);
   });
 
-  it("does not export executable rules, policies or actions in M1", () => {
-    const exportedNames = Object.keys(mama);
+  it("keeps the M1 terminology/domain layer free of executable rules, policies or actions", () => {
+    const exportedNames = [
+      ...Object.keys(mamaTerminologyModule),
+      ...Object.keys(mamaDomain),
+    ];
     expect(exportedNames.some((name) => /Rule|Policy|Action/.test(name))).toBe(false);
   });
 });
