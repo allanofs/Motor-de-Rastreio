@@ -1,12 +1,9 @@
+import type { UiExam } from "./pilotExamState";
+
 type Answer = "yes" | "no" | "unknown" | "not_asked";
 type Availability = "available" | "unavailable" | "unknown";
 
 type PilotControl = HTMLElement & { value?: string };
-
-type PilotExam = Record<string, unknown> & {
-  kind: "fit" | "colonoscopy";
-  id: string;
-};
 
 function element<T extends HTMLElement>(id: string): T {
   const found = document.getElementById(id);
@@ -38,60 +35,6 @@ function visible(id: string): boolean {
   return !element(id).classList.contains("hidden");
 }
 
-function readExamControl(card: HTMLElement, field: string): string {
-  const control = card.querySelector<PilotControl>(`[data-field="${field}"]`);
-  return control ? semanticValue(control) : "";
-}
-
-function collectExam(card: HTMLElement): PilotExam | undefined {
-  const id = card.dataset.examId;
-  if (!id) return undefined;
-  const heading = card.querySelector("h3")?.textContent?.trim();
-  const kind =
-    heading === "FIT"
-      ? "fit"
-      : heading === "Colonoscopia"
-        ? "colonoscopy"
-        : undefined;
-  if (!kind) return undefined;
-
-  const status = readExamControl(card, "status") || "unknown";
-  const date = readExamControl(card, "date");
-  const result = readExamControl(card, "result") || "unknown";
-
-  if (kind === "fit") {
-    return {
-      kind,
-      id,
-      status,
-      ...(date ? { date } : {}),
-      result,
-    };
-  }
-
-  return {
-    kind,
-    id,
-    status,
-    role: readExamControl(card, "role") || "other_or_unknown",
-    ...(date ? { date } : {}),
-    result,
-    preparation: readExamControl(card, "preparation") || "unknown",
-    completeness: readExamControl(card, "completeness") || "unknown",
-    resolutionInformation:
-      readExamControl(card, "resolutionInformation") || "unknown",
-  };
-}
-
-function collectExams(): PilotExam[] {
-  if (!visible("exam-section")) return [];
-  return Array.from(
-    document.querySelectorAll<HTMLElement>("#exam-list .exam-card"),
-  )
-    .map(collectExam)
-    .filter((exam): exam is PilotExam => exam !== undefined);
-}
-
 function collectFamilyDetails(): Record<string, unknown> | undefined {
   if (!visible("family-section") || controlValue("family-history") !== "yes")
     return undefined;
@@ -110,15 +53,17 @@ function collectFamilyDetails(): Record<string, unknown> | undefined {
 }
 
 /**
- * Serializes the current pilot DOM into the existing CCR product-draft contract.
- * This module contains no clinical inference: visibility and semantic control values
- * are transported exactly as already determined by the pilot UI.
+ * Serializes current pilot controls plus the authoritative in-memory exam snapshot
+ * into the existing CCR product-draft contract. No clinical inference occurs here.
  */
-export function collectCcrPilotDraft(): Record<string, unknown> {
+export function collectCcrPilotDraft(
+  exams: readonly UiExam[] = [],
+): Record<string, unknown> {
   const age = optionalNumber("age");
   const riskVisible = visible("risk-section");
   const familyVisible = visible("family-section");
   const historyVisible = visible("history-section");
+  const examVisible = visible("exam-section");
   const strategyVisible = visible("strategy-section");
   const familyDetails = collectFamilyDetails();
   const careSetting: Record<string, Availability> = {};
@@ -168,7 +113,7 @@ export function collectCcrPilotDraft(): Record<string, unknown> {
     )
       ? controlValue("specialist-care")
       : "not_asked") as Answer,
-    exams: collectExams(),
+    exams: examVisible ? structuredClone(exams) : [],
     careSetting,
   };
 }
