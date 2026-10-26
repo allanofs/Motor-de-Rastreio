@@ -4,6 +4,7 @@ import {
   renderCcrReportHtml,
 } from "../../src/product/ccr";
 import { collectCcrPilotDraft } from "./pilotDraft";
+import { snapshotPilotExams } from "./pilotExamState";
 
 let currentReportHtml: string | undefined;
 
@@ -56,7 +57,7 @@ function refreshExportState(): void {
   clearExportState();
   if (element("result-state").classList.contains("hidden")) return;
 
-  const draft = collectCcrPilotDraft();
+  const draft = collectCcrPilotDraft(snapshotPilotExams());
   const evaluated = evaluateCcrProductDraft(draft);
   if (!evaluated.ok) return;
   const built = buildCcrReportModel(draft, evaluated);
