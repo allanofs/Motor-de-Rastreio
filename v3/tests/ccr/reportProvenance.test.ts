@@ -46,7 +46,7 @@ function evaluate(draft: unknown) {
 }
 
 describe("CCR Report & Evidence Provenance R0", () => {
-  it("builds a final routine report from governed trace sourceRefs and source catalog", () => {
+  it("builds a final routine report from governed trigger tracks, trace sourceRefs and source catalog", () => {
     const draft = baseDraft();
     const result = evaluate(draft);
     const built = buildCcrReportModel(draft, result);
@@ -61,6 +61,14 @@ describe("CCR Report & Evidence Provenance R0", () => {
     expect(built.report.primaryActions.length).toBeGreaterThan(0);
     expect(built.report.primaryActions[0]?.text).toMatch(/FIT/i);
     expect(built.report.inputs.careSettingResources).not.toEqual({});
+
+    expect(built.report.rationale.length).toBeGreaterThan(0);
+    for (const reason of built.report.rationale) {
+      expect(built.report.boundary.triggerTrackIds).toContain(reason.trackId);
+      expect(reason.trackLabel.length).toBeGreaterThan(0);
+      expect(reason.summary.length).toBeGreaterThan(0);
+      expect(reason.activatedRuleIds.length).toBeGreaterThan(0);
+    }
 
     expect(built.report.provenance.status).toBe("complete");
     expect(built.report.provenance.sources.length).toBeGreaterThan(0);
@@ -97,6 +105,9 @@ describe("CCR Report & Evidence Provenance R0", () => {
     expect(built.report.primaryActions).toEqual([]);
     expect(built.report.provenance.sources.length).toBeGreaterThan(0);
     expect(built.report.inputs.records.some(({ used }) => used)).toBe(true);
+    expect(built.report.rationale.every((reason) =>
+      built.report.boundary.triggerTrackIds.includes(reason.trackId),
+    )).toBe(true);
   });
 
   it("refuses report export while the product is still waiting for a human strategy choice", () => {
@@ -125,10 +136,10 @@ describe("CCR Report & Evidence Provenance R0", () => {
     });
   });
 
-  it("detects when report inputs do not correspond to the evaluated result", () => {
+  it("detects when current clinical inputs do not reproduce the evaluated result", () => {
     const evaluatedDraft = baseDraft();
     const result = evaluate(evaluatedDraft);
-    const changedDraft = { ...evaluatedDraft, asOf: "2026-10-25" };
+    const changedDraft = { ...evaluatedDraft, ageYears: 76 };
     const built = buildCcrReportModel(changedDraft, result);
 
     expect(built).toMatchObject({
