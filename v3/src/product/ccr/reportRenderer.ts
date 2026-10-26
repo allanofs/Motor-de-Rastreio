@@ -64,6 +64,22 @@ function partialDate(date: PartialCalendarDate | undefined): string {
   return `${String(date.day).padStart(2, "0")}/${String(date.month).padStart(2, "0")}/${date.year}`;
 }
 
+function reportDate(iso: string): string {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
+  return match ? `${match[3]}/${match[2]}/${match[1]}` : iso;
+}
+
+function historyTopicLabel(topic: string): string {
+  return topic === CCR_IDS.topic ? "Rastreamento colorretal" : topic;
+}
+
+function historyValueLabel(value: string): string {
+  if (value === "never_performed") return "Nunca realizado (confirmado)";
+  if (value === "known") return "Histórico conhecido";
+  if (value === "unknown") return "Histórico desconhecido";
+  return value;
+}
+
 function modality(id: string): string {
   if (id === CCR_IDS.modalities.fit) return "FIT";
   if (id === CCR_IDS.modalities.colonoscopyScreening) return "Colonoscopia de rastreamento";
@@ -144,7 +160,7 @@ export function renderCcrReportHtml(report: CcrReportModel): string {
     ? `<ul>${report.inputs.factsUsed.map(renderFact).join("")}</ul>`
     : '<p class="muted">Nenhum fato clínico adicional precisou ser materialmente utilizado pelos tracks determinantes.</p>';
   const history = Object.entries(report.inputs.historyKnowledge)
-    .map(([topic, value]) => `<li><strong>${esc(topic)}:</strong> ${esc(value)}</li>`)
+    .map(([topic, value]) => `<li><strong>${esc(historyTopicLabel(topic))}:</strong> ${esc(historyValueLabel(value))}</li>`)
     .join("");
   const unresolved = report.unresolvedInformation.length
     ? `<section><h2>Informações não resolvidas</h2><ul>${report.unresolvedInformation.map((value) => `<li>${esc(value)}</li>`).join("")}</ul></section>`
@@ -160,7 +176,7 @@ export function renderCcrReportHtml(report: CcrReportModel): string {
 <main class="page">
 <div class="warning"><strong>PILOTO LOCAL DE INTEGRAÇÃO.</strong> Este relatório não autoriza uso clínico real, liberação pública ou substituição de julgamento profissional.</div>
 <p class="eyebrow">Motor de Rastreio V3</p><h1>Relatório de apoio à decisão - rastreamento de câncer colorretal</h1>
-<div class="meta"><div><strong>Referencial:</strong><br>${esc(report.policy.label)}</div><div><strong>Data de referência:</strong><br>${esc(report.asOf)}</div><div><strong>Ruleset:</strong><br>${esc(report.rulesetVersion)}</div><div><strong>Contrato:</strong><br>${esc(report.contractVersion)}</div></div>
+<div class="meta"><div><strong>Referencial:</strong><br>${esc(report.policy.label)}</div><div><strong>Data de referência:</strong><br>${esc(reportDate(report.asOf))}</div><div><strong>Ruleset:</strong><br>${esc(report.rulesetVersion)}</div><div><strong>Contrato:</strong><br>${esc(report.contractVersion)}</div></div>
 <section class="result"><h2>${esc(boundary.label)}</h2><p>${esc(boundary.message)}</p></section>
 <section><h2>Por que o Motor chegou a esta conclusão</h2>${renderRationale(report)}</section>
 <section><h2>Próxima ação</h2>${renderActions(report)}</section>
