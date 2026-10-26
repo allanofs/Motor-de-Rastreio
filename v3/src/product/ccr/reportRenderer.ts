@@ -182,7 +182,7 @@ export function renderCcrReportHtml(report: CcrReportModel): string {
 </style>
 </head>
 <body>
-<div class="toolbar"><button type="button" onclick="window.print()">Imprimir / salvar como PDF</button></div>
+<div class="toolbar"><button id="print-report" type="button">Imprimir / salvar como PDF</button></div>
 <main class="page">
 <div class="warning"><strong>PILOTO LOCAL DE INTEGRAÇÃO.</strong> Este relatório não autoriza uso clínico real, liberação pública ou substituição de julgamento profissional.</div>
 <p class="eyebrow">Motor de Rastreio V3</p>
