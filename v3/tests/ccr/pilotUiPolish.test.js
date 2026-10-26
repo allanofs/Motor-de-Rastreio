@@ -121,4 +121,27 @@ describe("Phase 7.4.3 guided interview polish", () => {
     card.querySelector(".exam-edit").click();
     expect(card.classList.contains("exam-card-collapsed")).toBe(false);
   });
+
+  it("does not keep a hidden downstream exam count in Até aqui after upstream invalidation", async () => {
+    policy("sus_oficial");
+    set("#as-of", "2026-10-24");
+    set("#age", "60");
+    set("#screening-context", "yes");
+    for (const id of ["prior-crc", "prior-polyp-surveillance", "colonic-ibd", "hereditary-syndrome"])
+      set(`#${id}`, "no");
+    set("#family-history", "no");
+    set("#history-knowledge", "known");
+    set("#history-sufficient", "yes");
+    el("#add-fit").click();
+    el("#finish-exams").click();
+    await settle();
+
+    expect(el("#journey-summary").textContent).toContain("1 exame conhecido registrado");
+
+    set("#history-knowledge", "never_performed");
+    await settle();
+
+    expect(el("#exam-section").classList.contains("hidden")).toBe(true);
+    expect(el("#journey-summary").textContent).not.toContain("exame conhecido registrado");
+  });
 });
