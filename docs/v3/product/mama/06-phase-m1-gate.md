@@ -1,10 +1,10 @@
 # Mama — M1 gate
 
-Status: **implementada e tecnicamente verde; aguardando aprovação humana do modelo de domínio**.
+Status: **aprovada pelo responsável do projeto em 2026-10-26; base congelada para M2**.
 
 ## Gate humano anterior
 
-A M0 — escopo, referenciais e Depth Budget — foi explicitamente aprovada pelo responsável do projeto em 2026-10-26 e está marcada como aprovada nos documentos M0.
+A M0 — escopo, referenciais e Depth Budget — foi explicitamente aprovada pelo responsável do projeto em 2026-10-26.
 
 ## Entregas M1
 
@@ -39,7 +39,7 @@ Teste:
 
 ## Gate automatizado
 
-Head funcional da M1 validado: `a964978454949c52f57c6b21cbe92e97bfbfa882`.
+Head funcional validado antes da aprovação humana: `a964978454949c52f57c6b21cbe92e97bfbfa882`.
 
 - schema checks: **62/62**;
 - test files: **44/44**;
@@ -51,9 +51,7 @@ Head funcional da M1 validado: `a964978454949c52f57c6b21cbe92e97bfbfa882`.
 - CCR pilot build: passou;
 - V2 byte-for-byte: preservada.
 
-Commits documentais posteriores apenas registram a aprovação M0 e este gate; não alteram o comportamento M1.
-
-## O que M1 ainda não autoriza
+## O que a aprovação M1 não autoriza
 
 - nenhuma regra de idade;
 - nenhum intervalo de rastreamento;
@@ -63,14 +61,10 @@ Commits documentais posteriores apenas registram a aprovação M0 e este gate; n
 - nenhuma UI de Mama;
 - nenhum merge/deploy/uso clínico real.
 
-## Próximo gate
+## Gate humano registrado
 
-M2 só deve começar após aprovação humana explícita de:
+Em 2026-10-26, o responsável do projeto aprovou explicitamente:
 
-1. vocabulário/IDs;
-2. cinco tracks grossos;
-3. lista de hard exits;
-4. separação entre mamografia de rastreamento e diagnóstica;
-5. contrato temporal mínimo;
-6. manutenção de DBT fora da estratégia V1;
-7. Depth Budget sem BI-RADS profundo.
+> “Aprovo a M1 de Mama — vocabulário, tracks, hard exits e contrato temporal mínimo.”
+
+A M2 pode, portanto, estruturar fontes, proposições e locators, mas continua proibida de criar regras executáveis antes de novo gate humano.
