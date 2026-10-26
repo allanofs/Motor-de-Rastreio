@@ -82,7 +82,11 @@ export type CcrReportModel = {
 
 export type CcrReportBuildFailure = {
   ok: false;
-  code: "invalid_input" | "pending_input" | "evaluation_input_mismatch";
+  code:
+    | "invalid_input"
+    | "pending_input"
+    | "incomplete_evaluation"
+    | "evaluation_input_mismatch";
   message: string;
 };
 
@@ -263,6 +267,13 @@ export function buildCcrReportModel(
       code: "pending_input",
       message:
         "A avaliação ainda solicita informação humana ou operacional antes de permitir exportação.",
+    };
+  if (presentation.automationBoundary.code === "MORE_INFORMATION_NEEDED")
+    return {
+      ok: false,
+      code: "incomplete_evaluation",
+      message:
+        "A avaliação ainda depende de informação clínica para chegar a uma conclusão exportável.",
     };
 
   const tracks = triggerTracks(evaluated);
