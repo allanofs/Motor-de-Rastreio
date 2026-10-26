@@ -104,6 +104,51 @@ Family/history/exam acquisition is not shown as a required continuation on the l
 
 This confirms that a hard exclusion has precedence over routine screening on the primary product surface.
 
+### Brasil ampliado BA-A — average-risk strategy/resource sequence confirmed
+
+Real-browser scenario:
+
+- referential: Brasil ampliado BA-A;
+- age: 57;
+- preventive context confirmed;
+- conditions that change the route: all negative;
+- family history: negative;
+- screening history: never performed.
+
+Observed sequence:
+
+1. first evaluation -> **Escolha necessária: estratégia**;
+2. no resource-availability step is shown before a strategy is selected;
+3. user selected **Colonoscopia primária**;
+4. after re-evaluation, only **Colonoscopia** availability is requested;
+5. after `Colonoscopia = Disponível`, final primary surface -> **Rastreamento indicado**.
+
+The Motor therefore preserves the intended order:
+
+`strategy_selection -> selected resource availability -> final routine result`
+
+and the UI does not infer availability questions before the product contract requests them.
+
+### Internacional / USPSTF governante — average-risk strategy/resource sequence confirmed
+
+Real-browser scenario:
+
+- referential: Internacional (USPSTF governante);
+- age: 57;
+- preventive context confirmed;
+- conditions that change the route: all negative;
+- family history: negative;
+- screening history: never performed.
+
+Observed sequence:
+
+1. first evaluation -> **Escolha necessária: estratégia**;
+2. user selected **Colonoscopia primária**;
+3. after re-evaluation, only **Colonoscopia** availability is requested;
+4. after `Colonoscopia = Disponível`, final primary surface -> **Rastreamento indicado**.
+
+This confirms that the adaptive strategy -> selected-resource sequence generalizes beyond BA-A to the International policy path. The browser pass used colonoscopy rather than FIT; FIT-specific selected-resource isolation remains covered by automated DOM tests and SUS real-browser FIT availability, while a dedicated International-FIT real-browser pass is optional rather than mandatory for Phase 7.5 closure.
+
 ## Runtime defect found and fixed during browser validation
 
 The first Phase 7.4.3 browser attempt rendered but became effectively unresponsive to clicks.
@@ -152,6 +197,8 @@ Do not patch Foundation or clinical rules merely to hide this card. First determ
 6. `Rastreamento indicado` now provides a materially clearer routine endpoint than generic `Avaliação concluída`.
 7. `Atenção específica` successfully prevents a deep CCR follow-up protocol from becoming the primary product surface.
 8. Hard exclusions stop the visible average-risk acquisition journey rather than asking irrelevant downstream questions.
+9. BA-A and International both preserve strategy-before-resource ordering.
+10. Resource availability remains strategy-specific: colonoscopy selection requests colonoscopy availability only.
 
 ### Remaining observations to inspect
 
@@ -176,11 +223,11 @@ Completed on current branch:
 - colonoscopy availability after FIT-positive follow-up ✅
 - hard exclusion / route-changing condition primary boundary ✅
 - prior FIT-positive follow-up through final `Atenção específica` ✅
+- Brasil ampliado average-risk `strategy_selection` -> selected colonoscopy availability -> `Rastreamento indicado` ✅
+- International/USPSTF average-risk strategy -> selected colonoscopy availability -> `Rastreamento indicado` ✅
 
 Still required:
 
-- Brasil ampliado average-risk path where `strategy_selection` is requested, then only the selected resource availability;
-- International/USPSTF path where strategy is requested;
 - unknown family history / indeterminate route;
 - edit an earlier completed step and confirm downstream invalidation/reconstruction on the current branch;
 - add, edit, collapse and remove FIT and colonoscopy records in real browser;
