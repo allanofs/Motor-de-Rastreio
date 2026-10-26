@@ -735,10 +735,10 @@ function renderOverview(model: ReturnType<typeof presentCcrProduct>): void {
   const target = element("clinical-overview");
   target.replaceChildren();
   const cards = model.sections.flatMap(section => section.cards);
-  const has = (status: CcrPresentationCard["status"]) => cards.some(card => card.status === status);
   const title = document.createElement("h2");
   const message = document.createElement("p");
-  // Only presentation of existing states/requests; no clinical eligibility inference.
+
+  // Pending human/resource inputs stay above the final automation boundary.
   if (model.requestedInputs.includes("strategy_selection")) {
     title.textContent = "Escolha necessária";
     message.textContent = "Selecione a estratégia solicitada para continuar a avaliação.";
@@ -747,31 +747,47 @@ function renderOverview(model: ReturnType<typeof presentCcrProduct>): void {
     message.textContent = model.requestedInputs.includes("fit_availability")
       ? "Precisamos confirmar a disponibilidade do FIT."
       : "Precisamos confirmar a disponibilidade da colonoscopia.";
-  } else if (has("Conflict") || has("ComputationError")) {
-    title.textContent = "Resolver primeiro";
-    message.textContent = "Não foi possível concluir com segurança. Confira os detalhes da avaliação.";
-  } else if (has("ClinicalReviewRequired")) {
-    title.textContent = "Revisão clínica necessária";
-    message.textContent = "O Motor não consegue determinar com segurança uma orientação automática para todos os caminhos deste cenário."
-      + (has("Indeterminate") ? " Também há informações pendentes; confira os detalhes." : "");
-  } else if (has("Indeterminate")) {
-    title.textContent = "Próxima informação necessária";
-    message.textContent = "Faltam informações para concluir todos os caminhos desta avaliação. Consulte os detalhes.";
-  } else if (has("SharedDecision")) {
-    title.textContent = "Decisão compartilhada";
-    message.textContent = "A orientação requer discussão e escolha humana.";
   } else {
-    title.textContent = "Avaliação concluída";
-    message.textContent = has("PendingResult") ? "Há resultado pendente antes de concluir o acompanhamento."
-      : has("HandedOff") ? "Cuidado assumido por outro serviço."
-      : has("Current") ? "Em dia / acompanhar, conforme os caminhos avaliados."
-      : cards.every(card => card.status === "NotApplicable") ? "Sem ação de rotina neste referencial para os caminhos avaliados."
-      : "Confira as orientações disponíveis abaixo.";
+    switch (model.automationBoundary.code) {
+      case "CANNOT_CONCLUDE_SAFELY":
+        title.textContent = "Não foi possível concluir com segurança";
+        message.textContent = "Confira os detalhes técnicos antes de continuar.";
+        break;
+      case "SPECIFIC_ATTENTION_REQUIRED":
+        title.textContent = "Atenção específica";
+        message.textContent = "Há uma situação que precisa ser resolvida antes de retornar ao rastreamento de rotina. O rastreamento de rotina fica suspenso neste momento.";
+        break;
+      case "SPECIFIC_CARE_ACTIVE":
+        title.textContent = "Em acompanhamento específico";
+        message.textContent = "Este caminho já saiu do rastreamento de rotina e está sob cuidado específico.";
+        break;
+      case "MORE_INFORMATION_NEEDED":
+        title.textContent = "Próxima informação necessária";
+        message.textContent = "Faltam informações para concluir com segurança esta avaliação.";
+        break;
+      case "SHARED_DECISION":
+        title.textContent = "Decisão individual";
+        message.textContent = "A próxima etapa exige discussão e escolha humana; o Motor não escolhe a modalidade autonomamente.";
+        break;
+      case "ROUTINE_DUE":
+        title.textContent = "Rastreamento indicado";
+        message.textContent = "Há uma ação de rastreamento indicada neste referencial.";
+        break;
+      case "ROUTINE_CURRENT":
+        title.textContent = "Em dia";
+        message.textContent = "O rastreamento está em dia com base no histórico qualificável disponível.";
+        break;
+      case "SCREENING_NOT_INDICATED":
+        title.textContent = "Rastreamento não indicado";
+        message.textContent = "Não há nova ação de rastreamento de rotina indicada neste referencial para os caminhos avaliados.";
+        break;
+    }
   }
   target.append(title, message);
+
   const statuses = document.createElement("ul");
   const labels = new Set(cards.map(card => card.statusLabel));
-  // Retain attention states without exposing parallel internal domains as primary cards.
+  // Internal states remain available as a secondary audit view.
   for (const label of labels) {
     const item = document.createElement("li"); item.textContent = label; statuses.append(item);
   }
@@ -780,13 +796,19 @@ function renderOverview(model: ReturnType<typeof presentCcrProduct>): void {
   statusSummary.textContent = "Estados de acompanhamento";
   statusDetails.append(statusSummary, statuses);
   target.append(statusDetails);
+
+  const showPrimaryActions = model.requestedInputs.length > 0 ||
+    model.automationBoundary.code === "ROUTINE_DUE" ||
+    model.automationBoundary.code === "SHARED_DECISION";
+  if (!showPrimaryActions) return;
+
   const seen = new Set<string>();
   for (const card of cards) {
     const actions = card.actions.filter(action => {
       const key = JSON.stringify([action.actionId, action.text, action.operational]);
       if (seen.has(key)) return false; seen.add(key); return true;
     });
-    // Clinical text is transported verbatim; technical kinds remain in the audit cards.
+    // Clinical text is transported verbatim only when the boundary allows it on the primary surface.
     for (const action of actions) {
       const box = document.createElement("div"); box.className = "primary-guidance";
       const text = document.createElement("p"); text.textContent = action.text; box.append(text);
@@ -916,7 +938,7 @@ function resetPilot(): void {
   clearResults();
   element("result-notice").textContent =
     "Formulário limpo. Comece pelo referencial.";
-  element("ruleset-version").textContent = "crc-0.5.5-phase6-active";
+  element("ruleset-version").textContent = "crc-0.5.9-phase6-h1-active";
   updateProgressiveDisclosure();
   element("policy").focus();
 }
@@ -926,7 +948,7 @@ initializePolicies();
 initializeChoices();
 initializeGuidedInterview();
 renderExamList();
-element("ruleset-version").textContent = "crc-0.5.5-phase6-active";
+element("ruleset-version").textContent = "crc-0.5.9-phase6-h1-active";
 updateProgressiveDisclosure();
 
 element<HTMLButtonElement>("add-fit").addEventListener("click", () => {
