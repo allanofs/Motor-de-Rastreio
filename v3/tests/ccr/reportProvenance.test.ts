@@ -110,6 +110,21 @@ describe("CCR Report & Evidence Provenance R0", () => {
     expect(built).toMatchObject({ ok: false, code: "pending_input" });
   });
 
+  it("refuses report export when the final boundary still requires clinical information", () => {
+    const draft = baseDraft({
+      familyHistory: "unknown",
+      historyKnowledge: "unknown",
+      careSetting: {},
+    });
+    const result = evaluate(draft);
+    const built = buildCcrReportModel(draft, result);
+
+    expect(built).toMatchObject({
+      ok: false,
+      code: "incomplete_evaluation",
+    });
+  });
+
   it("detects when report inputs do not correspond to the evaluated result", () => {
     const evaluatedDraft = baseDraft();
     const result = evaluate(evaluatedDraft);
