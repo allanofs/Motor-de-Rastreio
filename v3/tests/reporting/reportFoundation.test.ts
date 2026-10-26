@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { URL as NodeURL } from "node:url";
 import type { Source } from "../../src/model/content";
 import {
+  assessReportExportEligibility,
   escapeReportHtml,
   formatReportIsoDate,
   renderPrintableReportDocument,
@@ -49,6 +50,32 @@ describe("Report Foundation R3", () => {
     ]);
   });
 
+  it("keeps export eligibility generic while the module owns incomplete boundary codes", () => {
+    expect(
+      assessReportExportEligibility({
+        requestedInputCount: 1,
+        boundaryCode: "READY",
+        incompleteBoundaryCodes: ["NEEDS_DATA"],
+      }),
+    ).toEqual({ ok: false, code: "pending_input" });
+
+    expect(
+      assessReportExportEligibility({
+        requestedInputCount: 0,
+        boundaryCode: "NEEDS_DATA",
+        incompleteBoundaryCodes: ["NEEDS_DATA"],
+      }),
+    ).toEqual({ ok: false, code: "incomplete_evaluation" });
+
+    expect(
+      assessReportExportEligibility({
+        requestedInputCount: 0,
+        boundaryCode: "REVIEW_REQUIRED",
+        incompleteBoundaryCodes: ["NEEDS_DATA"],
+      }),
+    ).toEqual({ ok: true });
+  });
+
   it("keeps common HTML helpers safe and A4/print-ready without browser behavior", () => {
     expect(escapeReportHtml('<script id="x">bad()</script>')).toBe(
       "&lt;script id=&quot;x&quot;&gt;bad()&lt;/script&gt;",
@@ -74,7 +101,13 @@ describe("Report Foundation R3", () => {
   });
 
   it("keeps the shared reporting layer clinically agnostic", () => {
-    const files = ["model.ts", "provenance.ts", "html.ts", "index.ts"];
+    const files = [
+      "model.ts",
+      "provenance.ts",
+      "html.ts",
+      "eligibility.ts",
+      "index.ts",
+    ];
     const sourceText = files
       .map((file) =>
         readFileSync(
