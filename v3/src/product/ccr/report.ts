@@ -4,6 +4,7 @@ import type { CalendarDate } from "../../model/dates";
 import type { ClinicalFact, ExamRecord } from "../../model/patient";
 import type { TrackEvaluation } from "../../model/evaluation";
 import {
+  evaluateCcrProductDraft,
   normalizeCcrProductDraft,
   type CcrNormalizedProductInput,
 } from "./form";
@@ -64,6 +65,15 @@ export type CcrReportPrimaryAction = {
   };
 };
 
+export type CcrReportRationale = {
+  trackId: string;
+  trackLabel: string;
+  status: TrackEvaluation["state"]["status"];
+  summary: string;
+  activatedRuleIds: string[];
+  guardrails: string[];
+};
+
 export type CcrReportModel = {
   contractVersion: typeof CCR_REPORT_CONTRACT_VERSION;
   releaseGate: CcrProductSuccess["releaseGate"];
@@ -74,6 +84,7 @@ export type CcrReportModel = {
     code: CcrAutomationBoundaryCode;
     triggerTrackIds: string[];
   };
+  rationale: CcrReportRationale[];
   inputs: CcrReportInputSnapshot;
   primaryActions: CcrReportPrimaryAction[];
   unresolvedInformation: string[];
@@ -104,6 +115,14 @@ function triggerTracks(result: CcrProductSuccess): TrackEvaluation[] {
   return result.evaluation.plan.topics
     .flatMap((topic) => topic.tracks)
     .filter((track) => triggerIds.has(track.trackId));
+}
+
+function evaluationFingerprint(result: CcrProductSuccess): string {
+  return JSON.stringify({
+    rulesetVersion: result.rulesetVersion,
+    policyId: result.policy.policyId,
+    plan: result.evaluation.plan,
+  });
 }
 
 function sourceRefKey(ref: SourceRef): string {
@@ -215,16 +234,22 @@ function usedInputSnapshot(
   };
 }
 
-function primaryActions(result: CcrProductSuccess): CcrReportPrimaryAction[] {
+function primaryActions(
+  result: CcrProductSuccess,
+  tracks: TrackEvaluation[],
+): CcrReportPrimaryAction[] {
   const model = presentCcrProduct(result);
   if (!["ROUTINE_DUE", "SHARED_DECISION"].includes(model.automationBoundary.code))
     return [];
 
+  const triggerIds = new Set(tracks.map((track) => track.trackId));
   const seen = new Set<string>();
   const actions: CcrReportPrimaryAction[] = [];
 
   for (const action of model.sections.flatMap((section) =>
-    section.cards.flatMap((card) => card.actions),
+    section.cards
+      .filter((card) => triggerIds.has(card.trackId))
+      .flatMap((card) => card.actions),
   )) {
     const key = JSON.stringify([
       action.actionId,
@@ -238,6 +263,30 @@ function primaryActions(result: CcrProductSuccess): CcrReportPrimaryAction[] {
   }
 
   return actions;
+}
+
+function rationaleFor(
+  result: CcrProductSuccess,
+  tracks: TrackEvaluation[],
+): CcrReportRationale[] {
+  const model = presentCcrProduct(result);
+  const cards = new Map(
+    model.sections
+      .flatMap((section) => section.cards)
+      .map((card) => [card.trackId, card] as const),
+  );
+
+  return tracks.map((track) => {
+    const card = cards.get(track.trackId);
+    return {
+      trackId: track.trackId,
+      trackLabel: card?.trackLabel ?? track.trackId,
+      status: track.state.status,
+      summary: card?.summary ?? "Conclusão determinada pelo track governado.",
+      activatedRuleIds: unique(track.trace.rulesActivated),
+      guardrails: [...track.guardrails],
+    };
+  });
 }
 
 function unresolvedInformation(tracks: TrackEvaluation[]): string[] {
@@ -260,7 +309,16 @@ export function buildCcrReportModel(
       message: normalizedResult.issues.join("; "),
     };
 
-  const presentation = presentCcrProduct(evaluated);
+  const recalculated = evaluateCcrProductDraft(draft);
+  if (!recalculated.ok)
+    return {
+      ok: false,
+      code: "evaluation_input_mismatch",
+      message:
+        "Os dados atuais não reproduzem com segurança a avaliação fornecida para o relatório.",
+    };
+
+  const presentation = presentCcrProduct(recalculated);
   if (presentation.requestedInputs.length > 0)
     return {
       ok: false,
@@ -276,10 +334,18 @@ export function buildCcrReportModel(
         "A avaliação ainda depende de informação clínica para chegar a uma conclusão exportável.",
     };
 
-  const tracks = triggerTracks(evaluated);
+  if (evaluationFingerprint(recalculated) !== evaluationFingerprint(evaluated))
+    return {
+      ok: false,
+      code: "evaluation_input_mismatch",
+      message:
+        "Os dados atuais não reproduzem a avaliação que originou este relatório.",
+    };
+
+  const tracks = triggerTracks(recalculated);
   const asOf = traceAsOf(tracks);
   if (
-    normalizedResult.value.policyId !== evaluated.policy.policyId ||
+    normalizedResult.value.policyId !== recalculated.policy.policyId ||
     asOf === undefined ||
     !sameCalendarDate(normalizedResult.value.asOf, asOf)
   )
@@ -296,16 +362,17 @@ export function buildCcrReportModel(
     ok: true,
     report: {
       contractVersion: CCR_REPORT_CONTRACT_VERSION,
-      releaseGate: evaluated.releaseGate,
-      rulesetVersion: evaluated.rulesetVersion,
-      policy: evaluated.policy,
+      releaseGate: recalculated.releaseGate,
+      rulesetVersion: recalculated.rulesetVersion,
+      policy: recalculated.policy,
       asOf: calendarDateKey(asOf),
       boundary: {
         code: presentation.automationBoundary.code,
         triggerTrackIds: [...presentation.automationBoundary.triggerTrackIds],
       },
+      rationale: rationaleFor(recalculated, tracks),
       inputs: usedInputSnapshot(normalizedResult.value, tracks),
-      primaryActions: primaryActions(evaluated),
+      primaryActions: primaryActions(recalculated, tracks),
       unresolvedInformation: unresolvedInformation(tracks),
       provenance: resolveCcrReportProvenance(sourceRefs),
     },
