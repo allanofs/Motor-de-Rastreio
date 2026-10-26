@@ -488,7 +488,7 @@ describe("Phase 7.4.2 guided interview presentation", () => {
     expect(el("#availability-section .step-summary").textContent).toContain("Disponível");
     submit(); expectVisible("#followup-request", false);
     // H1 regression: explicit negative family history must not elevate a spurious review.
-    expect(el("#clinical-overview h2").textContent).toBe("Avaliação concluída");
+    expect(el("#clinical-overview h2").textContent).toBe("Rastreamento indicado");
     expect(el("#clinical-overview").textContent).toContain("FIT");
     expect(el("#clinical-overview").textContent).not.toContain("Revisão clínica necessária");
   });
@@ -521,7 +521,7 @@ describe("Phase 7.4.2 guided interview presentation", () => {
 
   it("never prints raw English diagnostics on the clinical surface and has no internal result scroll", () => {
     set("#prior-crc", "yes"); submit();
-    expect(el("#clinical-overview h2").textContent).toBe("Revisão clínica necessária");
+    expect(el("#clinical-overview h2").textContent).toBe("Atenção específica");
     expect(el("#clinical-overview").textContent).not.toMatch(/At least|active rule|asOf/);
     expect(el("#reference-section").textContent).not.toContain("asOf");
     const css = readFileSync(new NodeURL("../../pilot/ccr/styles.css", import.meta.url), "utf8");
@@ -535,6 +535,7 @@ describe("Phase 7.4.2 guided interview presentation", () => {
     expect(source).not.toMatch(/src\/(engine|model|clinical)\//);
     expect(source).not.toMatch(/CCR_IDS|evaluatePatient|ccrCandidate|age\s*[<>=]+\s*(45|50|75|76)/);
     expect(source).toContain("model.requestedInputs");
+    expect(source).toContain("model.automationBoundary");
   });
 });
 
