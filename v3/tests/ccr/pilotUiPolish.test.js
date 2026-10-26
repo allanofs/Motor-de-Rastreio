@@ -82,7 +82,7 @@ describe("Phase 7.4.3 guided interview polish", () => {
     expect(el("#screening-context").value).toBe("unknown");
   });
 
-  it("rephrases genuine clinical review while keeping it a clinical-review state", async () => {
+  it("presents a genuine route-changing condition as specific attention while preserving the technical clinical-review state", async () => {
     policy("sus_oficial");
     set("#as-of", "2026-10-24");
     set("#age", "60");
@@ -93,9 +93,9 @@ describe("Phase 7.4.3 guided interview polish", () => {
     el("#screening-form").dispatchEvent(new Event("submit", { cancelable: true }));
     await settle();
 
-    expect(el("#clinical-overview h2").textContent).toBe("Revisão clínica necessária");
-    expect(el("#clinical-overview").textContent).toContain("orientação automática segura");
-    expect(el("#clinical-overview").textContent).not.toContain("todos os caminhos deste cenário");
+    expect(el("#clinical-overview h2").textContent).toBe("Atenção específica");
+    expect(el("#clinical-overview").textContent).toContain("rastreamento de rotina fica suspenso");
+    expect(document.querySelector('[data-status="ClinicalReviewRequired"]')).not.toBeNull();
     expect(el("#clinical-overview details > summary").textContent).toBe("Ver orientações disponíveis");
   });
 
@@ -120,5 +120,28 @@ describe("Phase 7.4.3 guided interview polish", () => {
     expect(card.querySelector(".exam-compact").hidden).toBe(false);
     card.querySelector(".exam-edit").click();
     expect(card.classList.contains("exam-card-collapsed")).toBe(false);
+  });
+
+  it("does not keep a hidden downstream exam count in Até aqui after upstream invalidation", async () => {
+    policy("sus_oficial");
+    set("#as-of", "2026-10-24");
+    set("#age", "60");
+    set("#screening-context", "yes");
+    for (const id of ["prior-crc", "prior-polyp-surveillance", "colonic-ibd", "hereditary-syndrome"])
+      set(`#${id}`, "no");
+    set("#family-history", "no");
+    set("#history-knowledge", "known");
+    set("#history-sufficient", "yes");
+    el("#add-fit").click();
+    el("#finish-exams").click();
+    await settle();
+
+    expect(el("#journey-summary").textContent).toContain("1 exame conhecido registrado");
+
+    set("#history-knowledge", "never_performed");
+    await settle();
+
+    expect(el("#exam-section").classList.contains("hidden")).toBe(true);
+    expect(el("#journey-summary").textContent).not.toContain("exame conhecido registrado");
   });
 });

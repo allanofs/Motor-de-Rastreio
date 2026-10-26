@@ -302,7 +302,7 @@ describe("CCR Phase 7.1 product form normalization", () => {
       ok: false,
       stage: "normalization",
       code: "invalid_form",
-      rulesetVersion: "crc-0.5.5-phase6-active",
+      rulesetVersion: "crc-0.5.9-phase6-h1-active",
     });
   });
 
@@ -310,7 +310,7 @@ describe("CCR Phase 7.1 product form normalization", () => {
     const result = evaluateCcrProductDraft(draft());
     expect(result.ok).toBe(true);
     if (!result.ok) throw new Error("Expected successful product evaluation");
-    expect(result.rulesetVersion).toBe("crc-0.5.5-phase6-active");
+    expect(result.rulesetVersion).toBe("crc-0.5.9-phase6-h1-active");
     expect(
       result.sections
         .find((section) => section.id === "do_now")

@@ -158,7 +158,14 @@ function syncJourneyPanel(): void {
   const list = element<HTMLUListElement>("journey-summary");
   if (!list) return;
   const summaries = STEP_IDS
-    .filter(id => element(id)?.classList.contains("step-complete"))
+    .filter(id => {
+      const section = element(id);
+      return Boolean(
+        section?.classList.contains("step-complete") &&
+        !section.classList.contains("hidden") &&
+        !section.classList.contains("guided-future"),
+      );
+    })
     .map(journeySummary)
     .filter(Boolean);
   const current = Array.from(list.children).map(item => item.textContent ?? "");

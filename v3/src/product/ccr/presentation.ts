@@ -7,6 +7,10 @@ import type {
   PathwayState,
   TrackEvaluation,
 } from "../../model/evaluation";
+import {
+  deriveCcrAutomationBoundary,
+  type CcrAutomationBoundary,
+} from "./automationBoundary";
 import type {
   CcrProductSectionId,
   CcrProductSuccess,
@@ -85,6 +89,7 @@ export type CcrPresentationModel = {
   releaseGate: CcrProductSuccess["releaseGate"];
   policy: CcrProductSuccess["policy"];
   requiresAttention: boolean;
+  automationBoundary: CcrAutomationBoundary;
   requestedInputs: CcrRequestedInput[];
   sections: CcrPresentationSection[];
 };
@@ -192,16 +197,40 @@ function requestedInputsFor(sections: CcrPresentationSection[]): CcrRequestedInp
   return [...requests];
 }
 
+function prioritizeBoundaryTriggers(
+  sections: CcrPresentationSection[],
+  automationBoundary: CcrAutomationBoundary,
+): CcrPresentationSection[] {
+  const triggerIds = new Set(automationBoundary.triggerTrackIds);
+  const hasTrigger = (section: CcrPresentationSection) =>
+    section.cards.some((card) => triggerIds.has(card.trackId));
+
+  return sections
+    .map((section) => ({
+      ...section,
+      cards: [...section.cards].sort(
+        (left, right) =>
+          Number(triggerIds.has(right.trackId)) -
+          Number(triggerIds.has(left.trackId)),
+      ),
+    }))
+    .sort(
+      (left, right) => Number(hasTrigger(right)) - Number(hasTrigger(left)),
+    );
+}
+
 export function presentCcrProduct(
   result: CcrProductSuccess,
 ): CcrPresentationModel {
-  const sections = result.sections.map((section) => ({
+  const automationBoundary = deriveCcrAutomationBoundary(result);
+  const rawSections = result.sections.map((section) => ({
     id: section.id,
     label: section.label,
     cards: section.cards.map((card) =>
       presentTrack(card.topicId, section.id, card.track),
     ),
   }));
+  const sections = prioritizeBoundaryTriggers(rawSections, automationBoundary);
 
   return {
     contractVersion: CCR_PRESENTATION_CONTRACT_VERSION,
@@ -209,6 +238,7 @@ export function presentCcrProduct(
     releaseGate: result.releaseGate,
     policy: result.policy,
     requiresAttention: result.requiresAttention,
+    automationBoundary,
     requestedInputs: requestedInputsFor(sections),
     sections,
   };
