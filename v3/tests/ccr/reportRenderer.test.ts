@@ -44,12 +44,16 @@ function reportFor(draft: unknown) {
 }
 
 describe("CCR printable report renderer R1", () => {
-  it("renders a local A4-ready report with governed source title, URL and locator", () => {
+  it("renders result, explicit rationale and governed source title, URL and locator", () => {
     const report = reportFor(routineDraft());
     const html = renderCcrReportHtml(report);
 
     expect(html).toContain("Relatório de apoio à decisão");
     expect(html).toContain("Rastreamento indicado");
+    expect(html).toContain("Por que o Motor chegou a esta conclusão");
+    expect(html).toContain(report.rationale[0]!.trackLabel);
+    expect(html).toContain(report.rationale[0]!.summary);
+    expect(html).toContain("Regra(s) ativada(s)");
     expect(html).toContain("crc-0.5.9-phase6-h1-active");
     expect(html).toContain("Referências utilizadas nesta conclusão");
     expect(html).toContain(report.provenance.sources[0]!.documentTitle);
@@ -82,6 +86,7 @@ describe("CCR printable report renderer R1", () => {
     expect(report.boundary.code).toBe("SPECIFIC_ATTENTION_REQUIRED");
     expect(report.primaryActions).toEqual([]);
     expect(html).toContain("Atenção específica");
+    expect(html).toContain("Por que o Motor chegou a esta conclusão");
     expect(html).toContain("Nenhuma ação clínica profunda foi promovida");
     expect(html).not.toContain("Providenciar colonoscopia diagnóstica adequada para avaliação do FIT positivo");
   });
