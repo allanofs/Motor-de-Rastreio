@@ -56,7 +56,8 @@ describe("CCR printable report renderer R1", () => {
     expect(html).toContain(report.provenance.sources[0]!.url);
     expect(html).toContain(report.provenance.sources[0]!.references[0]!.locator);
     expect(html).toContain("@page { size: A4");
-    expect(html).toContain("window.print()");
+    expect(html).toContain('id="print-report"');
+    expect(html).not.toContain("window.print");
   });
 
   it("does not promote deep FIT-positive management as the report's primary action", () => {
