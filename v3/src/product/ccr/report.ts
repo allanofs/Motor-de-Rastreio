@@ -4,6 +4,7 @@ import type { CalendarDate } from "../../model/dates";
 import type { ClinicalFact, ExamRecord } from "../../model/patient";
 import type { TrackEvaluation } from "../../model/evaluation";
 import {
+  assessReportExportEligibility,
   resolveReportProvenance,
   type ReportPrimaryAction,
   type ReportProvenance,
@@ -233,20 +234,26 @@ export function buildCcrReportModel(
     };
 
   const presentation = presentCcrProduct(recalculated);
-  if (presentation.requestedInputs.length > 0)
-    return {
-      ok: false,
-      code: "pending_input",
-      message:
-        "A avaliação ainda solicita informação humana ou operacional antes de permitir exportação.",
-    };
-  if (presentation.automationBoundary.code === "MORE_INFORMATION_NEEDED")
+  const exportEligibility = assessReportExportEligibility({
+    requestedInputCount: presentation.requestedInputs.length,
+    boundaryCode: presentation.automationBoundary.code,
+    incompleteBoundaryCodes: ["MORE_INFORMATION_NEEDED"],
+  });
+  if (!exportEligibility.ok) {
+    if (exportEligibility.code === "pending_input")
+      return {
+        ok: false,
+        code: "pending_input",
+        message:
+          "A avaliação ainda solicita informação humana ou operacional antes de permitir exportação.",
+      };
     return {
       ok: false,
       code: "incomplete_evaluation",
       message:
         "A avaliação ainda depende de informação clínica para chegar a uma conclusão exportável.",
     };
+  }
 
   if (evaluationFingerprint(recalculated) !== evaluationFingerprint(evaluated))
     return {
