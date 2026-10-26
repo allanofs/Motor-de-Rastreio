@@ -1,5 +1,6 @@
 import { ccrCandidateRuleset } from "../../clinical/ccr";
 import type { Source, SourceRef } from "../../model/content";
+import type { CalendarDate } from "../../model/dates";
 import type { ClinicalFact, ExamRecord } from "../../model/patient";
 import type { TrackEvaluation } from "../../model/evaluation";
 import {
@@ -103,6 +104,17 @@ function triggerTracks(result: CcrProductSuccess): TrackEvaluation[] {
 
 function sourceRefKey(ref: SourceRef): string {
   return JSON.stringify([ref.sourceId, ref.locator, ref.evidence ?? null]);
+}
+
+function calendarDateKey(date: CalendarDate): string {
+  const year = String(date.year).padStart(4, "0");
+  const month = String(date.month).padStart(2, "0");
+  const day = String(date.day).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function sameCalendarDate(a: CalendarDate, b: CalendarDate): boolean {
+  return a.year === b.year && a.month === b.month && a.day === b.day;
 }
 
 export function resolveCcrReportProvenance(
@@ -228,7 +240,7 @@ function unresolvedInformation(tracks: TrackEvaluation[]): string[] {
   return unique(tracks.flatMap((track) => track.missingData));
 }
 
-function traceAsOf(tracks: TrackEvaluation[]): string | undefined {
+function traceAsOf(tracks: TrackEvaluation[]): CalendarDate | undefined {
   return tracks[0]?.trace.asOf;
 }
 
@@ -258,7 +270,7 @@ export function buildCcrReportModel(
   if (
     normalizedResult.value.policyId !== evaluated.policy.policyId ||
     asOf === undefined ||
-    String(normalizedResult.value.asOf) !== String(asOf)
+    !sameCalendarDate(normalizedResult.value.asOf, asOf)
   )
     return {
       ok: false,
@@ -276,7 +288,7 @@ export function buildCcrReportModel(
       releaseGate: evaluated.releaseGate,
       rulesetVersion: evaluated.rulesetVersion,
       policy: evaluated.policy,
-      asOf: String(asOf),
+      asOf: calendarDateKey(asOf),
       boundary: {
         code: presentation.automationBoundary.code,
         triggerTrackIds: [...presentation.automationBoundary.triggerTrackIds],
