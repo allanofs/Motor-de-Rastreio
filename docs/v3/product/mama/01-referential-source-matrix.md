@@ -1,5 +1,7 @@
 # Mama — M0: matriz de referenciais e fontes
 
+Status: **Aprovada como base de M0 em 2026-10-26; ainda não traduzida em regras executáveis.**
+
 Data da auditoria: **2026-10-26**.
 
 Esta matriz serve para governança clínica e provenance. Ela **não é uma regra executável**.
