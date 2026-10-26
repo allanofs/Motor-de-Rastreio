@@ -17,6 +17,14 @@ const polishSource = readFileSync(
   new NodeURL("../../pilot/ccr/polish.ts", import.meta.url),
   "utf8",
 );
+const reportUiSource = readFileSync(
+  new NodeURL("../../pilot/ccr/reportUi.ts", import.meta.url),
+  "utf8",
+);
+const pilotDraftSource = readFileSync(
+  new NodeURL("../../pilot/ccr/pilotDraft.ts", import.meta.url),
+  "utf8",
+);
 const styles = readFileSync(
   new NodeURL("../../pilot/ccr/styles.css", import.meta.url),
   "utf8",
@@ -129,12 +137,19 @@ describe("Phase 7.5 accessibility structure", () => {
 
 describe("Phase 7.5 pilot privacy/static network gate", () => {
   it("does not introduce browser persistence, analytics or patient-data transport APIs", () => {
-    const source = `${mainSource}\n${polishSource}`;
+    const source = `${mainSource}\n${polishSource}\n${reportUiSource}\n${pilotDraftSource}`;
     expect(source).not.toMatch(/\b(localStorage|sessionStorage|indexedDB)\b/);
     expect(source).not.toMatch(/\b(XMLHttpRequest|WebSocket|EventSource)\b/);
     expect(source).not.toMatch(/navigator\.sendBeacon/);
     expect(source).not.toMatch(/\bfetch\s*\(/);
     expect(source).not.toMatch(/analytics|gtag\s*\(|mixpanel|segment\./i);
+  });
+
+  it("keeps report export local and session-only", () => {
+    expect(reportUiSource).toContain("buildCcrReportModel");
+    expect(reportUiSource).toContain("renderCcrReportHtml");
+    expect(reportUiSource).toContain('window.open("", "_blank")');
+    expect(reportUiSource).not.toMatch(/https?:\/\//);
   });
 
   it("states session-only exam handling in the visible pilot copy", () => {

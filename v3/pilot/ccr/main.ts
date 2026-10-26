@@ -5,9 +5,8 @@ import {
   type CcrPresentationCard,
   type CcrRequestedInput,
 } from "../../src/product/ccr";
-
-type Answer = "yes" | "no" | "unknown" | "not_asked";
-type Availability = "available" | "unavailable" | "unknown";
+import { collectCcrPilotDraft } from "./pilotDraft";
+import { pilotExams as exams } from "./pilotExamState";
 
 type FitUiExam = {
   kind: "fit";
@@ -38,7 +37,6 @@ const HARD_RISK_IDS = [
   "hereditary-syndrome",
 ] as const;
 
-const exams: UiExam[] = [];
 const requestedInputs = new Set<CcrRequestedInput>();
 let nextExamId = 1;
 let editingStep: string | undefined;
@@ -556,85 +554,6 @@ function invalidateResults(clearRequests = true): void {
       "Dados alterados. Avalie novamente para atualizar o resultado.";
 }
 
-function collectFamilyDetails(): Record<string, unknown> | undefined {
-  if (
-    element("family-section").classList.contains("hidden") ||
-    selectValue("family-history") !== "yes"
-  )
-    return undefined;
-  const details: Record<string, unknown> = {};
-  const fdr = optionalNumber("family-fdr");
-  const sdr = optionalNumber("family-sdr");
-  const exactAge = optionalNumber("family-age-years");
-  const ageBand = selectValue("family-age-band");
-  const finding = selectValue("family-finding");
-  if (fdr !== undefined) details.affectedFdrCount = fdr;
-  if (sdr !== undefined) details.affectedSdrCount = sdr;
-  if (exactAge !== undefined) details.youngestDiagnosisAgeYears = exactAge;
-  if (ageBand !== "") details.youngestDiagnosisAgeBand = ageBand;
-  if (finding !== "") details.findingType = finding;
-  return Object.keys(details).length === 0 ? undefined : details;
-}
-
-function collectDraft(): Record<string, unknown> {
-  const age = optionalNumber("age");
-  const riskVisible = !element("risk-section").classList.contains("hidden");
-  const familyVisible = !element("family-section").classList.contains("hidden");
-  const historyVisible = !element("history-section").classList.contains("hidden");
-  const examVisible = !element("exam-section").classList.contains("hidden");
-  const strategyVisible = !element("strategy-section").classList.contains("hidden");
-  const familyDetails = collectFamilyDetails();
-  const careSetting: Record<string, Availability> = {};
-
-  if (!element("availability-fit-wrap").classList.contains("hidden")) {
-    const fitAvailability = selectValue("availability-fit");
-    if (fitAvailability !== "")
-      careSetting.fit = fitAvailability as Availability;
-  }
-  if (!element("availability-colonoscopy-wrap").classList.contains("hidden")) {
-    const colonoscopyAvailability = selectValue("availability-colonoscopy");
-    if (colonoscopyAvailability !== "")
-      careSetting.colonoscopy = colonoscopyAvailability as Availability;
-  }
-
-  return {
-    policyId: selectValue("policy"),
-    asOf: inputValue("as-of"),
-    ...(age === undefined ? {} : { ageYears: age }),
-    screeningContext: selectValue("screening-context") as Answer,
-    priorCrc: (riskVisible ? selectValue("prior-crc") : "not_asked") as Answer,
-    priorPolypSurveillance: (riskVisible
-      ? selectValue("prior-polyp-surveillance")
-      : "not_asked") as Answer,
-    colonicIbd: (riskVisible ? selectValue("colonic-ibd") : "not_asked") as Answer,
-    hereditarySyndrome: (riskVisible
-      ? selectValue("hereditary-syndrome")
-      : "not_asked") as Answer,
-    familyHistory: (familyVisible
-      ? selectValue("family-history")
-      : "not_asked") as Answer,
-    ...(familyDetails === undefined ? {} : { familyDetails }),
-    historyKnowledge: historyVisible
-      ? selectValue("history-knowledge")
-      : "not_asked",
-    historySufficientForCurrentStatus:
-      historyVisible &&
-      !element("history-sufficient-wrap").classList.contains("hidden")
-        ? selectValue("history-sufficient")
-        : "not_asked",
-    strategySelection: strategyVisible
-      ? selectValue("strategy")
-      : "unselected",
-    specialistCareAssumed: (!element("specialist-care-wrap").classList.contains(
-      "hidden",
-    )
-      ? selectValue("specialist-care")
-      : "not_asked") as Answer,
-    exams: examVisible ? structuredClone(exams) : [],
-    careSetting,
-  };
-}
-
 function clearResults(): void {
   element("clinical-overview").replaceChildren();
   element("result-sections").replaceChildren();
@@ -904,7 +823,7 @@ function evaluateForm(event: SubmitEvent): void {
     if (current) focusControl(current.querySelector<HTMLElement>("fieldset, select, input, button") ?? undefined);
     return;
   }
-  const result = evaluateCcrProductDraft(collectDraft());
+  const result = evaluateCcrProductDraft(collectCcrPilotDraft(exams));
   if (!result.ok) {
     requestedInputs.clear();
     updateProgressiveDisclosure();
