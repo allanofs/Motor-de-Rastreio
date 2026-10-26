@@ -2,14 +2,24 @@ import { describe, expect, it } from "vitest";
 import {
   CCR_ACTIVE_RULESET_VERSION,
   CCR_CANDIDATE_RULESET_VERSION,
+  CCR_H1_ACTIVE_RULESET_VERSION,
   ccrCandidateRuleset,
+  ccrPhase6ActiveRuleset,
+  ccrPhase6H1ActiveRuleset,
   ccrPhase6R2ReviewedRuleset,
 } from "../../src/clinical/ccr";
 
 describe("CCR activation readiness and post-activation safety", () => {
-  it("promotes the canonical candidate to the explicitly authorized active snapshot", () => {
-    expect(CCR_CANDIDATE_RULESET_VERSION).toBe("crc-0.5.5-phase6-active");
-    expect(CCR_CANDIDATE_RULESET_VERSION).toBe(CCR_ACTIVE_RULESET_VERSION);
+  it("preserves the original Phase 6 active snapshot and points canonical consumption to the later governed H1 active snapshot", () => {
+    expect(CCR_ACTIVE_RULESET_VERSION).toBe("crc-0.5.5-phase6-active");
+    expect(ccrPhase6ActiveRuleset.rulesetVersion).toBe(
+      "crc-0.5.5-phase6-active",
+    );
+    expect(CCR_H1_ACTIVE_RULESET_VERSION).toBe(
+      "crc-0.5.9-phase6-h1-active",
+    );
+    expect(CCR_CANDIDATE_RULESET_VERSION).toBe(CCR_H1_ACTIVE_RULESET_VERSION);
+    expect(ccrCandidateRuleset).toBe(ccrPhase6H1ActiveRuleset);
     expect(ccrCandidateRuleset.rules).toHaveLength(43);
     expect(
       ccrCandidateRuleset.rules.every(
@@ -21,7 +31,7 @@ describe("CCR activation readiness and post-activation safety", () => {
     ).toBe(true);
   });
 
-  it("preserves the pre-activation R2 snapshot as draft for audit", () => {
+  it("preserves the pre-activation Phase 6 R2 snapshot as draft for audit", () => {
     expect(
       ccrPhase6R2ReviewedRuleset.rules.every(
         (rule) =>
@@ -31,7 +41,7 @@ describe("CCR activation readiness and post-activation safety", () => {
     ).toBe(true);
   });
 
-  it("keeps every active candidate source final, HTTPS-backed and verified on the freeze date", () => {
+  it("keeps every canonical active source final, HTTPS-backed and verified on the freeze date", () => {
     for (const source of ccrCandidateRuleset.sources) {
       expect(source.documentStatus).toBe("final");
       expect(source.url.startsWith("https://")).toBe(true);
@@ -43,7 +53,7 @@ describe("CCR activation readiness and post-activation safety", () => {
     }
   });
 
-  it("keeps all active rule source references resolvable with non-empty locators", () => {
+  it("keeps all canonical active rule source references resolvable with non-empty locators", () => {
     const sourceIds = new Set(
       ccrCandidateRuleset.sources.map((source) => source.sourceId),
     );
