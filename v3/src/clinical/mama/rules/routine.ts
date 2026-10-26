@@ -102,7 +102,7 @@ function sharedDecisionAgeRule(args: {
       trackId: MAMA_IDS.tracks.population,
       clinicalRole: "screening",
       stance: "shared_decision",
-      computability: "clinician_judgment_required",
+      computability: "computable",
       requiredKnownFacts: populationRequiredKnownFacts,
       population: {
         minAge: args.minAge,
@@ -116,6 +116,7 @@ function sharedDecisionAgeRule(args: {
       supersedes: [],
       excludes: [],
       guardrails: [
+        "The computable output is the need for an individualized/shared decision, not the final clinical choice.",
         "Do not convert this individualized band into automatic routine Due.",
         "An already-open specific breast-care pathway remains outside this population rule.",
       ],
