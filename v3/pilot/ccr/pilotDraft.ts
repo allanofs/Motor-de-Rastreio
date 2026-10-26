@@ -14,11 +14,13 @@ function element<T extends HTMLElement>(id: string): T {
   return found as T;
 }
 
-function controlValue(id: string): string {
-  const control = element<PilotControl>(id);
-  if (control instanceof HTMLInputElement || control instanceof HTMLSelectElement)
-    return control.value;
+function semanticValue(control: PilotControl): string {
+  if (typeof control.value === "string") return control.value;
   return control.querySelector<HTMLInputElement>('input:checked')?.value ?? "";
+}
+
+function controlValue(id: string): string {
+  return semanticValue(element<PilotControl>(id));
 }
 
 function inputValue(id: string): string {
@@ -38,10 +40,7 @@ function visible(id: string): boolean {
 
 function readExamControl(card: HTMLElement, field: string): string {
   const control = card.querySelector<PilotControl>(`[data-field="${field}"]`);
-  if (!control) return "";
-  if (control instanceof HTMLInputElement || control instanceof HTMLSelectElement)
-    return control.value;
-  return control.querySelector<HTMLInputElement>('input:checked')?.value ?? "";
+  return control ? semanticValue(control) : "";
 }
 
 function collectExam(card: HTMLElement): PilotExam | undefined {
