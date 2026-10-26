@@ -9,7 +9,6 @@ import { PatientSchema } from "../../src/model/patient";
 import {
   MAMA_HARD_EXIT_CONCEPTS,
   MAMA_IDS,
-  breastInsufficientEvidenceAction,
   breastSharedDecisionAction,
   mammographyScreeningAction,
   mamaBrasilAmpliadoM3DraftPolicy,
@@ -205,13 +204,13 @@ describe("Mama M3 draft translation", () => {
     );
   });
 
-  it("Brasil ampliado age 76 remains individualized", () => {
+  it("Brasil ampliado age 76 remains SharedDecision rather than automatic Due", () => {
     const result = run(
       mamaBrasilAmpliadoM3DraftPolicy.policyId,
       patient({ age: 76, history: "never_performed" }),
     );
     expect(track(result, MAMA_IDS.tracks.population).state.status).toBe(
-      "ClinicalReviewRequired",
+      "SharedDecision",
     );
     expect(result.plan.actions.map((action) => action.actionId)).toContain(
       breastSharedDecisionAction.actionId,
@@ -226,15 +225,15 @@ describe("Mama M3 draft translation", () => {
       mamaInternationalM3DraftPolicy.policyId,
       patient({ age: 76, history: "never_performed" }),
     );
-    expect(track(result, MAMA_IDS.tracks.population).state.status).toBe(
-      "ClinicalReviewRequired",
-    );
-    expect(result.plan.actions.map((action) => action.actionId)).toContain(
-      breastInsufficientEvidenceAction.actionId,
+    const population = track(result, MAMA_IDS.tracks.population);
+    expect(population.state.status).toBe("ClinicalReviewRequired");
+    expect(population.activeRuleIds).toContain(
+      "breast.intl.population.75-plus-insufficient-evidence",
     );
     expect(result.plan.actions.map((action) => action.actionId)).not.toContain(
       mammographyScreeningAction.actionId,
     );
+    expect(result.plan.actions).toEqual([]);
   });
 
   it("known high familial risk exits routine without a risk calculator", () => {
