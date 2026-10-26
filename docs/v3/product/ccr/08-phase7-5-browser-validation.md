@@ -179,6 +179,30 @@ After `FIT = Disponível` and re-evaluation:
 
 This confirms correct invalidation and reconstruction of dependent downstream state after editing an earlier completed step.
 
+A transient journey-summary inconsistency was observed during the dirty edit state and is tracked separately as Issue #10.
+
+### Unknown / indeterminate route — confirmed at product level
+
+Real-browser SUS scenario:
+
+- age: 57;
+- preventive context confirmed;
+- conditions that change the route: all negative;
+- family history: **unknown**;
+- screening history: **unknown**.
+
+Observed final primary surface:
+
+**Próxima informação necessária**
+
+Observed explanation:
+
+`Faltam informações para concluir com segurança esta avaliação.`
+
+The visible journey preserved both unknown states explicitly (`História familiar desconhecida` and `Histórico de rastreamento desconhecido`). The Motor therefore did not coerce unknown history into a negative answer or continue as if routine eligibility had been fully established.
+
+Technical details showed `História familiar` as `Falta informação / Indeterminate`, with additional downstream indeterminate technical tracks. This scenario validates the compound indeterminate route. Because both family history and screening history were unknown simultaneously, it does not isolate family-history unknown as the sole missing variable; that narrower distinction remains covered by automated tests and may be re-exercised manually if needed.
+
 ## Runtime defect found and fixed during browser validation
 
 The first Phase 7.4.3 browser attempt rendered but became effectively unresponsive to clicks.
@@ -197,7 +221,9 @@ Fix HEAD:
 
 GitHub Actions for this HEAD completed successfully.
 
-## New browser observation — Issue #9
+## Browser observations tracked separately
+
+### Issue #9 — hard exclusion technical-detail noise
 
 Hard-exclusion testing exposed a presentation/audit inconsistency that is separate from the H1 clinical blocker.
 
@@ -209,11 +235,15 @@ When `Detalhes técnicos` is expanded after a hard exclusion, a downstream card 
 
 This does **not** alter the correct primary result (`Atenção específica`) and downstream family acquisition remains hidden in the guided interview. It is therefore not currently classified as a clinical blocker.
 
-Tracked separately as:
+Tracked as:
 
 **Issue #9 — `[Phase 7.5] Hard exclusion leaves downstream family missing-state in technical details`**
 
 Do not patch Foundation or clinical rules merely to hide this card. First determine whether the deep CCR benchmark intentionally evaluates the downstream family track after a hard exclusion. If it does, prefer presentation prioritization/de-emphasis using product-boundary metadata while preserving the complete trace.
+
+### Issue #10 — stale summary during dirty edit state
+
+During strategy editing, the route and final result invalidate correctly, but the transient `Até aqui` summary may retain an old exam-count line until re-evaluation. This is a UI state-synchronization issue, not a clinical downstream-invalidation failure.
 
 ## Visual/product observations
 
@@ -230,6 +260,7 @@ Do not patch Foundation or clinical rules merely to hide this card. First determ
 9. BA-A and International both preserve strategy-before-resource ordering.
 10. Resource availability remains strategy-specific.
 11. Editing an upstream strategy invalidates stale downstream resource state and reconstructs the correct route.
+12. Unknown clinical/history inputs remain explicitly unknown and produce an indeterminate product boundary rather than being coerced to negative.
 
 ### Remaining observations to inspect
 
@@ -239,6 +270,7 @@ The following are not all defects; they remain audit items:
 - governed action text can contain wording that is technically correct but more formal than the surrounding UI; do not rewrite clinical semantics merely for style;
 - raw English diagnostic/technical text remains visible inside `Detalhes técnicos`; acceptable for the current internal pilot, but should be localized before a public-facing surface;
 - Issue #9: downstream non-trigger technical tracks may compete visually with the track that actually caused `Atenção específica`;
+- Issue #10: transient journey summary can retain stale downstream exam-count text while an upstream edit is dirty;
 - long technical details create a tall page when expanded, but do not create nested scrolling.
 
 ## Remaining mandatory browser checks
@@ -257,12 +289,13 @@ Completed on current branch:
 - Brasil ampliado average-risk `strategy_selection` -> selected colonoscopy availability -> `Rastreamento indicado` ✅
 - International/USPSTF average-risk strategy -> selected colonoscopy availability -> `Rastreamento indicado` ✅
 - editing completed strategy invalidates colonoscopy availability and reconstructs FIT availability/results ✅
+- compound unknown family-history + unknown screening-history route -> `Próxima informação necessária` ✅
 
 Still required:
 
-- unknown family history / indeterminate route;
 - add, edit, collapse and remove FIT and colonoscopy records in real browser;
-- inspect Issue #9 semantics/presentation before Phase 7.5 closure.
+- inspect/fix or explicitly accept Issue #9 before Phase 7.5 closure;
+- inspect/fix Issue #10 before Phase 7.5 closure.
 
 ### Keyboard and focus
 
