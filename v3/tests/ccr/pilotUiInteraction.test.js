@@ -487,9 +487,10 @@ describe("Phase 7.4.2 guided interview presentation", () => {
     expect(el("#availability-section-body").hidden).toBe(true);
     expect(el("#availability-section .step-summary").textContent).toContain("Disponível");
     submit(); expectVisible("#followup-request", false);
-    // The returned family-status track still requires real human review: do not erase it.
-    expect(el("#clinical-overview h2").textContent).toBe("Revisão clínica necessária");
+    // H1 regression: explicit negative family history must not elevate a spurious review.
+    expect(el("#clinical-overview h2").textContent).toBe("Avaliação concluída");
     expect(el("#clinical-overview").textContent).toContain("FIT");
+    expect(el("#clinical-overview").textContent).not.toContain("Revisão clínica necessária");
   });
 
   it("keeps raw technical summaries and action kinds inside collapsed details, with action text verbatim on the surface", () => {

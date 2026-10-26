@@ -58,7 +58,7 @@ describe("CCR presentation contract and progressive input requests", () => {
     const evaluated = success(draft());
     const model = presentCcrProduct(evaluated);
     expect(model.contractVersion).toBe("phase7.4.1");
-    expect(model.rulesetVersion).toBe("crc-0.5.5-phase6-active");
+    expect(model.rulesetVersion).toBe("crc-0.5.9-phase6-h1-active");
     expect(model.releaseGate).toBe(
       "integration-only-not-authorized-for-real-world-use",
     );
