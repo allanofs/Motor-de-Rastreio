@@ -24,10 +24,6 @@ import {
   ccrPhase6H1R2Ruleset,
 } from "../../src/clinical/ccr/h1FamilyStatusR2Candidate";
 import {
-  CCR_CANDIDATE_RULESET_VERSION,
-  ccrCandidateRuleset,
-} from "../../src/clinical/ccr/candidate";
-import {
   CCR_FAMILY_DETAIL_KEYS,
   CCR_FAMILY_VALUES,
   CCR_IDS,
@@ -203,9 +199,14 @@ describe("Phase 6.H1 R2 governance-only promotion", () => {
     }
   });
 
-  it("does not repoint or activate the canonical candidate during R2", () => {
-    expect(CCR_CANDIDATE_RULESET_VERSION).toBe("crc-0.5.5-phase6-active");
-    expect(ccrCandidateRuleset.rulesetVersion).toBe("crc-0.5.5-phase6-active");
+  it("preserves the R2 snapshot as draft audit history after later activation", () => {
+    for (const rule of ccrPhase6H1R2Ruleset.rules.filter((candidate) =>
+      hotfixRuleIds.has(candidate.ruleId),
+    )) {
+      expect(rule.lifecycleStatus).toBe("draft");
+      expect(rule.reviewStatus).toBe("reviewed_by_2");
+      expect(rule.governance.reviews).toHaveLength(2);
+    }
   });
 
   it("preserves policies, resolvers, sources and terminology across the R2 governance step", () => {
