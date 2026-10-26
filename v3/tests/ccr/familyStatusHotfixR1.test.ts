@@ -21,10 +21,6 @@ import {
   ccrPhase6H1R1Ruleset,
 } from "../../src/clinical/ccr/h1FamilyStatusR1Candidate";
 import {
-  CCR_CANDIDATE_RULESET_VERSION,
-  ccrCandidateRuleset,
-} from "../../src/clinical/ccr/candidate";
-import {
   CCR_FAMILY_DETAIL_KEYS,
   CCR_FAMILY_VALUES,
   CCR_IDS,
@@ -131,10 +127,8 @@ function activateR1BehaviorPreview(rule: RuleDefinition): RuleDefinition {
 }
 
 /**
- * Test-only execution preview. The real R1 snapshot intentionally remains draft.
- * Promoting the three changed rules here is solely to verify that the reviewed
- * executable translation still produces the intended behavior; it is not a
- * governance event and does not alter candidate.ts or any persisted snapshot.
+ * Test-only execution preview. The persisted R1 snapshot remains draft even
+ * after later R2 review and activation snapshots are created.
  */
 function behaviorPreviewRuleset(): Ruleset {
   return RulesetSchema.parse({
@@ -197,9 +191,14 @@ describe("Phase 6.H1 R1 governance", () => {
     }
   });
 
-  it("does not repoint the canonical candidate before R2/activation", () => {
-    expect(CCR_CANDIDATE_RULESET_VERSION).toBe("crc-0.5.5-phase6-active");
-    expect(ccrCandidateRuleset.rulesetVersion).toBe("crc-0.5.5-phase6-active");
+  it("preserves the R1 snapshot as draft audit history after later activation", () => {
+    for (const rule of ccrPhase6H1R1Ruleset.rules.filter((candidate) =>
+      hotfixRuleIds.has(candidate.ruleId),
+    )) {
+      expect(rule.lifecycleStatus).toBe("draft");
+      expect(rule.reviewStatus).toBe("reviewed_by_1");
+      expect(rule.governance.reviews).toHaveLength(1);
+    }
   });
 });
 
