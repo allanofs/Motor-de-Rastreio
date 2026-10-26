@@ -4,7 +4,7 @@ Status: **implementada e tecnicamente verde; aguardando aprovação humana do mo
 
 ## Gate humano anterior
 
-A M0 — escopo, referenciais e Depth Budget — foi explicitamente aprovada pelo responsável do projeto em 2026-10-26.
+A M0 — escopo, referenciais e Depth Budget — foi explicitamente aprovada pelo responsável do projeto em 2026-10-26 e está marcada como aprovada nos documentos M0.
 
 ## Entregas M1
 
@@ -39,7 +39,7 @@ Teste:
 
 ## Gate automatizado
 
-Head validado antes deste documento: `a964978454949c52f57c6b21cbe92e97bfbfa882`.
+Head funcional da M1 validado: `a964978454949c52f57c6b21cbe92e97bfbfa882`.
 
 - schema checks: **62/62**;
 - test files: **44/44**;
@@ -50,6 +50,8 @@ Head validado antes deste documento: `a964978454949c52f57c6b21cbe92e97bfbfa882`.
 - Foundation build: passou;
 - CCR pilot build: passou;
 - V2 byte-for-byte: preservada.
+
+Commits documentais posteriores apenas registram a aprovação M0 e este gate; não alteram o comportamento M1.
 
 ## O que M1 ainda não autoriza
 
