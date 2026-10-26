@@ -1,6 +1,6 @@
 # Mama — Fase M0: discovery e escopo clínico
 
-Status: **Draft clínico / sem regras executáveis**.
+Status: **Aprovada em 2026-10-26 / sem regras executáveis**.
 
 Base arquitetural: `v3-report-foundation-r3`.
 
@@ -110,13 +110,6 @@ Para um caso rotineiro, o Motor deve conseguir responder apenas o necessário:
 - não alterar Foundation, engine ou model;
 - não mergear em `main`, fazer deploy ou autorizar uso clínico real.
 
-## Gate para M1
+## Gate M0
 
-M1 só começa quando estiverem congelados:
-
-- as famílias de referenciais;
-- o Depth Budget de Mama;
-- o conjunto mínimo de fatos/exames necessários;
-- os hard exits da rotina;
-- a política temporal para mamografia qualificável;
-- a hierarquia de fontes e provenance.
+M0 foi aprovada explicitamente pelo responsável do projeto em 2026-10-26. A M1 pode estruturar fatos, exames, tracks e o contrato temporal mínimo, mantendo os limites acima.
