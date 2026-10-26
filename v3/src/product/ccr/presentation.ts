@@ -7,6 +7,10 @@ import type {
   PathwayState,
   TrackEvaluation,
 } from "../../model/evaluation";
+import {
+  deriveCcrAutomationBoundary,
+  type CcrAutomationBoundary,
+} from "./automationBoundary";
 import type {
   CcrProductSectionId,
   CcrProductSuccess,
@@ -85,6 +89,7 @@ export type CcrPresentationModel = {
   releaseGate: CcrProductSuccess["releaseGate"];
   policy: CcrProductSuccess["policy"];
   requiresAttention: boolean;
+  automationBoundary: CcrAutomationBoundary;
   requestedInputs: CcrRequestedInput[];
   sections: CcrPresentationSection[];
 };
@@ -209,6 +214,7 @@ export function presentCcrProduct(
     releaseGate: result.releaseGate,
     policy: result.policy,
     requiresAttention: result.requiresAttention,
+    automationBoundary: deriveCcrAutomationBoundary(result),
     requestedInputs: requestedInputsFor(sections),
     sections,
   };
