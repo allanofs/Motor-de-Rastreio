@@ -147,7 +147,37 @@ Observed sequence:
 3. after re-evaluation, only **Colonoscopia** availability is requested;
 4. after `Colonoscopia = Disponível`, final primary surface -> **Rastreamento indicado**.
 
-This confirms that the adaptive strategy -> selected-resource sequence generalizes beyond BA-A to the International policy path. The browser pass used colonoscopy rather than FIT; FIT-specific selected-resource isolation remains covered by automated DOM tests and SUS real-browser FIT availability, while a dedicated International-FIT real-browser pass is optional rather than mandatory for Phase 7.5 closure.
+This confirms that the adaptive strategy -> selected-resource sequence generalizes beyond BA-A to the International policy path.
+
+### Edit + downstream invalidation — confirmed
+
+Real-browser scenario started from the completed International average-risk path:
+
+- strategy = Colonoscopia primária;
+- colonoscopy availability = Disponível;
+- final result = Rastreamento indicado.
+
+The user reopened **Escolha de estratégia** and changed the strategy to **FIT**.
+
+Observed behavior before re-evaluation:
+
+- the previous result was explicitly invalidated;
+- the right panel showed `Dados alterados. Avalie novamente para atualizar o resultado.`;
+- the prior downstream colonoscopy availability was no longer treated as the active operational answer;
+- the journey returned to an in-progress strategy state.
+
+After re-evaluation:
+
+- only FIT availability was requested;
+- colonoscopy availability did not remain active in the new route.
+
+After `FIT = Disponível` and re-evaluation:
+
+- final primary result returned to **Rastreamento indicado**;
+- primary guidance changed to FIT;
+- the resource summary changed to `FIT: Disponível`.
+
+This confirms correct invalidation and reconstruction of dependent downstream state after editing an earlier completed step.
 
 ## Runtime defect found and fixed during browser validation
 
@@ -198,7 +228,8 @@ Do not patch Foundation or clinical rules merely to hide this card. First determ
 7. `Atenção específica` successfully prevents a deep CCR follow-up protocol from becoming the primary product surface.
 8. Hard exclusions stop the visible average-risk acquisition journey rather than asking irrelevant downstream questions.
 9. BA-A and International both preserve strategy-before-resource ordering.
-10. Resource availability remains strategy-specific: colonoscopy selection requests colonoscopy availability only.
+10. Resource availability remains strategy-specific.
+11. Editing an upstream strategy invalidates stale downstream resource state and reconstructs the correct route.
 
 ### Remaining observations to inspect
 
@@ -225,11 +256,11 @@ Completed on current branch:
 - prior FIT-positive follow-up through final `Atenção específica` ✅
 - Brasil ampliado average-risk `strategy_selection` -> selected colonoscopy availability -> `Rastreamento indicado` ✅
 - International/USPSTF average-risk strategy -> selected colonoscopy availability -> `Rastreamento indicado` ✅
+- editing completed strategy invalidates colonoscopy availability and reconstructs FIT availability/results ✅
 
 Still required:
 
 - unknown family history / indeterminate route;
-- edit an earlier completed step and confirm downstream invalidation/reconstruction on the current branch;
 - add, edit, collapse and remove FIT and colonoscopy records in real browser;
 - inspect Issue #9 semantics/presentation before Phase 7.5 closure.
 
