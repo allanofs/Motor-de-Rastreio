@@ -106,19 +106,38 @@ describe("CCR Phase 7 product integration contract", () => {
     );
   });
 
-  it("uses only the activated canonical ruleset and remains explicitly release-gated", () => {
+  it("uses only the activated canonical H1 ruleset and remains explicitly release-gated", () => {
     const result = evaluateCcrProduct({
       patient: patient(),
       policyId: susPolicyId(),
       asOf,
     });
     expect(result.ok).toBe(true);
-    expect(result.rulesetVersion).toBe("crc-0.5.5-phase6-active");
+    expect(result.rulesetVersion).toBe("crc-0.5.9-phase6-h1-active");
     expect(result.rulesetVersion).toBe(CCR_CANDIDATE_RULESET_VERSION);
     expect(result.releaseGate).toBe(
       "integration-only-not-authorized-for-real-world-use",
     );
     expect(result.releaseGate).toBe(CCR_PRODUCT_RELEASE_GATE);
+  });
+
+  it("keeps explicit negative family history out of clinical review in the product path", () => {
+    const result = evaluateCcrProduct({
+      patient: patient({ historyKnowledge: "never_performed" }),
+      policyId: susPolicyId(),
+      asOf,
+    });
+    if (!result.ok) throw new Error(result.message);
+
+    const familyTrack = result.evaluation.plan.topics[0]?.tracks.find(
+      (track) => track.trackId === CCR_IDS.tracks.familyStatus,
+    );
+    expect(familyTrack?.state.status).toBe("NotApplicable");
+    expect(
+      result.sections
+        .find((section) => section.id === "clinical_review")
+        ?.cards.some((card) => card.track.trackId === CCR_IDS.tracks.familyStatus),
+    ).toBe(false);
   });
 
   it("maps an eligible never-screened SUS patient to Fazer hoje without reinterpreting the engine", () => {
@@ -189,7 +208,7 @@ describe("CCR Phase 7 product integration contract", () => {
     expect(result).toMatchObject({
       ok: false,
       code: "unsupported_policy",
-      rulesetVersion: "crc-0.5.5-phase6-active",
+      rulesetVersion: "crc-0.5.9-phase6-h1-active",
     });
   });
 
