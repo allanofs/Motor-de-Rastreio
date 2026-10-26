@@ -4,6 +4,17 @@ import type { CalendarDate } from "../../model/dates";
 import type { ClinicalFact, ExamRecord } from "../../model/patient";
 import type { TrackEvaluation } from "../../model/evaluation";
 import {
+  assessReportExportEligibility,
+  resolveReportProvenance,
+  type ReportPrimaryAction,
+  type ReportProvenance,
+  type ReportRationale,
+  type ReportResolvedSource,
+  type ReportSourceReference,
+  type ReportUnresolvedSource,
+  type StructuredReportModel,
+} from "../reporting";
+import {
   evaluateCcrProductDraft,
   normalizeCcrProductDraft,
   type CcrNormalizedProductInput,
@@ -14,33 +25,10 @@ import type { CcrAutomationBoundaryCode } from "./automationBoundary";
 
 export const CCR_REPORT_CONTRACT_VERSION = "report-r0.1" as const;
 
-export type CcrReportSourceReference = {
-  locator: string;
-  evidence?: SourceRef["evidence"];
-};
-
-export type CcrReportResolvedSource = {
-  sourceId: string;
-  institution: string;
-  documentTitle: string;
-  publicationYear: number;
-  version: string;
-  jurisdiction: string;
-  url: string;
-  references: CcrReportSourceReference[];
-};
-
-export type CcrReportUnresolvedSource = {
-  sourceId: string;
-  locator: string;
-  reason: "source_not_found_in_governed_catalog";
-};
-
-export type CcrReportProvenance = {
-  status: "complete" | "incomplete";
-  sources: CcrReportResolvedSource[];
-  unresolved: CcrReportUnresolvedSource[];
-};
+export type CcrReportSourceReference = ReportSourceReference;
+export type CcrReportResolvedSource = ReportResolvedSource;
+export type CcrReportUnresolvedSource = ReportUnresolvedSource;
+export type CcrReportProvenance = ReportProvenance;
 
 export type CcrReportInputSnapshot = {
   ageYears?: number;
@@ -53,43 +41,17 @@ export type CcrReportInputSnapshot = {
   careSettingResources: CcrNormalizedProductInput["careSetting"]["resources"];
 };
 
-export type CcrReportPrimaryAction = {
-  actionId: string;
-  kind: string;
-  text: string;
-  resourceId?: string;
-  operational?: {
-    availability: "available" | "unavailable" | "unknown";
-    route: "local" | "referral" | "clinical_review" | "clarify_availability";
-    routeLabel: string;
-  };
-};
+export type CcrReportPrimaryAction = ReportPrimaryAction;
+export type CcrReportRationale = ReportRationale<TrackEvaluation["state"]["status"]>;
 
-export type CcrReportRationale = {
-  trackId: string;
-  trackLabel: string;
-  status: TrackEvaluation["state"]["status"];
-  summary: string;
-  activatedRuleIds: string[];
-  guardrails: string[];
-};
-
-export type CcrReportModel = {
-  contractVersion: typeof CCR_REPORT_CONTRACT_VERSION;
-  releaseGate: CcrProductSuccess["releaseGate"];
-  rulesetVersion: string;
-  policy: CcrProductSuccess["policy"];
-  asOf: string;
-  boundary: {
-    code: CcrAutomationBoundaryCode;
-    triggerTrackIds: string[];
-  };
-  rationale: CcrReportRationale[];
-  inputs: CcrReportInputSnapshot;
-  primaryActions: CcrReportPrimaryAction[];
-  unresolvedInformation: string[];
-  provenance: CcrReportProvenance;
-};
+export type CcrReportModel = StructuredReportModel<
+  typeof CCR_REPORT_CONTRACT_VERSION,
+  CcrProductSuccess["releaseGate"],
+  CcrProductSuccess["policy"],
+  CcrAutomationBoundaryCode,
+  TrackEvaluation["state"]["status"],
+  CcrReportInputSnapshot
+>;
 
 export type CcrReportBuildFailure = {
   ok: false;
@@ -125,10 +87,6 @@ function evaluationFingerprint(result: CcrProductSuccess): string {
   });
 }
 
-function sourceRefKey(ref: SourceRef): string {
-  return JSON.stringify([ref.sourceId, ref.locator, ref.evidence ?? null]);
-}
-
 function calendarDateKey(date: CalendarDate): string {
   const year = String(date.year).padStart(4, "0");
   const month = String(date.month).padStart(2, "0");
@@ -144,50 +102,7 @@ export function resolveCcrReportProvenance(
   sourceRefs: SourceRef[],
   sourceCatalog: Source[] = ccrCandidateRuleset.sources,
 ): CcrReportProvenance {
-  const catalog = new Map(sourceCatalog.map((source) => [source.sourceId, source]));
-  const grouped = new Map<string, { source: Source; refs: SourceRef[] }>();
-  const unresolved: CcrReportUnresolvedSource[] = [];
-  const seenRefs = new Set<string>();
-
-  for (const ref of sourceRefs) {
-    const key = sourceRefKey(ref);
-    if (seenRefs.has(key)) continue;
-    seenRefs.add(key);
-
-    const source = catalog.get(ref.sourceId);
-    if (source === undefined) {
-      unresolved.push({
-        sourceId: ref.sourceId,
-        locator: ref.locator,
-        reason: "source_not_found_in_governed_catalog",
-      });
-      continue;
-    }
-
-    const current = grouped.get(source.sourceId);
-    if (current === undefined) grouped.set(source.sourceId, { source, refs: [ref] });
-    else current.refs.push(ref);
-  }
-
-  const sources = [...grouped.values()].map(({ source, refs }) => ({
-    sourceId: source.sourceId,
-    institution: source.institution,
-    documentTitle: source.documentTitle,
-    publicationYear: source.publicationYear,
-    version: source.version,
-    jurisdiction: source.jurisdiction,
-    url: source.url,
-    references: refs.map((ref) => ({
-      locator: ref.locator,
-      ...(ref.evidence === undefined ? {} : { evidence: ref.evidence }),
-    })),
-  }));
-
-  return {
-    status: unresolved.length === 0 ? "complete" : "incomplete",
-    sources,
-    unresolved,
-  };
+  return resolveReportProvenance(sourceRefs, sourceCatalog);
 }
 
 function usedInputSnapshot(
@@ -319,20 +234,26 @@ export function buildCcrReportModel(
     };
 
   const presentation = presentCcrProduct(recalculated);
-  if (presentation.requestedInputs.length > 0)
-    return {
-      ok: false,
-      code: "pending_input",
-      message:
-        "A avaliação ainda solicita informação humana ou operacional antes de permitir exportação.",
-    };
-  if (presentation.automationBoundary.code === "MORE_INFORMATION_NEEDED")
+  const exportEligibility = assessReportExportEligibility({
+    requestedInputCount: presentation.requestedInputs.length,
+    boundaryCode: presentation.automationBoundary.code,
+    incompleteBoundaryCodes: ["MORE_INFORMATION_NEEDED"],
+  });
+  if (!exportEligibility.ok) {
+    if (exportEligibility.code === "pending_input")
+      return {
+        ok: false,
+        code: "pending_input",
+        message:
+          "A avaliação ainda solicita informação humana ou operacional antes de permitir exportação.",
+      };
     return {
       ok: false,
       code: "incomplete_evaluation",
       message:
         "A avaliação ainda depende de informação clínica para chegar a uma conclusão exportável.",
     };
+  }
 
   if (evaluationFingerprint(recalculated) !== evaluationFingerprint(evaluated))
     return {
