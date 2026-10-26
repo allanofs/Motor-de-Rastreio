@@ -44,7 +44,7 @@ function reportFor(draft: unknown) {
 }
 
 describe("CCR printable report renderer R1", () => {
-  it("renders result, explicit rationale and governed source title, URL and locator", () => {
+  it("renders result, rationale, human labels and governed source provenance", () => {
     const report = reportFor(routineDraft());
     const html = renderCcrReportHtml(report);
 
@@ -55,6 +55,10 @@ describe("CCR printable report renderer R1", () => {
     expect(html).toContain(report.rationale[0]!.summary);
     expect(html).toContain("Regra(s) ativada(s)");
     expect(html).toContain("crc-0.5.9-phase6-h1-active");
+    expect(html).toContain("26/10/2026");
+    expect(html).toContain("Rastreamento colorretal");
+    expect(html).toContain("Nunca realizado (confirmado)");
+    expect(html).not.toContain("crc-screening: never_performed");
     expect(html).toContain("Referências utilizadas nesta conclusão");
     expect(html).toContain(report.provenance.sources[0]!.documentTitle);
     expect(html).toContain(report.provenance.sources[0]!.url);
