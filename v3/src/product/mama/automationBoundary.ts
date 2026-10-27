@@ -114,6 +114,15 @@ export function deriveMamaAutomationBoundary(
   if (specificAttention.length > 0)
     return boundary("SPECIFIC_ATTENTION_REQUIRED", specificAttention);
 
+  const missingInformation = select(
+    tracks,
+    (track) =>
+      track.state.status === "Indeterminate" ||
+      track.state.status === "PendingResult",
+  );
+  if (missingInformation.length > 0)
+    return boundary("MORE_INFORMATION_NEEDED", missingInformation);
+
   const insufficientEvidence = select(
     tracks,
     (track) =>
@@ -131,15 +140,6 @@ export function deriveMamaAutomationBoundary(
   );
   if (unknownClinicalReview.length > 0)
     return boundary("CANNOT_CONCLUDE_SAFELY", unknownClinicalReview);
-
-  const missingInformation = select(
-    tracks,
-    (track) =>
-      track.state.status === "Indeterminate" ||
-      track.state.status === "PendingResult",
-  );
-  if (missingInformation.length > 0)
-    return boundary("MORE_INFORMATION_NEEDED", missingInformation);
 
   const sharedDecision = select(
     tracks,
