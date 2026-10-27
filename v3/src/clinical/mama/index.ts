@@ -7,6 +7,7 @@ export * from "./under40Scope";
 export * from "./decisionSemantics";
 export * from "./inputContracts";
 export * from "./decisionContext";
+export * from "./m31R2ReviewedCandidate";
 export * from "./activationReadiness";
 export * from "./actions";
 export * from "./ruleSupport";
