@@ -99,9 +99,11 @@ function evaluate(args: {
   const result = evaluateMamaProduct({
     patient: patient({
       age: args.age ?? 55,
-      history: args.history,
-      mammogramDate: args.mammogramDate,
-      overrides: args.overrides,
+      ...(args.history === undefined ? {} : { history: args.history }),
+      ...(args.mammogramDate === undefined
+        ? {}
+        : { mammogramDate: args.mammogramDate }),
+      ...(args.overrides === undefined ? {} : { overrides: args.overrides }),
     }),
     policyId: policyId(args.family ?? "sus_oficial"),
     asOf: AS_OF,
