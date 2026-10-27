@@ -9,6 +9,8 @@ export * from "./inputContracts";
 export * from "./decisionContext";
 export * from "./m31R2ReviewedCandidate";
 export * from "./activationReadiness";
+export * from "./activeCandidate";
+export * from "./candidate";
 export * from "./actions";
 export * from "./ruleSupport";
 export * from "./rules/routine";
