@@ -5,7 +5,7 @@ import {
 } from "./under40Scope";
 
 export const MAMA_ACTIVATION_READINESS_VERSION =
-  "breast-0.1.4-activation-readiness" as const;
+  "breast-0.1.5-activation-readiness" as const;
 
 export const MAMA_ACTIVATION_BLOCKERS = {
   m31IndependentR2ReviewMissing: "m3_1_independent_r2_review_missing",
@@ -27,20 +27,24 @@ export type MamaActivationReadiness = Readonly<{
     under40ScopeSourceBacked: boolean;
     under40HumanGateApproved: true;
     m31IndependentR2Reviewed: false;
-    under40IncludedInCanonicalDecisionTrace: false;
+    under40IncludedInCanonicalDecisionTrace: true;
   }>;
   blockers: readonly MamaActivationBlocker[];
 }>;
 
 /**
  * Clinical-content activation-readiness audit for Mama after the approved M3.1
- * human gate.
+ * human gate and canonical Mama decision-context integration.
  *
- * This function intentionally returns NOT READY while the final M3.1
- * implementation has not received independent R2 review and while under-40
- * provenance is not yet consumed by a canonical Mama evaluation/trace path.
+ * The technical under-40 provenance integration blocker is closed: the Mama
+ * decision context consumes the Foundation result plus the M3.1 source-backed
+ * scope artifact and suppresses routine closure whenever safety tracks are
+ * active or incomplete.
  *
- * It must not be used to activate content automatically.
+ * Readiness intentionally remains false until the final M3.1 implementation
+ * receives genuinely independent R2 review.
+ *
+ * This function must not activate content automatically.
  */
 export function assessMamaActivationReadiness(): MamaActivationReadiness {
   const coreRulesReviewedBy2 = mamaM3R2Ruleset.rules.every(
@@ -63,7 +67,6 @@ export function assessMamaActivationReadiness(): MamaActivationReadiness {
 
   const blockers: MamaActivationBlocker[] = [
     MAMA_ACTIVATION_BLOCKERS.m31IndependentR2ReviewMissing,
-    MAMA_ACTIVATION_BLOCKERS.under40CanonicalTraceIntegrationMissing,
   ];
 
   return {
@@ -77,7 +80,7 @@ export function assessMamaActivationReadiness(): MamaActivationReadiness {
       under40ScopeSourceBacked,
       under40HumanGateApproved: true,
       m31IndependentR2Reviewed: false,
-      under40IncludedInCanonicalDecisionTrace: false,
+      under40IncludedInCanonicalDecisionTrace: true,
     },
     blockers,
   };
