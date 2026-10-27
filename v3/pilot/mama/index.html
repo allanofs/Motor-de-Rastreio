@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex,nofollow" />
+    <title>Motor de Rastreio — Mama (piloto)</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <div>
+        <p class="eyebrow">Motor de Rastreio · V3</p>
+        <h1>Mama</h1>
+        <p class="subtitle">Entrevista guiada para rastreamento mamográfico de rotina.</p>
+      </div>
+      <div class="pilot-badge">Piloto interno</div>
+    </header>
+
+    <main class="layout">
+      <aside class="journey-panel" aria-labelledby="journey-title">
+        <p class="eyebrow">Caminho guiado</p>
+        <h2 id="journey-title">Comece pelo contexto</h2>
+        <p id="journey-next">Escolha o referencial, a data e informe a idade.</p>
+        <ol id="journey-list" class="journey-list" aria-label="Etapas da entrevista">
+          <li data-journey-step="reference-section">Referencial</li>
+          <li data-journey-step="context-section">Contexto</li>
+          <li data-journey-step="safety-section">Segurança</li>
+          <li data-journey-step="history-section">Histórico</li>
+          <li data-journey-step="exam-section">Mamografias</li>
+          <li data-journey-step="availability-section">Disponibilidade</li>
+        </ol>
+        <p class="privacy-note">
+          Os dados deste piloto ficam apenas na memória desta página. Não há armazenamento,
+          analytics ou transmissão de dados de paciente.
+        </p>
+      </aside>
+
+      <div class="workspace">
+        <form id="screening-form" novalidate>
+          <section id="reference-section" class="step-card" aria-labelledby="reference-heading">
+            <div class="section-heading">
+              <span class="step-marker" aria-hidden="true">1</span>
+              <div><p class="eyebrow">Etapa 1</p><h2 id="reference-heading">Referencial e idade</h2></div>
+            </div>
+            <div class="step-fields three-columns">
+              <label>
+                Referencial clínico
+                <select id="policy" required>
+                  <option value="">Selecione…</option>
+                </select>
+              </label>
+              <label>
+                Data de referência
+                <input id="as-of" type="date" required />
+              </label>
+              <label>
+                Idade em anos
+                <input id="age" type="number" min="0" max="150" inputmode="numeric" required />
+              </label>
+            </div>
+          </section>
+
+          <section id="context-section" class="step-card hidden" aria-labelledby="context-heading" aria-hidden="true">
+            <div class="section-heading">
+              <span class="step-marker" aria-hidden="true">2</span>
+              <div><p class="eyebrow">Etapa 2</p><h2 id="context-heading">Contexto da avaliação</h2></div>
+            </div>
+            <div class="question-stack">
+              <fieldset id="screening-context" class="choice-group">
+                <legend>Esta avaliação é para rastreamento preventivo, sem uma investigação diagnóstica já em andamento?</legend>
+                <div class="choice-options">
+                  <label><input type="radio" name="screening-context" value="yes" /><span>Sim</span></label>
+                  <label><input type="radio" name="screening-context" value="no" /><span>Não</span></label>
+                  <label><input type="radio" name="screening-context" value="unknown" /><span>Não sei</span></label>
+                </div>
+              </fieldset>
+
+              <fieldset id="relevant-breast-tissue" class="choice-group">
+                <legend>Há tecido mamário relevante para esta avaliação?</legend>
+                <p class="helper">O Motor pergunta diretamente sobre anatomia; não infere isso por sexo ou identidade de gênero.</p>
+                <div class="choice-options">
+                  <label><input type="radio" name="relevant-breast-tissue" value="yes" /><span>Sim</span></label>
+                  <label><input type="radio" name="relevant-breast-tissue" value="no" /><span>Não</span></label>
+                  <label><input type="radio" name="relevant-breast-tissue" value="unknown" /><span>Não sei</span></label>
+                </div>
+              </fieldset>
+            </div>
+          </section>
+
+          <section id="safety-section" class="step-card hidden" aria-labelledby="safety-heading" aria-hidden="true">
+            <div class="section-heading">
+              <span class="step-marker" aria-hidden="true">3</span>
+              <div><p class="eyebrow">Etapa 3</p><h2 id="safety-heading">Situações que podem retirar da rotina</h2></div>
+            </div>
+            <p class="section-intro">Responda sobre situações já conhecidas. “Não sei” permanece como incerteza clínica; não vira “não”.</p>
+            <div id="safety-questions" class="question-stack"></div>
+          </section>
+
+          <section id="history-section" class="step-card hidden" aria-labelledby="history-heading" aria-hidden="true">
+            <div class="section-heading">
+              <span class="step-marker" aria-hidden="true">4</span>
+              <div><p class="eyebrow">Etapa 4</p><h2 id="history-heading">Histórico de mamografia</h2></div>
+            </div>
+            <fieldset id="history-knowledge" class="choice-group">
+              <legend>O que você sabe sobre mamografias anteriores?</legend>
+              <div class="choice-options vertical-on-small">
+                <label><input type="radio" name="history-knowledge" value="never_performed" /><span>Nunca realizou mamografia</span></label>
+                <label><input type="radio" name="history-knowledge" value="known" /><span>Conheço o histórico</span></label>
+                <label><input type="radio" name="history-knowledge" value="unknown" /><span>Não sei / histórico incerto</span></label>
+              </div>
+            </fieldset>
+
+            <div id="history-detail-wrap" class="hidden nested-panel" aria-hidden="true">
+              <fieldset id="history-sufficient" class="choice-group">
+                <legend>As informações disponíveis são suficientes para saber a situação atual do rastreamento?</legend>
+                <div class="choice-options">
+                  <label><input type="radio" name="history-sufficient" value="yes" /><span>Sim</span></label>
+                  <label><input type="radio" name="history-sufficient" value="no" /><span>Não</span></label>
+                  <label><input type="radio" name="history-sufficient" value="unknown" /><span>Não sei</span></label>
+                </div>
+              </fieldset>
+
+              <fieldset id="prior-mammography-allows-routine" class="choice-group">
+                <legend>O resultado anterior permitiu retornar ao rastreamento de rotina?</legend>
+                <div class="choice-options">
+                  <label><input type="radio" name="prior-mammography-allows-routine" value="yes" /><span>Sim</span></label>
+                  <label><input type="radio" name="prior-mammography-allows-routine" value="no" /><span>Não</span></label>
+                  <label><input type="radio" name="prior-mammography-allows-routine" value="unknown" /><span>Não sei</span></label>
+                </div>
+              </fieldset>
+
+              <fieldset id="prior-mammography-needs-attention" class="choice-group">
+                <legend>Existe resultado anterior ainda exigindo avaliação ou acompanhamento específico?</legend>
+                <div class="choice-options">
+                  <label><input type="radio" name="prior-mammography-needs-attention" value="yes" /><span>Sim</span></label>
+                  <label><input type="radio" name="prior-mammography-needs-attention" value="no" /><span>Não</span></label>
+                  <label><input type="radio" name="prior-mammography-needs-attention" value="unknown" /><span>Não sei</span></label>
+                </div>
+              </fieldset>
+            </div>
+          </section>
+
+          <section id="exam-section" class="step-card hidden" aria-labelledby="exam-heading" aria-hidden="true">
+            <div class="section-heading">
+              <span class="step-marker" aria-hidden="true">5</span>
+              <div><p class="eyebrow">Etapa 5</p><h2 id="exam-heading">Mamografias conhecidas</h2></div>
+            </div>
+            <p class="section-intro">Registre somente o que é conhecido. O piloto não interpreta BI-RADS; usa apenas o papel do exame e a disposição clínica já conhecida.</p>
+            <div class="button-row">
+              <button id="add-screening-mammography" type="button" class="secondary">+ Mamografia de rastreamento</button>
+              <button id="add-diagnostic-mammography" type="button" class="secondary">+ Mamografia diagnóstica</button>
+            </div>
+            <div id="mammography-list" class="exam-list" aria-live="polite"></div>
+            <button id="finish-mammographies" type="button">Concluir histórico de mamografias</button>
+          </section>
+
+          <section id="availability-section" class="step-card hidden" aria-labelledby="availability-heading" aria-hidden="true">
+            <div class="section-heading">
+              <span class="step-marker" aria-hidden="true">6</span>
+              <div><p class="eyebrow">Etapa 6</p><h2 id="availability-heading">Disponibilidade local</h2></div>
+            </div>
+            <fieldset id="mammography-availability" class="choice-group">
+              <legend>A mamografia está disponível no contexto informado?</legend>
+              <div class="choice-options">
+                <label><input type="radio" name="mammography-availability" value="available" /><span>Disponível</span></label>
+                <label><input type="radio" name="mammography-availability" value="unavailable" /><span>Indisponível</span></label>
+                <label><input type="radio" name="mammography-availability" value="unknown" /><span>Não sei</span></label>
+              </div>
+            </fieldset>
+          </section>
+
+          <div id="form-actions" class="form-actions hidden">
+            <button id="evaluate-button" type="submit">Atualizar avaliação</button>
+            <button id="clear-form" type="button" class="secondary">Limpar</button>
+          </div>
+        </form>
+
+        <section id="result-region" class="result-region hidden" aria-live="polite" aria-labelledby="result-title">
+          <div id="result-state" class="result-surface">
+            <p class="eyebrow">Resultado do Motor</p>
+            <h2 id="result-title"></h2>
+            <p id="result-detail"></p>
+            <p id="followup-request" class="followup"></p>
+          </div>
+          <div id="result-actions" class="result-actions"></div>
+          <details id="technical-details">
+            <summary>Detalhes técnicos e rastreabilidade</summary>
+            <div id="technical-content"></div>
+          </details>
+        </section>
+
+        <section id="error-state" class="error-state hidden" role="alert" aria-live="assertive"></section>
+      </div>
+    </main>
+
+    <footer>
+      <p>Protótipo interno. Não autoriza uso clínico real, diagnóstico, tratamento ou publicação.</p>
+    </footer>
+
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>
