@@ -81,6 +81,22 @@ Permanece provisoriamente aceita. Deve ser reavaliada antes da integração fina
 
 `breast-known-high-risk-familial-context = yes` deve representar classificação de alto risco familiar já estabelecida externamente. O Motor V1 não deve derivar esse estado automaticamente de um único familiar de primeiro grau nem reconstruir Gail/Tyrer-Cuzick/BOADICEA.
 
+## Gate automatizado pós-R2
+
+HEAD R2 passou integralmente:
+
+- schema checks: **62/62**;
+- test files: **48/48**;
+- tests: **613/613**;
+- Mama M3 golden cases: **10/10**;
+- Mama M3 R1 governance: **5/5**;
+- Mama M3 R2 governance/anonymity: **5/5**;
+- Foundation typecheck ✅;
+- CCR pilot typecheck ✅;
+- Foundation build ✅;
+- CCR pilot build ✅;
+- V2 byte-for-byte preserved ✅.
+
 ## O R2 não autoriza
 
 - `lifecycleStatus: active`;
@@ -93,7 +109,6 @@ Permanece provisoriamente aceita. Deve ser reavaliada antes da integração fina
 
 ## Próximo gate
 
-1. validar automaticamente o snapshot `breast-0.1.2-m3-r2-reviewed-draft`;
-2. executar **M3.1** para resolver o gap <40 e os invariants associados;
-3. rerodar golden/safety cases;
-4. somente depois avaliar activation readiness de Mama em gate humano separado.
+1. executar **M3.1** para resolver o gap <40 e os invariants associados;
+2. rerodar golden/safety cases;
+3. somente depois avaliar activation readiness de Mama em gate humano separado.
