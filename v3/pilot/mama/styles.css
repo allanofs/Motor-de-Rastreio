@@ -43,8 +43,15 @@ button:focus-visible, input:focus-visible, select:focus-visible, summary:focus-v
 .layout { max-width: 1180px; margin: 0 auto; padding: 2rem 1rem 4rem; display: grid; grid-template-columns: minmax(220px, 300px) minmax(0, 1fr); gap: 1.5rem; align-items: start; }
 .journey-panel { position: sticky; top: 1rem; background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 1.25rem; box-shadow: var(--shadow); }
 .journey-panel h2 { margin: .2rem 0 .5rem; font-size: 1.2rem; }
-.journey-list { margin: 1.25rem 0; padding-left: 1.4rem; color: var(--text-soft); }
-.journey-list li { padding: .28rem 0 .28rem .25rem; }
+.journey-list { margin: 1.25rem 0; padding-left: 0; color: var(--text-soft); list-style: none; }
+.journey-list li { display: flex; gap: .45rem; padding: .28rem 0; }
+.journey-list li::before { flex: 0 0 1.2rem; text-align: right; }
+.journey-list li[data-journey-step="reference-section"]::before { content: "1."; }
+.journey-list li[data-journey-step="context-section"]::before { content: "2."; }
+.journey-list li[data-journey-step="safety-section"]::before { content: "3."; }
+.journey-list li[data-journey-step="history-section"]::before { content: "4."; }
+.journey-list li[data-journey-step="exam-section"]::before { content: "5."; }
+.journey-list li[data-journey-step="availability-section"]::before { content: "6."; }
 .journey-list li.current { color: var(--accent); font-weight: 800; }
 .journey-list li.complete { color: #345c46; }
 .privacy-note { font-size: .83rem; margin: 1rem 0 0; padding-top: 1rem; border-top: 1px solid var(--border); }
