@@ -104,17 +104,6 @@ export const MamaProductDraftSchema = z
 
     if (
       draft.historyKnowledge === "never_performed" &&
-      draft.mammographies.length > 0
-    ) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["mammographies"],
-        message: "never_performed cannot coexist with mammography records",
-      });
-    }
-
-    if (
-      draft.historyKnowledge === "never_performed" &&
       (draft.priorMammographyAllowsRoutine === "yes" ||
         draft.priorMammographyNeedsSpecificAttention === "yes")
     ) {
@@ -252,9 +241,6 @@ function normalizeMammography(
     draft.role === "screening"
       ? MAMA_IDS.modalities.mammographyScreening
       : MAMA_IDS.modalities.mammographyDiagnostic;
-
-  const result: ExamRecord extends infer _ ? unknown : never = undefined;
-  void result;
 
   const normalizedResult =
     draft.disposition === "routine_return"
