@@ -105,11 +105,8 @@ export function deriveMamaAutomationBoundary(
   const specificAttention = select(
     tracks,
     (track) =>
-      [MAMA_IDS.tracks.specialRisk, MAMA_IDS.tracks.priorFinding].includes(
-        track.trackId as
-          | typeof MAMA_IDS.tracks.specialRisk
-          | typeof MAMA_IDS.tracks.priorFinding,
-      ) &&
+      (track.trackId === MAMA_IDS.tracks.specialRisk ||
+        track.trackId === MAMA_IDS.tracks.priorFinding) &&
       ["ClinicalReviewRequired", "InFollowUp", "HandedOff"].includes(
         track.state.status,
       ),
@@ -148,12 +145,14 @@ export function deriveMamaAutomationBoundary(
     tracks,
     (track) => track.state.status === "SharedDecision",
   );
-  if (sharedDecision.length > 0)
-    return boundary("SHARED_DECISION", sharedDecision, {
-      ...(sharedDecisionReason(sharedDecision) === undefined
-        ? {}
-        : { reasonCode: sharedDecisionReason(sharedDecision) }),
-    });
+  if (sharedDecision.length > 0) {
+    const reasonCode = sharedDecisionReason(sharedDecision);
+    return boundary(
+      "SHARED_DECISION",
+      sharedDecision,
+      reasonCode === undefined ? {} : { reasonCode },
+    );
+  }
 
   const due = select(tracks, (track) => track.state.status === "Due");
   if (due.length > 0) return boundary("ROUTINE_DUE", due);
