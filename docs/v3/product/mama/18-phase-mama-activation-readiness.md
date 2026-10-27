@@ -1,67 +1,60 @@
-# Mama — activation-readiness audit after approved M3.1
+# Mama — activation-readiness audit after focused M3.1 R2
 
-Status: **NOT READY FOR ACTIVATION — one clinical-governance blocker remains**.
+Status: **READY FOR EXPLICIT LIFECYCLE ACTIVATION GATE — not active yet**.
 
 This audit consolidates:
 
 - M3 core rules: `breast-0.1.2-m3-r2-reviewed-draft` — 15 rules, independent R2 approved, still draft;
-- M3.1 under-40 scope: `breast-0.1.3-m3-1-under40-source-verified-draft` — human gate approved, still draft/source-verified;
+- M3.1 under-40 scope: `breast-0.1.3-m3-1-under40-source-verified-draft`;
+- M3.1 focused reviewed snapshot: `breast-0.1.6-m3-1-r2-reviewed-draft` — human gate + independent anonymous R2 approved, still draft;
 - canonical Mama decision context: `breast-0.1.5-m3-1-decision-context-draft`.
 
-## What is ready
+## Readiness checks closed
 
-- 15/15 M3 core rules have two distinct reviewer records and remain immutable/draft;
-- all core rules have sourceRefs with governed sources/locators;
-- M3.1 under-40 scope is source-backed for SUS, Brasil ampliado and USPSTF;
-- hard-exit precedence in <40 is protected by automated safety cases;
-- SharedDecision reason semantics are domain-specific without Foundation expansion;
-- known high familial risk input contract is hardened;
-- Depth Budget remains shallow;
-- a canonical Mama decision-context adapter now consumes the engine result plus the M3.1 under-40 scope artifact.
-
-## Blocker AR-01 — M3.1 lacks independent R2 review
-
-The independent R2 approval applied to `breast-0.1.1-m3-r1-draft` / the 15 M3 rules. The final M3.1 implementation did not yet exist at that time.
-
-Therefore the approved M3.1 human gate must not be represented as `reviewed_by_2`.
-
-Required resolution:
-
-- focused independent review of the M3.1 implementation/evidence semantics;
-- record verdict using an anonymous reviewer handle under the same governance model as M3 R2;
-- if approved, freeze a reviewed M3.1 snapshot without changing clinical semantics.
-
-## AR-02 closed — canonical under-40 provenance integration
-
-The Foundation engine still correctly returns routine `NotApplicable` for average-risk people <40 because no ordinary age rule applies.
-
-The Mama domain now provides `buildMamaDecisionContext()`, which combines the engine evaluation with the M3.1 source-backed under-40 scope artifact.
-
-Safety behavior:
-
-- under-40 routine scope is attached only after `specialRisk`, `priorFinding` and `specificCare` are all complete and `NotApplicable`;
-- any active higher-acuity track suppresses routine age closure;
-- any incomplete/unknown safety assessment suppresses routine age closure;
-- the added sourceRefs remain available for future product/report provenance;
-- Foundation remains unchanged.
-
-This closes `under40_canonical_trace_integration_missing` as a technical blocker.
-
-## Not blockers for clinical-content readiness yet
-
-- multi-source hard-exit provenance remains accepted provisionally through R2; reassess before final report/product integration;
-- no UI exists yet;
-- no Mama report exists yet;
-- no deployment exists yet.
-
-Those are later product gates, not reasons to falsify clinical lifecycle now.
+- 15/15 M3 core rules have the governed R1 + independent R2 records and remain immutable/draft;
+- all core rules have governed sourceRefs/locators;
+- M3.1 under-40 semantics are source-backed for SUS, Brasil ampliado and USPSTF;
+- the M3.1 final implementation received focused independent R2 approval;
+- the R2 reviewer is represented only by the anonymous public handle `external-physician-r2-private-breast-001`;
+- hard-exit precedence in people <40 is protected by automated safety cases;
+- incomplete/unknown safety facts suppress routine age closure;
+- SharedDecision reason semantics remain Mama-specific without Foundation expansion;
+- the known-high-risk-familial input contract remains strict;
+- a canonical Mama decision-context adapter consumes the engine result plus the M3.1 under-40 provenance artifact;
+- Foundation remains unchanged;
+- the Depth Budget remains shallow.
 
 ## Readiness verdict
 
-`ready = false`
+`ready = true`
 
-Remaining blocker:
+Remaining activation blockers tracked by this audit: **none**.
 
-1. `m3_1_independent_r2_review_missing`
+This means only that the clinical-content governance prerequisites represented by this audit are satisfied.
 
-No `active` Mama snapshot should be created until this final clinical-governance blocker is closed and the gate is rerun.
+## Still NOT authorized
+
+`ready = true` does **not** mean `active`.
+
+No action in this readiness phase authorizes:
+
+- lifecycle promotion to `active`;
+- a canonical active Mama entrypoint;
+- UI/product/report activation;
+- merge;
+- deploy;
+- public release;
+- real-world clinical use.
+
+Lifecycle activation must occur only after a separate explicit approval from the project lead.
+
+## Later product gates
+
+These do not block clinical-content activation readiness, but remain necessary before product release:
+
+- reassess provisional multi-source hard-exit provenance during Mama report/product integration;
+- build Mama automation boundary/presentation;
+- build progressive interview UI;
+- integrate Report Foundation R3;
+- perform real-browser accessibility/privacy/visual validation;
+- preserve the same no-deep-diagnostic-tree Depth Budget.
