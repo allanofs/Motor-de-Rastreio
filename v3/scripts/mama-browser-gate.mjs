@@ -220,9 +220,28 @@ async function main() {
     await dispatchTab(page);
     const tab1 = await page.evaluate("document.activeElement?.id");
     assert(tab1 === "as-of", "Keyboard Tab from policy did not reach as-of", { activeElement: tab1 });
-    await dispatchTab(page);
-    const tab2 = await page.evaluate("document.activeElement?.id");
-    assert(tab2 === "age", "Keyboard Tab from as-of did not reach age", { activeElement: tab2 });
+
+    const dateTabSequence = [];
+    let reachedAge = false;
+    for (let attempt = 0; attempt < 6; attempt += 1) {
+      await dispatchTab(page);
+      const active = await page.evaluate("document.activeElement?.id");
+      dateTabSequence.push(active ?? "");
+      if (active === "age") {
+        reachedAge = true;
+        break;
+      }
+      assert(
+        active === "as-of",
+        "Keyboard traversal left the native date control in an unexpected direction",
+        { activeElement: active, dateTabSequence },
+      );
+    }
+    assert(
+      reachedAge,
+      "Keyboard traversal through native date subcontrols did not eventually reach age",
+      { dateTabSequence },
+    );
 
     await page.evaluate(`(() => {
       window.__mamaGate = {
@@ -327,7 +346,7 @@ async function main() {
       previewUrl: PREVIEW_URL,
       browser: "Chrome/Chromium via DevTools Protocol",
       desktop,
-      keyboard: { policyTo: tab1, asOfTo: tab2 },
+      keyboard: { policyTo: tab1, dateTabSequence, reachedAge },
       governedFlow: finalDesktop,
       mobile,
       networkRequestCount: networkRequests.length,
