@@ -1,11 +1,8 @@
 import { IdSchema } from "../../model/common";
 
 /**
- * Breast screening terminology for the M1 representability layer.
- *
- * M1 deliberately defines vocabulary only. It does not encode executable
- * clinical rules, age thresholds, intervals, BI-RADS management, or risk
- * calculations.
+ * Breast screening terminology for the M1/M2 representability layer and
+ * the first M3 draft-rule translation.
  */
 export const MAMA_IDS = {
   topic: "breast-cancer-screening",
@@ -31,6 +28,7 @@ export const MAMA_IDS = {
     suspiciousBreastSymptoms: "breast-suspicious-symptoms",
     priorBreastCancer: "breast-prior-cancer",
     highRiskGeneticContext: "breast-high-risk-genetic-context",
+    knownHighRiskFamilialContext: "breast-known-high-risk-familial-context",
     priorHighRiskChestRadiation: "breast-prior-high-risk-chest-radiation",
     priorHighRiskBreastLesion: "breast-prior-high-risk-lesion",
     specificBreastCareActive: "breast-specific-care-active",

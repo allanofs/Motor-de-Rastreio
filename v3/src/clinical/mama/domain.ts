@@ -1,10 +1,11 @@
 import { MAMA_IDS } from "./terminology";
 
 /**
- * M1 domain contract for breast screening.
+ * M1/M2 domain contract for breast screening.
  *
- * These collections define representability and ownership boundaries only.
- * They are not executable clinical logic.
+ * These collections define representability and ownership boundaries. M3
+ * consumes them, but they remain intentionally shallow and do not encode
+ * diagnostic management trees.
  */
 export const MAMA_ROUTINE_REQUIRED_CONCEPTS = [
   MAMA_IDS.concepts.screeningContextConfirmed,
@@ -16,6 +17,7 @@ export const MAMA_HARD_EXIT_CONCEPTS = [
   MAMA_IDS.concepts.suspiciousBreastSymptoms,
   MAMA_IDS.concepts.priorBreastCancer,
   MAMA_IDS.concepts.highRiskGeneticContext,
+  MAMA_IDS.concepts.knownHighRiskFamilialContext,
   MAMA_IDS.concepts.priorHighRiskChestRadiation,
   MAMA_IDS.concepts.priorHighRiskBreastLesion,
   MAMA_IDS.concepts.specificBreastCareActive,
@@ -37,14 +39,13 @@ export const MAMA_ROUTINE_RESULT_CLASSES = [
 ] as const;
 
 /**
- * M1 intentionally keeps the first release to a single operational resource.
- * DBT, ultrasound, MRI and biopsy are not represented as routine resources yet.
+ * V1 keeps a single operational resource. DBT, ultrasound, MRI and biopsy are
+ * not represented as routine resources.
  */
 export const MAMA_ROUTINE_RESOURCES = [MAMA_IDS.resources.mammography] as const;
 
 /**
- * Tracks are intentionally coarse to enforce the approved Depth Budget.
- * No BI-RADS-specific or diagnostic-management track exists in M1.
+ * Tracks remain coarse to enforce the approved Depth Budget.
  */
 export const MAMA_TRACKS = [
   MAMA_IDS.tracks.routine,
