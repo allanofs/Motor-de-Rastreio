@@ -1,6 +1,6 @@
 # Mama — Product Input / Acquisition Contract
 
-Status: **IMPLEMENTED / DRAFT PR / AWAITING CI GATE**.
+Status: **GREEN / TECHNICALLY FROZEN / DRAFT PR**.
 
 This phase defines how a future Guided Interview may collect simple user-facing answers and normalize them into the governed `Patient`, `ExamRecord` and `CareSettingContext` structures consumed by the active Mama product integration.
 
@@ -124,20 +124,9 @@ The future UI should use progressive disclosure approximately as follows:
 
 This is an acquisition order, not a new clinical decision algorithm. The final requested-next-input behavior should continue to be driven by the product result/presentation rather than duplicated in UI conditionals.
 
-## Non-goals
+## Automated invariants
 
-- no generic family-history risk calculation;
-- no Gail/Tyrer-Cuzick/BOADICEA;
-- no BI-RADS interpretation;
-- no ultrasound/MRI/biopsy tree;
-- no Foundation/engine/model changes;
-- no UI implementation yet;
-- no storage, analytics or network transmission;
-- no merge/deploy/public release/clinical-use authorization.
-
-## Gate target
-
-Automated tests must prove at minimum:
+The acquisition suite proves:
 
 - strict rejection of ungoverned family/risk fields;
 - explicit-only familial high-risk mapping;
@@ -150,3 +139,30 @@ Automated tests must prove at minimum:
 - under-40 hard-exit precedence preserved;
 - unknown safety answer -> more information needed;
 - mammography availability remains operational only.
+
+## Final gate
+
+- schema checks: **62/62**;
+- test files: **57/57**;
+- tests: **665/665**;
+- Mama acquisition / normalization: **12/12**;
+- Foundation typecheck: green;
+- CCR pilot typecheck: green;
+- Foundation build: green;
+- CCR pilot build: green;
+- V2 byte-for-byte preserved.
+
+## Non-goals / still not authorized
+
+- no generic family-history risk calculation;
+- no Gail/Tyrer-Cuzick/BOADICEA;
+- no BI-RADS interpretation;
+- no ultrasound/MRI/biopsy tree;
+- no Foundation/engine/model changes;
+- no UI implementation yet;
+- no storage, analytics or network transmission;
+- no merge/deploy/public release/clinical-use authorization.
+
+## Next phase
+
+Build the **Mama Guided Interview UI** in a separate stacked branch. The UI must serialize only into `MamaProductDraft`, use progressive disclosure, preserve `not_asked` for hidden controls, and render only the governed Mama presentation result rather than implementing clinical conditions itself.
