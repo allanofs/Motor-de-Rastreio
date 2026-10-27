@@ -1,0 +1,61 @@
+name: V3 Mama browser gate
+on:
+  pull_request:
+    paths:
+      - 'v3/pilot/mama/**'
+      - 'v3/src/product/mama/**'
+      - 'v3/scripts/mama-browser-gate.mjs'
+      - 'v3/vite.mama-pilot.config.ts'
+      - 'v3/tsconfig.mama-pilot.json'
+      - '.github/workflows/v3-mama-browser-gate.yml'
+  push:
+    branches: ['v3-mama-browser-gate']
+    paths:
+      - 'v3/pilot/mama/**'
+      - 'v3/src/product/mama/**'
+      - 'v3/scripts/mama-browser-gate.mjs'
+      - 'v3/vite.mama-pilot.config.ts'
+      - 'v3/tsconfig.mama-pilot.json'
+      - '.github/workflows/v3-mama-browser-gate.yml'
+permissions:
+  contents: read
+jobs:
+  chromium:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: v3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: v3/package-lock.json
+      - run: npm ci
+      - name: Build Mama pilot
+        run: npm run build:mama-pilot
+      - name: Confirm real Chrome is available
+        run: google-chrome --version
+      - name: Start local Mama preview
+        run: |
+          nohup npx vite preview --config vite.mama-pilot.config.ts --host 127.0.0.1 --port 4174 > /tmp/mama-preview.log 2>&1 &
+          echo $! > /tmp/mama-preview.pid
+          for attempt in $(seq 1 40); do
+            if curl --fail --silent http://127.0.0.1:4174/ >/dev/null; then
+              exit 0
+            fi
+            sleep 0.25
+          done
+          cat /tmp/mama-preview.log
+          exit 1
+      - name: Run real Chromium responsive / keyboard / privacy gate
+        run: node scripts/mama-browser-gate.mjs
+      - name: Upload browser-gate evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mama-browser-gate-evidence
+          path: v3/browser-artifacts/
+          if-no-files-found: warn
+          retention-days: 14
