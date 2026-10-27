@@ -188,7 +188,8 @@ describe("Mama Guided Interview mammography history", () => {
       resolutionInformation: "sufficient",
     });
     el("#finish-mammographies").click();
-    expect(resultTitle()).toBe("Rastreamento indicado");
+    expect(resultTitle()).not.toBe("Em dia");
+    expect(resultTitle()).toBe("Próxima informação necessária");
   });
 
   it("uses a recent qualifying screening mammogram to show current status", () => {
