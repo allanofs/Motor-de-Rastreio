@@ -69,6 +69,8 @@ R2 não transforma ausência de regra abaixo de 40 em autorização de ativaçã
 - incluir golden cases de pessoa <40 sintomática, de alto risco genético/familiar estabelecido e com radioterapia torácica de alto risco;
 - não inventar `recommend_against` sem suporte explícito da fonte.
 
+Como a M3.1 introduzirá tradução/regra clínica que **não existia no snapshot visto pelo R2**, qualquer regra clínica nova deverá passar por gate humano próprio antes de activation readiness; a aprovação R2 atual não deve ser retroativamente aplicada a código futuro.
+
 ### SharedDecision reason semantics
 
 A diferença entre decisão individual por estar fora do núcleo populacional e continuidade favorável condicionada deve ser preservada no domínio/produto Mama. Isso ainda não justifica alteração genérica da Foundation.
@@ -109,6 +111,8 @@ HEAD R2 passou integralmente:
 
 ## Próximo gate
 
-1. executar **M3.1** para resolver o gap <40 e os invariants associados;
-2. rerodar golden/safety cases;
-3. somente depois avaliar activation readiness de Mama em gate humano separado.
+1. congelar a PR M3/R2;
+2. executar **M3.1** em branch/PR separada para resolver o gap <40 e os invariants associados;
+3. rerodar golden/safety cases;
+4. revisar humanamente qualquer nova tradução clínica da M3.1;
+5. somente depois avaliar activation readiness de Mama em gate humano separado.
