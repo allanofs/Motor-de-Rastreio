@@ -3,9 +3,13 @@ import {
   MAMA_M3_1_SCOPE_VERSION,
   MAMA_UNDER40_SCOPE_BY_POLICY,
 } from "./under40Scope";
+import {
+  MAMA_M3_1_R2_SNAPSHOT_VERSION,
+  mamaM31R2ReviewedSnapshot,
+} from "./m31R2ReviewedCandidate";
 
 export const MAMA_ACTIVATION_READINESS_VERSION =
-  "breast-0.1.5-activation-readiness" as const;
+  "breast-0.1.7-activation-readiness" as const;
 
 export const MAMA_ACTIVATION_BLOCKERS = {
   m31IndependentR2ReviewMissing: "m3_1_independent_r2_review_missing",
@@ -21,30 +25,26 @@ export type MamaActivationReadiness = Readonly<{
   ready: boolean;
   coreRulesetVersion: string;
   under40ScopeVersion: string;
+  m31R2SnapshotVersion: string;
   checks: Readonly<{
     coreRulesReviewedBy2: boolean;
     coreRulesStillDraft: boolean;
     under40ScopeSourceBacked: boolean;
     under40HumanGateApproved: true;
-    m31IndependentR2Reviewed: false;
+    m31IndependentR2Reviewed: boolean;
+    m31StillDraft: boolean;
     under40IncludedInCanonicalDecisionTrace: true;
   }>;
   blockers: readonly MamaActivationBlocker[];
 }>;
 
 /**
- * Clinical-content activation-readiness audit for Mama after the approved M3.1
- * human gate and canonical Mama decision-context integration.
+ * Clinical-content activation-readiness audit for Mama after M3 + M3.1.
  *
- * The technical under-40 provenance integration blocker is closed: the Mama
- * decision context consumes the Foundation result plus the M3.1 source-backed
- * scope artifact and suppresses routine closure whenever safety tracks are
- * active or incomplete.
- *
- * Readiness intentionally remains false until the final M3.1 implementation
- * receives genuinely independent R2 review.
- *
- * This function must not activate content automatically.
+ * `ready=true` means the clinical-content governance prerequisites tracked by
+ * this audit are satisfied. It does NOT activate content automatically and does
+ * not authorize merge, deployment, public release, UI integration or real-world
+ * clinical use. Lifecycle activation remains a separate explicit gate.
  */
 export function assessMamaActivationReadiness(): MamaActivationReadiness {
   const coreRulesReviewedBy2 = mamaM3R2Ruleset.rules.every(
@@ -64,22 +64,42 @@ export function assessMamaActivationReadiness(): MamaActivationReadiness {
       resolution.sourceRefs.length > 0 &&
       resolution.sourceRefs.every((ref) => ref.locator.trim().length > 0),
   );
+  const m31IndependentR2Reviewed =
+    mamaM31R2ReviewedSnapshot.reviewStatus === "reviewed_by_2" &&
+    mamaM31R2ReviewedSnapshot.verdict === "APPROVE" &&
+    mamaM31R2ReviewedSnapshot.governance.reviews.some(
+      (review) => review.role === "independent_r2",
+    ) &&
+    mamaM31R2ReviewedSnapshot.reviewedArtifacts.under40ScopeVersion ===
+      MAMA_M3_1_SCOPE_VERSION;
+  const m31StillDraft =
+    mamaM31R2ReviewedSnapshot.lifecycleStatus === "draft";
 
-  const blockers: MamaActivationBlocker[] = [
-    MAMA_ACTIVATION_BLOCKERS.m31IndependentR2ReviewMissing,
-  ];
+  const blockers: MamaActivationBlocker[] = [];
+  if (!m31IndependentR2Reviewed)
+    blockers.push(MAMA_ACTIVATION_BLOCKERS.m31IndependentR2ReviewMissing);
+
+  const ready =
+    coreRulesReviewedBy2 &&
+    coreRulesStillDraft &&
+    under40ScopeSourceBacked &&
+    m31IndependentR2Reviewed &&
+    m31StillDraft &&
+    blockers.length === 0;
 
   return {
     version: MAMA_ACTIVATION_READINESS_VERSION,
-    ready: false,
+    ready,
     coreRulesetVersion: mamaM3R2Ruleset.rulesetVersion,
     under40ScopeVersion: MAMA_M3_1_SCOPE_VERSION,
+    m31R2SnapshotVersion: MAMA_M3_1_R2_SNAPSHOT_VERSION,
     checks: {
       coreRulesReviewedBy2,
       coreRulesStillDraft,
       under40ScopeSourceBacked,
       under40HumanGateApproved: true,
-      m31IndependentR2Reviewed: false,
+      m31IndependentR2Reviewed,
+      m31StillDraft,
       under40IncludedInCanonicalDecisionTrace: true,
     },
     blockers,
