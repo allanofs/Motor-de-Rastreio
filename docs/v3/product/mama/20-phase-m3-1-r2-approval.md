@@ -49,6 +49,21 @@ The snapshot records:
 - reviewed SharedDecision reason mapping;
 - reviewed high-risk familial input contract.
 
+## Final automated gate
+
+After the focused R2 registration and strict-type test correction:
+
+- schema checks: **62/62**;
+- test files: **52/52**;
+- tests: **633/633**;
+- M3.1 focused R2 governance: **5/5**;
+- Mama activation-readiness: **5/5**;
+- Foundation typecheck ✅;
+- CCR pilot typecheck ✅;
+- Foundation build ✅;
+- CCR pilot build ✅;
+- V2 byte-for-byte preserved ✅.
+
 ## What this approval does NOT authorize
 
 - lifecycle activation;
