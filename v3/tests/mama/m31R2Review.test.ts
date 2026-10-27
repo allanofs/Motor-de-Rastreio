@@ -41,10 +41,14 @@ describe("Mama M3.1 focused independent R2 governance", () => {
   it("records a project human gate plus a distinct independent R2 review", () => {
     const reviews = mamaM31R2ReviewedSnapshot.governance.reviews;
     expect(reviews).toHaveLength(2);
-    expect(reviews[0].role).toBe("project_human_gate");
-    expect(reviews[1].role).toBe("independent_r2");
-    expect(reviews[1].reviewer).toBe(MAMA_M3_1_R2_REVIEWER_PUBLIC_ID);
-    expect(reviews[1].reviewer).not.toBe(reviews[0].reviewer);
+    const firstReview = reviews[0];
+    const secondReview = reviews[1];
+    if (firstReview === undefined || secondReview === undefined)
+      throw new Error("Expected two M3.1 governance reviews");
+    expect(firstReview.role).toBe("project_human_gate");
+    expect(secondReview.role).toBe("independent_r2");
+    expect(secondReview.reviewer).toBe(MAMA_M3_1_R2_REVIEWER_PUBLIC_ID);
+    expect(secondReview.reviewer).not.toBe(firstReview.reviewer);
   });
 
   it("keeps all reviewed under-40 policy resolutions source-backed", () => {
