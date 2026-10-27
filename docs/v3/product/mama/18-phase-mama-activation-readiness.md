@@ -7,7 +7,8 @@ This audit consolidates:
 - M3 core rules: `breast-0.1.2-m3-r2-reviewed-draft` — 15 rules, independent R2 approved, still draft;
 - M3.1 under-40 scope: `breast-0.1.3-m3-1-under40-source-verified-draft`;
 - M3.1 focused reviewed snapshot: `breast-0.1.6-m3-1-r2-reviewed-draft` — human gate + independent anonymous R2 approved, still draft;
-- canonical Mama decision context: `breast-0.1.5-m3-1-decision-context-draft`.
+- canonical Mama decision context: `breast-0.1.5-m3-1-decision-context-draft`;
+- focused R2 approval record: `docs/v3/product/mama/20-phase-m3-1-r2-approval.md`.
 
 ## Readiness checks closed
 
