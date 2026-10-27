@@ -35,15 +35,15 @@ describe("Mama activation readiness after M3.1 human approval", () => {
   it("does not claim activation readiness while M3.1 lacks independent R2 review", () => {
     const readiness = assessMamaActivationReadiness();
     expect(readiness.ready).toBe(false);
-    expect(readiness.blockers).toContain(
+    expect(readiness.blockers).toEqual([
       MAMA_ACTIVATION_BLOCKERS.m31IndependentR2ReviewMissing,
-    );
+    ]);
   });
 
-  it("keeps under-40 provenance integration as an explicit canonical-trace blocker", () => {
+  it("closes the canonical under-40 provenance integration blocker", () => {
     const readiness = assessMamaActivationReadiness();
-    expect(readiness.checks.under40IncludedInCanonicalDecisionTrace).toBe(false);
-    expect(readiness.blockers).toContain(
+    expect(readiness.checks.under40IncludedInCanonicalDecisionTrace).toBe(true);
+    expect(readiness.blockers).not.toContain(
       MAMA_ACTIVATION_BLOCKERS.under40CanonicalTraceIntegrationMissing,
     );
   });
