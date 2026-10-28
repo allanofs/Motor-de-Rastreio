@@ -69,19 +69,13 @@ export function encodeMotorNavigationHandoff(
   return `${MOTOR_NAVIGATION_HANDOFF_PREFIX}${JSON.stringify(envelope)}`;
 }
 
-/**
- * Single-use, same-tab handoff. The value is carried in window.name only for
- * the navigation boundary and is cleared before any domain projection occurs.
- * It is never written to URL, localStorage, sessionStorage, cookies or network.
- */
+/** Pure single-use handoff contract. Browser transport is owned by pilot UI code. */
 export function consumeMotorNavigationHandoff(
   port: MotorNavigationNamePort,
   expectedTarget: MotorModuleId,
 ): MotorSharedSessionContext | undefined {
   const raw = port.name;
   if (!raw.startsWith(MOTOR_NAVIGATION_HANDOFF_PREFIX)) return undefined;
-
-  // Clear first: malformed or mismatched MOTOR envelopes must not linger.
   port.name = "";
 
   try {
