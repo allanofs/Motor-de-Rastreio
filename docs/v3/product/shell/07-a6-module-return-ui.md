@@ -1,6 +1,6 @@
 # A6 — Explicit module return to Unified MOTOR Shell
 
-Status: **Draft / integration gate**
+Status: **GREEN / FROZEN / Draft PR**
 
 ## Objective
 
@@ -8,7 +8,7 @@ Wire the frozen A5 shallow outcome receipt into the pilot experience:
 
 `Shell -> selected module -> current module evaluation -> explicit "Voltar ao MOTOR" -> Shell card for that same module`
 
-A6 must improve continuity without creating a patient dashboard, cross-module inference or persistent history.
+A6 improves continuity without creating a patient dashboard, cross-module inference or persistent history.
 
 ## Domain ownership
 
@@ -34,7 +34,7 @@ If there is no valid receipt, the Shell behaves exactly as before.
 
 A6 deliberately does not maintain a cross-module ledger. The returned snapshot exists only in the current Shell page instance after the single-use receipt is consumed. Navigating into another module does not preserve the previous module result for later aggregation.
 
-This limitation is intentional: persistence or a multi-module session ledger would require a separate architecture/privacy contract.
+This limitation is intentional: persistence or a multi-module session ledger requires a separate architecture/privacy contract.
 
 ## Privacy and safety boundaries
 
@@ -50,19 +50,32 @@ A6 adds no:
 - module priority ordering;
 - CCR <-> Mama clinical inference.
 
-## Gate
+## Final gate
 
-A6 is green only if:
+The A6 implementation gate passed at HEAD `50e3ecc745506bff7cb6c46df79b90ecb6a61bb8` before this documentation-only freeze commit:
 
-- inherited A0-A5 tests remain green;
-- CCR and Mama each expose an explicit return action only within their result region;
-- each return action derives its receipt through that domain's existing evaluator/presenter/adapter;
-- the Shell consumes the receipt but imports no domain clinical evaluator/presenter/adapter;
-- only the matching card renders the returned status;
-- no cross-module ledger or global status is introduced;
-- Shell typecheck/build and real-Chrome smoke remain green;
-- affected domain build/browser gates remain green;
-- V2 remains byte-for-byte preserved.
+- inherited `npm run check`: green;
+- A6 Shell/domain boundary tests: green as part of the full suite;
+- V2 byte-for-byte preservation: green;
+- Shell TypeScript typecheck: green;
+- Shell Vite build: green;
+- Shell real-Chrome DOM/navigation smoke: green;
+- Shell desktop/mobile screenshot capture: green;
+- Shell evidence upload: green;
+- Mama pilot build: green;
+- Mama real-Chrome responsive/keyboard/privacy gate: green on retry;
+- Mama real-Chrome local report-export gate: green on retry;
+- Mama browser evidence upload: green.
+
+The first Mama browser attempt failed before page validation because the Chrome DevTools endpoint did not become reachable within the gate timeout (`fetch failed`). No code change was made for that infrastructure-only failure. The exact job was rerun and the responsive/keyboard/privacy and report-export gates both passed.
+
+## Freeze rule
+
+A6 is frozen as an ephemeral one-module-at-a-time return experience. Later phases must not introduce a multi-module ledger, persistence, global preventive status, cross-module clinical inference or broader return payload without a new explicit architecture/privacy contract and gate.
+
+## Next architectural decision
+
+The next meaningful product step is no longer a simple UI continuation. A multi-module session view would require deciding whether the MOTOR should retain more than one shallow module snapshot during the same tab session. That decision should be handled as a separate architecture phase before implementation.
 
 ## Non-goals
 
