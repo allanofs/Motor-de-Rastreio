@@ -10,7 +10,7 @@ describe("A6 explicit module -> Shell return UI", () => {
   it("consumes exactly one shallow outcome receipt when the Shell loads", () => {
     expect(shellMain).toContain("consumeMotorModuleOutcomeReceipt(window)");
     expect(shellMain).toContain("returnedSnapshot?.moduleId === module.id");
-    expect(shellMain).toContain("data-returned-module-status");
+    expect(shellMain).toContain("status.dataset.returnedModuleStatus = module.id");
   });
 
   it("renders returned status only on the matching independent module card", () => {
