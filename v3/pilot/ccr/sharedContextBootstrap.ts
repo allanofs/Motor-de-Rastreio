@@ -8,6 +8,7 @@ import {
   consumeMotorNavigationHandoff,
   consumeMotorTabSessionModuleHandoff,
   createMotorEphemeralSessionLedger,
+  encodeMotorTabJourneyShellReturn,
   encodeMotorTabSessionShellReturn,
 } from "../../src/product/shell";
 import { collectCcrPilotDraft } from "./pilotDraft";
@@ -45,7 +46,9 @@ if (resultState instanceof HTMLElement) {
     const evaluated = evaluateCcrProductDraft(collectCcrPilotDraft(pilotExams));
     if (!evaluated.ok) return;
     const snapshot = toCcrMotorModuleSnapshot(presentCcrProduct(evaluated));
-    window.name = encodeMotorTabSessionShellReturn(sessionLedger, snapshot);
+    window.name = context === undefined
+      ? encodeMotorTabSessionShellReturn(sessionLedger, snapshot)
+      : encodeMotorTabJourneyShellReturn("ccr", context, sessionLedger, snapshot);
     window.location.assign("../shell/index.html");
   });
   returnBox.append(button);
