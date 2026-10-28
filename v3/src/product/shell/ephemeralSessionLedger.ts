@@ -12,6 +12,9 @@ export type MotorEphemeralSessionLedger = Readonly<{
 function sanitizeSnapshot(
   snapshot: MotorModuleSnapshot<MotorModuleId>,
 ): MotorModuleSnapshot<MotorModuleId> {
+  if (snapshot.moduleId !== "ccr" && snapshot.moduleId !== "mama") {
+    throw new TypeError("Unknown MOTOR module snapshot");
+  }
   return Object.freeze({
     moduleId: snapshot.moduleId,
     moduleLabel: snapshot.moduleLabel,
@@ -58,10 +61,11 @@ export function upsertMotorEphemeralSessionSnapshot(
   ledger: MotorEphemeralSessionLedger,
   snapshot: MotorModuleSnapshot<MotorModuleId>,
 ): MotorEphemeralSessionLedger {
-  return freezeLedger({
-    ...ledger.snapshots,
-    [snapshot.moduleId]: sanitizeSnapshot(snapshot),
-  });
+  const next: Partial<Record<MotorModuleId, MotorModuleSnapshot<MotorModuleId>>> = {};
+  if (ledger.snapshots.ccr !== undefined) next.ccr = sanitizeSnapshot(ledger.snapshots.ccr);
+  if (ledger.snapshots.mama !== undefined) next.mama = sanitizeSnapshot(ledger.snapshots.mama);
+  next[snapshot.moduleId] = sanitizeSnapshot(snapshot);
+  return freezeLedger(next);
 }
 
 export function readMotorEphemeralSessionSnapshot(
