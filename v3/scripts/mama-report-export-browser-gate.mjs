@@ -413,7 +413,15 @@ async function main() {
       width: innerWidth,
       externalLoadedResources: performance.getEntriesByType('resource')
         .map((entry) => entry.name)
-        .filter((url) => /^https?:/i.test(url) && !/^https?:\/\/(127\.0\.0\.1|localhost)(:|\/)/i.test(url)),
+        .filter((url) => {
+          try {
+            const parsed = new URL(url);
+            return ['http:', 'https:'].includes(parsed.protocol) &&
+              !['127.0.0.1', 'localhost'].includes(parsed.hostname);
+          } catch {
+            return false;
+          }
+        }),
     }))()`);
 
     assert(/Relatório Mama/i.test(reportTab.title ?? ""), "Wrong report title", reportTab);
