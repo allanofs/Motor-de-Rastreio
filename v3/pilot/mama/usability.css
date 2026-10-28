@@ -1,0 +1,41 @@
+/* A13 usability pass: presentation only. No clinical logic lives here. */
+
+/* The safety block contains seven short tri-state questions. On desktop,
+   keep them visually grouped so the user can scan the set without a long page. */
+#safety-questions {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .75rem;
+  align-items: stretch;
+}
+
+#safety-questions .choice-group {
+  display: flex;
+  flex-direction: column;
+  padding: .8rem .9rem;
+  min-width: 0;
+}
+
+#safety-questions .choice-group legend {
+  line-height: 1.35;
+}
+
+#safety-questions .choice-options {
+  gap: .4rem;
+  margin-top: .55rem;
+}
+
+#safety-questions .choice-options label {
+  padding: .42rem .62rem;
+  min-height: 40px;
+}
+
+#safety-questions .helper {
+  font-size: .8rem;
+  line-height: 1.4;
+  margin-top: .45rem;
+}
+
+@media (max-width: 700px) {
+  #safety-questions { grid-template-columns: 1fr; }
+  #safety-questions .choice-options label { min-height: 44px; }
+}
