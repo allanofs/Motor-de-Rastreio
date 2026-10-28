@@ -1,6 +1,6 @@
 # A9 — Multi-module same-tab continuity UI
 
-Status: **Draft / integration gate**
+Status: **GREEN / FROZEN / Draft PR**
 
 ## Objective
 
@@ -35,7 +35,7 @@ CCR and Mama shared bootstrap code may:
 - derive the current domain's own shallow snapshot through its existing evaluator/presenter/adapter;
 - call the shared A8 return encoder with the opaque ledger + current snapshot.
 
-The bootstrap must not inspect `ledger.snapshots`, compare modules or derive cross-domain meaning.
+The bootstrap does not inspect `ledger.snapshots`, compare modules or derive cross-domain meaning.
 
 ## Compatibility
 
@@ -61,7 +61,7 @@ The `window.name` channel is only a single-use navigation carrier. A8 consumes r
 
 ## No aggregation rule
 
-Even when both cards have summaries, A9 must not show or derive:
+Even when both cards have summaries, A9 does not show or derive:
 
 - global preventive status;
 - "all screening complete";
@@ -72,24 +72,28 @@ Even when both cards have summaries, A9 must not show or derive:
 
 The user sees two independent module summaries, not one synthetic clinical conclusion.
 
-## Gate
+## Final gate
 
-A9 is green only if:
+The A9 implementation gate passed at HEAD `1981e968ef02e7874774d18a27a8acb84d27b539` before this documentation-only freeze commit:
 
-- inherited A0-A8 gates remain green;
-- Shell consumes A8 return into an A7 ledger;
-- Shell sends the current ledger with the next A8 module handoff;
-- CCR and Mama bootstraps consume A8 and keep the ledger opaque;
-- both bootstraps return through A8 with only their own derived shallow snapshot;
-- Shell renders each card from its own ledger entry;
-- A6 explicit return behavior remains intact;
-- no aggregate/global status is introduced;
-- no persistence/network/URL state is introduced;
-- Shell, CCR and Mama builds/browser gates remain green where triggered;
-- V2 remains byte-for-byte preserved.
+- inherited `npm run check`: green;
+- A9 multi-module continuity tests: green as part of the full suite;
+- V2 byte-for-byte preservation: green;
+- Shell typecheck/build: green;
+- Shell real-Chrome DOM/navigation smoke: green;
+- Shell desktop/mobile screenshots + evidence upload: green;
+- Mama pilot build: green;
+- Mama real-Chrome responsive/keyboard/privacy gate: green;
+- Mama real-Chrome local report-export gate: green;
+- Mama browser evidence upload: green;
+- Foundation gate continues to cover CCR pilot typecheck/build.
+
+## Freeze rule
+
+A9 is frozen as same-tab, multi-module continuity of shallow independent summaries. Later phases must not add persistence, patient identity, cross-module clinical inference, combined status/score or broader payloads without a new explicit architecture/privacy contract and gate.
 
 ## Next phase after A9
 
-After A9, the next useful work should focus on product validation of this full two-module journey in real Chrome, including a scripted CCR -> Shell -> Mama -> Shell scenario and screenshot evidence showing both independent summaries together.
+A10 should validate the full two-module journey in real Chrome with a scripted CCR -> Shell -> Mama -> Shell scenario and screenshot evidence showing both independent summaries together.
 
 That validation must not require merge, deploy or public release.
