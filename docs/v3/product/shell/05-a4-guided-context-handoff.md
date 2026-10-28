@@ -1,6 +1,6 @@
 # A4 — Ephemeral Guided Interview context handoff
 
-Status: **Draft / integration gate**
+Status: **GREEN / FROZEN / Draft PR**
 
 ## Objective
 
@@ -8,7 +8,7 @@ Carry the two A2 global session facts from the Unified MOTOR Shell into the sele
 
 ## Data flow
 
-`Shell form -> single-use same-tab handoff -> selected domain adapter -> local Guided Interview inputs`
+`Shell module selection -> progressive context form -> single-use same-tab handoff -> selected domain adapter -> local Guided Interview inputs`
 
 Allowed shared facts remain only:
 
@@ -16,6 +16,8 @@ Allowed shared facts remain only:
 - birth date, when voluntarily supplied.
 
 The Shell does not derive age. CCR and Mama independently derive completed age through their A3 domain adapters.
+
+The context form is progressively disclosed only after the user chooses a module; the initial landing surface remains free of patient-input fields.
 
 ## Carrier and lifecycle
 
@@ -50,6 +52,24 @@ A4 does not:
 - infer anatomy, sex/gender, risk, eligibility or screening status from birth date;
 - authorize clinical or public use.
 
-## Required gate
+## Final gate
 
-A4 must preserve all inherited A0-A3 tests and builds and add checks for single-use consumption, target binding, malformed-envelope safe failure, invalid-date safe failure, unknown propagation and URL/storage boundaries. Real-Chrome validation should confirm Shell -> CCR and Shell -> Mama prefill, carrier clearing after entry, correction remaining local, and no patient facts in the address bar.
+A4 preserved the inherited A0-A3 boundaries and passed the integration gate at HEAD `86d2c1bb21c599509ff8208f4bbfc746a53b53d8` before this documentation-only freeze commit:
+
+- Foundation workflow: green;
+- V2 byte-for-byte preservation: green;
+- Mama browser gate: green;
+- Unified MOTOR Shell browser gate: green;
+- Shell TypeScript typecheck: green;
+- Shell Vite build: green;
+- real-Chrome DOM/navigation lifecycle: green;
+- desktop/mobile evidence capture: green;
+- single-use and target-bound handoff tests: green;
+- malformed/invalid context safe failure: green;
+- no patient facts in URL or durable browser storage: preserved.
+
+The first A4 browser run exposed a TypeScript DOM typing incompatibility for the birthday autocomplete value. The implementation was corrected without weakening the contract, and the rerun passed.
+
+## Freeze rule
+
+A4 is frozen as the first validated one-way Shell-to-module context transport. Later phases must not broaden the shared fact set, add persistence, introduce module-to-Shell write-back, or create cross-module clinical inference without a new explicit contract and gate.
