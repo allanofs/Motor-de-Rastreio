@@ -1,6 +1,6 @@
 # A8 — Same-tab transport for shared context + shallow module ledger
 
-Status: **Draft / architecture gate**
+Status: **GREEN / FROZEN / Draft PR**
 
 ## Objective
 
@@ -78,28 +78,32 @@ Runtime extras in context or snapshots are removed by composition through the fr
 
 ## Clinical blindness rule
 
-The transport lives under `src/product/shell` and must not import CCR or Mama evaluators, presenters, rules or clinical adapters.
+The transport lives under `src/product/shell` and does not import CCR or Mama evaluators, presenters, rules or clinical adapters.
 
 Later pilot integration may pass the ledger through module bootstrap code, but the domain's clinical logic must remain blind to other modules' entries.
 
-## Gate
+## Final gate
 
-A8 is green only if:
+The A8 implementation gate passed at HEAD `40a1f7d8b7c50c4cb9859af88f1fbdb3193a88e0` before this documentation-only freeze commit:
 
-- inherited A0-A7 gates remain green;
-- module-bound handoff round-trips sanitized context plus up to two independent snapshots;
-- Shell-bound return replaces only the current module entry;
-- target mismatch and malformed MOTOR envelopes fail closed and clear the recognized carrier;
-- unrelated `window.name` is preserved;
-- duplicate module receipts are rejected;
-- runtime extras are absent from the encoded carrier;
-- transport imports no CCR/Mama clinical product code;
-- no persistence/network/URL carrier or aggregate status is introduced;
-- V2 remains byte-for-byte preserved.
+- inherited `npm run check`: green;
+- A8 transport tests: green as part of the full suite;
+- V2 byte-for-byte preservation: green;
+- Shell TypeScript typecheck: green;
+- Shell Vite build: green;
+- real-Chrome DOM/navigation smoke: green;
+- desktop/mobile screenshot capture: green;
+- Shell evidence upload: green.
+
+The gate covers sanitized context + ledger round-trip, current-module-only replacement, target/malformed safe failure, unrelated carrier preservation, duplicate receipt rejection, runtime-extra stripping, shared-infrastructure isolation and absence of persistence/network/URL/aggregate status.
+
+## Freeze rule
+
+A8 is frozen as the only authorized same-tab carrier for combined shared context + shallow ledger continuity. Later phases must not broaden its payload, add durable storage, identifiers, cross-module inference or global preventive status without a new explicit architecture/privacy contract and gate.
 
 ## Next phase after A8
 
-Only after A8 is green may A9 wire the pilot pages to the new session transport and render multiple independent returned module statuses in the Shell.
+A9 may wire the pilot pages to the new session transport and render multiple independent returned module statuses in the Shell.
 
 A9 must not add a combined status, score, priority order or persistence. It is only continuity of already-authorized shallow per-module states within the same tab journey.
 
