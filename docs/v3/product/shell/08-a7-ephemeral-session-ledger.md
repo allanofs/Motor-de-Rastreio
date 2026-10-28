@@ -1,6 +1,6 @@
 # A7 — Ephemeral multi-module shallow snapshot ledger
 
-Status: **Draft / architecture gate**
+Status: **GREEN / FROZEN / Draft PR**
 
 ## Objective
 
@@ -96,26 +96,29 @@ The presence of multiple snapshots must never be interpreted by the Shell as:
 
 The Shell may eventually display independent module states side by side, but each remains a separate domain projection.
 
-## Gate
+## Final gate
 
-A7 is green only if:
+The A7 implementation gate passed at HEAD `b6abba4976d7aa3ed302d33090a07a2cc272df2b` before this documentation-only freeze commit:
 
-- inherited A0-A6 gates remain green;
-- the ledger starts empty, immutable and explicitly tab-ephemeral;
-- it retains at most one shallow snapshot per registered module;
-- replacing one module leaves the other unchanged;
-- runtime extra/deep properties are stripped;
-- unknown module IDs are rejected;
-- unexpected ledger keys are not propagated;
-- explicit clearing returns an empty ledger;
-- the A7 source introduces no persistence, network, URL or browser-carrier mechanism;
-- no aggregate/global preventive status exists;
-- V2 remains byte-for-byte preserved.
+- inherited `npm run check`: green;
+- A7 ledger tests: green as part of the full suite;
+- V2 byte-for-byte preservation: green;
+- Shell TypeScript typecheck: green;
+- Shell Vite build: green;
+- real-Chrome DOM/navigation smoke: green;
+- desktop/mobile screenshot capture: green;
+- Shell evidence upload: green.
+
+The gate specifically covers immutability, independent per-module replacement, strict registered-module scope, runtime extra-field stripping, removal of unexpected ledger keys, explicit clearing, no browser carrier/persistence/network/URL mechanism in A7, and absence of aggregate/global preventive state.
+
+## Freeze rule
+
+A7 is frozen as a pure product-continuity ledger contract. Later phases must not add raw patient facts, persistence, identifiers, timestamps for clinical priority, cross-module inference or global preventive status without a new explicit architecture/privacy contract and gate.
 
 ## Next phase after A7
 
-Only after A7 is green may A8 define a same-tab transport protocol that carries this shallow ledger across Shell -> module -> Shell navigation.
+A8 may define a same-tab transport protocol that carries this shallow ledger across Shell -> module -> Shell navigation.
 
-A8 must keep the clinical module blind to the meaning of other modules' snapshots: any ledger pass-through must be handled by shared product/navigation infrastructure, not by CCR or Mama clinical logic.
+A8 must keep clinical modules blind to the meaning of other modules' snapshots: ledger pass-through must be handled by shared product/navigation infrastructure, not by CCR or Mama clinical logic.
 
 No persistence, merge, deploy or public release is authorized by A7.
