@@ -1,6 +1,6 @@
 # A10 — Preserve shared factual context on module -> Shell return
 
-Status: **Draft / architecture gate**
+Status: **GREEN / FROZEN / Draft PR**
 
 ## Why A10 exists
 
@@ -34,48 +34,32 @@ If source module and current snapshot disagree, encoding is rejected.
 
 ## Lifecycle
 
-The shared context remains:
-
-- explicit;
-- immutable;
-- known/unknown aware;
-- provenance-preserving;
-- same-tab ephemeral;
-- non-persistent.
+The shared context remains explicit, immutable, known/unknown aware, provenance-preserving, same-tab ephemeral and non-persistent.
 
 Returning the context to the Shell does not create a patient profile or longitudinal record. It only allows the next navigation in the same tab journey to reuse facts already supplied in that journey.
 
 ## Privacy boundary
 
-A10 adds no:
-
-- sex/gender inference;
-- age field in the Shell context;
-- symptoms, risks, screening history or exam data;
-- patient identifier;
-- rule/source IDs or traces;
-- report provenance internals;
-- timestamps for clinical priority;
-- localStorage/sessionStorage/IndexedDB/cookies;
-- URL query/fragment state;
-- backend, analytics or network transmission;
-- global preventive status or cross-module clinical inference.
+A10 adds no sex/gender inference, age field in shared context, symptoms/risks/history/exam data, patient identifier, rule/source IDs or traces, report internals, clinical-priority timestamps, durable storage, URL state, backend, analytics, global preventive status or cross-module clinical inference.
 
 Runtime extra properties are removed by the frozen A4/A8 contracts before transport.
 
-## Gate
+## Final gate
 
-A10 is green only if:
+The A10 implementation gate passed at HEAD `1d941909a81e851b15944f9454c63adad07d80da` before this documentation-only freeze commit:
 
-- inherited A0-A9 gates remain green;
-- context + shallow ledger round-trip together to the Shell;
-- an existing other-module snapshot is preserved while the current module is replaced;
-- source-module/current-snapshot mismatch is rejected;
-- runtime extra context/snapshot fields are absent from the carrier;
-- malformed recognized envelopes fail closed and clear;
-- unrelated `window.name` is preserved;
-- no persistence/network/URL/aggregation is introduced;
-- V2 remains byte-for-byte preserved.
+- inherited `npm run check`: green;
+- A10 context-return tests: green as part of the full suite;
+- V2 byte-for-byte preservation: green;
+- Shell typecheck/build: green;
+- Shell real-Chrome DOM/navigation smoke: green;
+- desktop/mobile screenshot capture + evidence upload: green.
+
+The gate covers context + shallow-ledger round-trip, preservation of an existing other-module snapshot, source/snapshot mismatch rejection, runtime-extra stripping, malformed safe failure, unrelated carrier preservation and absence of persistence/network/URL/aggregation.
+
+## Freeze rule
+
+A10 is frozen as the authorized way to return already-known shared factual context to the Shell within the same tab journey. Later phases must not broaden the shared facts or add persistence/identity/cross-module clinical inference without a new explicit contract and gate.
 
 ## Next phase after A10
 
