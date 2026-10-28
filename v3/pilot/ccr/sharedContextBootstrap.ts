@@ -6,12 +6,17 @@ import {
 } from "../../src/product/ccr";
 import {
   consumeMotorNavigationHandoff,
-  encodeMotorModuleOutcomeReceipt,
+  consumeMotorTabSessionModuleHandoff,
+  createMotorEphemeralSessionLedger,
+  encodeMotorTabSessionShellReturn,
 } from "../../src/product/shell";
 import { collectCcrPilotDraft } from "./pilotDraft";
 import { pilotExams } from "./pilotExamState";
 
-const context = consumeMotorNavigationHandoff(window, "ccr");
+const tabSession = consumeMotorTabSessionModuleHandoff(window, "ccr");
+let sessionLedger = tabSession?.ledger ?? createMotorEphemeralSessionLedger();
+const context = tabSession?.context ?? consumeMotorNavigationHandoff(window, "ccr");
+
 if (context !== undefined) {
   const projection = projectSharedSessionContextToCcr(context);
   const asOf = document.getElementById("as-of");
@@ -40,7 +45,7 @@ if (resultState instanceof HTMLElement) {
     const evaluated = evaluateCcrProductDraft(collectCcrPilotDraft(pilotExams));
     if (!evaluated.ok) return;
     const snapshot = toCcrMotorModuleSnapshot(presentCcrProduct(evaluated));
-    window.name = encodeMotorModuleOutcomeReceipt(snapshot);
+    window.name = encodeMotorTabSessionShellReturn(sessionLedger, snapshot);
     window.location.assign("../shell/index.html");
   });
   returnBox.append(button);
