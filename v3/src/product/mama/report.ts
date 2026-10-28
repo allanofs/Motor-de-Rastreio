@@ -222,7 +222,6 @@ function usedInputSnapshot(
 
 function primaryActions(
   result: MamaProductSuccess,
-  tracks: TrackEvaluation[],
 ): MamaReportPrimaryAction[] {
   const model = presentMamaProduct(result);
   if (!["ROUTINE_DUE", "SHARED_DECISION"].includes(model.automationBoundary.code))
@@ -353,15 +352,12 @@ export function buildMamaReportModel(
         "Os dados atuais não reproduzem a avaliação que originou este relatório.",
     };
 
-  if (
-    normalizedResult.value.policyId !== recalculated.policy.policyId ||
-    !sameCalendarDate(normalizedResult.value.asOf, normalizedResult.value.asOf)
-  )
+  if (normalizedResult.value.policyId !== recalculated.policy.policyId)
     return {
       ok: false,
       code: "evaluation_input_mismatch",
       message:
-        "Os dados fornecidos para o relatório não correspondem à avaliação calculada.",
+        "O referencial fornecido para o relatório não corresponde à avaliação calculada.",
     };
 
   const boundary = presentation.automationBoundary;
@@ -419,7 +415,7 @@ export function buildMamaReportModel(
       },
       rationale: rationaleFor(recalculated, tracks),
       inputs: usedInputSnapshot(normalizedResult.value, tracks),
-      primaryActions: primaryActions(recalculated, tracks),
+      primaryActions: primaryActions(recalculated),
       unresolvedInformation: unresolvedInformation(tracks),
       provenance: resolveMamaReportProvenance(refs),
       ...(decisionContext === undefined ? {} : { decisionContext }),
