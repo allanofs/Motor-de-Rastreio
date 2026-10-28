@@ -4,3 +4,4 @@ export * from "./presentation";
 export * from "./acquisition";
 export * from "./report";
 export * from "./reportRenderer";
+export * from "./shellAdapter";

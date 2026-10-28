@@ -1,24 +1,15 @@
 import { CCR_IDS } from "../../clinical/ccr";
 import type { TrackEvaluation } from "../../model/evaluation";
+import type { MotorAutomationBoundaryCode } from "../shell/contracts";
 import type { CcrProductSuccess } from "./integration";
 
 export const CCR_AUTOMATION_BOUNDARY_CONTRACT_VERSION = "phaseB.1" as const;
 
 /**
- * Product/domain contract only. These codes are intentionally NOT Foundation
- * states: they compress an already-computed CCR evaluation for a simpler
- * product surface without changing clinical meaning or erasing the original
- * TrackEvaluation/DecisionTrace.
+ * Product/domain contract only. The shared code vocabulary is now proven in
+ * both CCR and Mama, but CCR still derives its boundary independently.
  */
-export type CcrAutomationBoundaryCode =
-  | "CANNOT_CONCLUDE_SAFELY"
-  | "SPECIFIC_ATTENTION_REQUIRED"
-  | "SPECIFIC_CARE_ACTIVE"
-  | "MORE_INFORMATION_NEEDED"
-  | "SHARED_DECISION"
-  | "ROUTINE_DUE"
-  | "ROUTINE_CURRENT"
-  | "SCREENING_NOT_INDICATED";
+export type CcrAutomationBoundaryCode = MotorAutomationBoundaryCode;
 
 export type CcrAutomationBoundary = {
   contractVersion: typeof CCR_AUTOMATION_BOUNDARY_CONTRACT_VERSION;
@@ -63,9 +54,7 @@ function boundary(
  * 6. routine current;
  * 7. no routine screening indication in the evaluated path.
  *
- * This function is domain-specific on purpose. It must not be promoted to the
- * Foundation until the same semantics are independently demonstrated in a
- * second domain.
+ * The vocabulary is shared with Mama; this derivation remains domain-specific.
  */
 export function deriveCcrAutomationBoundary(
   result: CcrProductSuccess,
