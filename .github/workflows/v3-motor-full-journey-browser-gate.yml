@@ -1,0 +1,52 @@
+name: V3 MOTOR full journey browser gate
+on:
+  pull_request:
+    paths:
+      - 'v3/pilot/shell/**'
+      - 'v3/pilot/ccr/**'
+      - 'v3/pilot/mama/**'
+      - 'v3/src/product/shell/**'
+      - 'v3/src/product/ccr/**'
+      - 'v3/src/product/mama/**'
+      - 'v3/scripts/motor-full-journey-browser-gate.mjs'
+      - 'v3/vite.motor-journey.config.ts'
+      - '.github/workflows/v3-motor-full-journey-browser-gate.yml'
+permissions:
+  contents: read
+jobs:
+  chromium:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: v3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: v3/package-lock.json
+      - run: npm ci
+      - name: Build integrated MOTOR journey
+        run: npx vite build --config vite.motor-journey.config.ts
+      - name: Confirm real Chrome
+        run: google-chrome --version
+      - name: Start integrated MOTOR preview
+        run: |
+          nohup npx vite preview --config vite.motor-journey.config.ts --host 127.0.0.1 --port 4176 > /tmp/motor-journey-preview.log 2>&1 &
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent http://127.0.0.1:4176/shell/index.html >/dev/null; then exit 0; fi
+            sleep 0.25
+          done
+          cat /tmp/motor-journey-preview.log
+          exit 1
+      - name: Run real-Chrome Shell -> CCR -> Shell -> Mama -> Shell gate
+        run: node scripts/motor-full-journey-browser-gate.mjs
+      - name: Upload full-journey evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: motor-full-journey-evidence
+          path: v3/journey-browser-artifacts/
+          if-no-files-found: warn
+          retention-days: 14
