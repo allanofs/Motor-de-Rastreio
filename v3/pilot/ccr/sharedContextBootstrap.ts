@@ -14,7 +14,7 @@ import { collectCcrPilotDraft } from "./pilotDraft";
 import { pilotExams } from "./pilotExamState";
 
 const tabSession = consumeMotorTabSessionModuleHandoff(window, "ccr");
-let sessionLedger = tabSession?.ledger ?? createMotorEphemeralSessionLedger();
+const sessionLedger = tabSession?.ledger ?? createMotorEphemeralSessionLedger();
 const context = tabSession?.context ?? consumeMotorNavigationHandoff(window, "ccr");
 
 if (context !== undefined) {
