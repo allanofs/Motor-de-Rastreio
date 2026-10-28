@@ -99,7 +99,8 @@ describe("A7 ephemeral multi-module shallow snapshot ledger", () => {
       createMotorEphemeralSessionLedger(),
       snapshot("ccr", "CCR"),
     );
-    expect(clearMotorEphemeralSessionLedger(populated as never).snapshots).toEqual({});
+    expect(populated.snapshots.ccr).toBeDefined();
+    expect(clearMotorEphemeralSessionLedger().snapshots).toEqual({});
   });
 
   it("defines no persistence, network, URL or browser carrier in A7", () => {
