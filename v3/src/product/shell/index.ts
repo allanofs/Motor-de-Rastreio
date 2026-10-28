@@ -4,3 +4,4 @@ export * from "./sessionContext";
 export * from "./navigationHandoff";
 export * from "./moduleOutcomeReceipt";
 export * from "./ephemeralSessionLedger";
+export * from "./tabSessionTransport";
