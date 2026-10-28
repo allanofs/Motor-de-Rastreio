@@ -6,14 +6,16 @@ const ccrBootstrap = readFileSync(new URL("../../pilot/ccr/sharedContextBootstra
 const mamaBootstrap = readFileSync(new URL("../../pilot/mama/sharedContextBootstrap.ts", import.meta.url), "utf8");
 const combinedModules = `${ccrBootstrap}\n${mamaBootstrap}`;
 
-describe("A6 explicit module -> Shell return UI", () => {
-  it("consumes exactly one shallow outcome receipt when the Shell loads", () => {
+describe("A6 explicit module -> Shell return UI invariants after A7-A9", () => {
+  it("still consumes shallow module outcomes without importing domain clinical logic into Shell", () => {
+    expect(shellMain).toContain("consumeMotorTabSessionShellReturn(window)");
     expect(shellMain).toContain("consumeMotorModuleOutcomeReceipt(window)");
-    expect(shellMain).toContain("returnedSnapshot?.moduleId === module.id");
     expect(shellMain).toContain("status.dataset.returnedModuleStatus = module.id");
+    expect(shellMain).not.toMatch(/evaluateCcr|evaluateMama|presentCcr|presentMama|toCcrMotor|toMamaMotor/i);
   });
 
-  it("renders returned status only on the matching independent module card", () => {
+  it("renders each returned status only from that module's independent shallow snapshot", () => {
+    expect(shellMain).toContain("sessionLedger.snapshots[module.id]");
     expect(shellMain).toContain("Última avaliação desta sessão");
     expect(shellMain).toContain("returned.surface.title");
     expect(shellMain).toContain("returned.surface.detail");
@@ -23,14 +25,14 @@ describe("A6 explicit module -> Shell return UI", () => {
   it("requires an explicit return action from both domain pilots", () => {
     expect(ccrBootstrap).toContain('button.textContent = "Voltar ao MOTOR"');
     expect(mamaBootstrap).toContain('button.textContent = "Voltar ao MOTOR"');
-    expect(combinedModules).toContain("encodeMotorModuleOutcomeReceipt(snapshot)");
+    expect(ccrBootstrap).toContain("encodeMotorTabSessionShellReturn(sessionLedger, snapshot)");
+    expect(mamaBootstrap).toContain("encodeMotorTabSessionShellReturn(sessionLedger, snapshot)");
     expect(combinedModules).toContain('window.location.assign("../shell/index.html")');
   });
 
-  it("derives the receipt through each domain adapter instead of the Shell", () => {
+  it("still derives each shallow snapshot through its own domain adapter", () => {
     expect(ccrBootstrap).toContain("toCcrMotorModuleSnapshot(presentCcrProduct(evaluated))");
     expect(mamaBootstrap).toContain("toMamaMotorModuleSnapshot(presentMamaProduct(evaluated))");
-    expect(shellMain).not.toMatch(/evaluateCcr|evaluateMama|presentCcr|presentMama|toCcrMotor|toMamaMotor/i);
   });
 
   it("adds no durable persistence, network transmission or URL-carried patient state", () => {
@@ -39,8 +41,9 @@ describe("A6 explicit module -> Shell return UI", () => {
     expect(combinedModules).not.toMatch(/location\.(search|hash)|URLSearchParams/i);
   });
 
-  it("does not create a cross-module ledger", () => {
-    expect(shellMain).not.toMatch(/ledger|moduleHistory|completedModules|moduleStatuses/i);
-    expect(shellMain).toContain("const returnedSnapshot");
+  it("permits only the explicitly authorized shallow session ledger, never aggregate clinical state", () => {
+    expect(shellMain).toContain("sessionLedger");
+    expect(shellMain).not.toMatch(/overallStatus|globalStatus|aggregateRisk|preventiveStatus|priorityScore/i);
+    expect(combinedModules).not.toMatch(/overallStatus|globalStatus|aggregateRisk|preventiveStatus|priorityScore/i);
   });
 });
