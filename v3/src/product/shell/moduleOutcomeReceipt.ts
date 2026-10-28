@@ -59,9 +59,9 @@ function parseSnapshot(value: unknown): MotorModuleSnapshot<MotorModuleId> | und
   if (!isNonEmptyString(value.policyLabel)) return undefined;
   if (typeof value.boundaryCode !== "string" || !BOUNDARY_CODES.has(value.boundaryCode as MotorAutomationBoundaryCode)) return undefined;
   if (typeof value.requiresAttention !== "boolean") return undefined;
-  if (!Number.isInteger(value.requestedInputCount) || (value.requestedInputCount as number) < 0) return undefined;
+  if (typeof value.requestedInputCount !== "number" || !Number.isInteger(value.requestedInputCount) || value.requestedInputCount < 0) return undefined;
   if (typeof value.hasPendingInput !== "boolean") return undefined;
-  if (value.hasPendingInput !== ((value.requestedInputCount as number) > 0)) return undefined;
+  if (value.hasPendingInput !== (value.requestedInputCount > 0)) return undefined;
   const surface = parseSurface(value.surface);
   if (surface === undefined) return undefined;
 
@@ -73,7 +73,7 @@ function parseSnapshot(value: unknown): MotorModuleSnapshot<MotorModuleId> | und
     policyLabel: value.policyLabel,
     boundaryCode: value.boundaryCode as MotorAutomationBoundaryCode,
     requiresAttention: value.requiresAttention,
-    requestedInputCount: value.requestedInputCount as number,
+    requestedInputCount: value.requestedInputCount,
     hasPendingInput: value.hasPendingInput,
     surface,
   });
