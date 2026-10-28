@@ -1,4 +1,8 @@
-import { MOTOR_MODULES } from "../../src/product/shell";
+import {
+  MOTOR_MODULES,
+  consumeMotorModuleOutcomeReceipt,
+  type MotorModuleSnapshot,
+} from "../../src/product/shell";
 import {
   createMotorSharedSessionContext,
   knownMotorSharedFact,
@@ -19,6 +23,8 @@ const icons: Record<(typeof MOTOR_MODULES)[number]["id"], string> = {
   mama: "MA",
 };
 
+const returnedSnapshot: MotorModuleSnapshot<MotorModuleId> | undefined =
+  consumeMotorModuleOutcomeReceipt(window);
 let pendingModule: MotorModuleId | undefined;
 let pendingHref: string | undefined;
 let evaluationDateEdited = false;
@@ -150,13 +156,26 @@ function cardFor(module: (typeof MOTOR_MODULES)[number]): HTMLElement {
   meta.className = "module-meta";
   meta.textContent = "Módulo clínico independente · apenas fatos globais podem acompanhar esta navegação";
 
+  const returned = returnedSnapshot?.moduleId === module.id ? returnedSnapshot : undefined;
+  const status = document.createElement("div");
+  status.className = "module-meta";
+  status.dataset.returnedModuleStatus = module.id;
+  status.hidden = returned === undefined;
+  if (returned !== undefined) {
+    const statusTitle = document.createElement("strong");
+    statusTitle.textContent = `Última avaliação desta sessão: ${returned.surface.title}`;
+    const statusDetail = document.createElement("span");
+    statusDetail.textContent = ` ${returned.surface.detail} · Referencial: ${returned.policyLabel}`;
+    status.append(statusTitle, statusDetail);
+  }
+
   const action = document.createElement("div");
   action.className = "module-action";
   const link = document.createElement("a");
   link.href = routes[module.id];
   link.dataset.moduleLink = module.id;
   const label = document.createElement("span");
-  label.textContent = "Iniciar avaliação";
+  label.textContent = returned === undefined ? "Iniciar avaliação" : "Revisar avaliação";
   const arrow = document.createElement("span");
   arrow.setAttribute("aria-hidden", "true");
   arrow.textContent = "→";
@@ -167,7 +186,7 @@ function cardFor(module: (typeof MOTOR_MODULES)[number]): HTMLElement {
   });
   action.append(link);
 
-  article.append(top, title, description, meta, action);
+  article.append(top, title, description, meta, status, action);
   return article;
 }
 
