@@ -4,7 +4,7 @@
 
 .result-panel {
   position: sticky;
-  top: 58px;
+  top: 1rem;
   padding: 20px 24px;
 }
 
@@ -13,13 +13,13 @@
 .journey-summary:empty { display: none; }
 
 .edit-step {
-  background: transparent;
-  color: #5269aa;
-  border: 1px solid #e1e6ef;
+  background: #fff;
+  color: #7b325f;
+  border: 1px solid #d7dee8;
   padding: 7px 10px;
   font-size: 13px;
 }
-.edit-step:hover { background: #f7f9fc; }
+.edit-step:hover { background: #f6eaf1; }
 
 .journey-started .hero {
   margin-bottom: 16px;
@@ -40,7 +40,7 @@
 }
 .exam-compact-summary {
   margin: 0;
-  color: #596276;
+  color: #5b6875;
   font-size: 13px;
   line-height: 1.45;
 }
