@@ -4,19 +4,13 @@ import {
   type MamaSharedDecisionReason,
 } from "../../clinical/mama";
 import type { TrackEvaluation } from "../../model/evaluation";
+import type { MotorAutomationBoundaryCode } from "../shell/contracts";
 import type { MamaProductSuccess } from "./integration";
 
 export const MAMA_AUTOMATION_BOUNDARY_CONTRACT_VERSION = "mama-B1" as const;
 
-export type MamaAutomationBoundaryCode =
-  | "CANNOT_CONCLUDE_SAFELY"
-  | "SPECIFIC_ATTENTION_REQUIRED"
-  | "SPECIFIC_CARE_ACTIVE"
-  | "MORE_INFORMATION_NEEDED"
-  | "SHARED_DECISION"
-  | "ROUTINE_DUE"
-  | "ROUTINE_CURRENT"
-  | "SCREENING_NOT_INDICATED";
+/** Shared vocabulary; Mama still derives its own boundary independently. */
+export type MamaAutomationBoundaryCode = MotorAutomationBoundaryCode;
 
 export type MamaAutomationBoundaryReasonCode =
   | MamaSharedDecisionReason
