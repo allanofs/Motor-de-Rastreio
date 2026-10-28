@@ -66,6 +66,10 @@ export function unknownMotorSharedFact(
   return Object.freeze({ status: "unknown", reason });
 }
 
+function isLeapYear(year: number): boolean {
+  return year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
+}
+
 export function motorIsoDate(value: string): MotorIsoDate {
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
   if (match === null) throw new Error("Expected ISO calendar date YYYY-MM-DD");
@@ -73,13 +77,22 @@ export function motorIsoDate(value: string): MotorIsoDate {
   const year = Number(match[1]);
   const month = Number(match[2]);
   const day = Number(match[3]);
-  const date = new Date(Date.UTC(year, month - 1, day));
+  const daysInMonth = [
+    31,
+    isLeapYear(year) ? 29 : 28,
+    31,
+    30,
+    31,
+    30,
+    31,
+    31,
+    30,
+    31,
+    30,
+    31,
+  ] as const;
 
-  if (
-    date.getUTCFullYear() !== year ||
-    date.getUTCMonth() !== month - 1 ||
-    date.getUTCDate() !== day
-  ) {
+  if (month < 1 || month > 12 || day < 1 || day > daysInMonth[month - 1]) {
     throw new Error("Expected a valid calendar date");
   }
 
