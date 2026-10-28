@@ -25,7 +25,7 @@
           <span class="section-kicker">Módulos disponíveis</span>
           <h2 id="module-heading">O que você quer revisar?</h2>
         </div>
-        <p>Você entra em um fluxo por vez. Nenhum dado é compartilhado automaticamente entre os módulos.</p>
+        <p>Você entra em um fluxo por vez. Apenas data de referência e, se informada, data de nascimento podem acompanhar a entrada no módulo.</p>
       </div>
       <div id="module-grid" class="module-grid" aria-live="polite"></div>
     </section>
@@ -42,6 +42,31 @@
       </div>
     </section>
   </main>
+
+  <dialog id="shared-context-dialog" class="shared-context-dialog" aria-labelledby="shared-context-title">
+    <form id="shared-context-form" method="dialog">
+      <span class="section-kicker">Contexto desta sessão</span>
+      <h2 id="shared-context-title">Antes de abrir <span id="shared-context-module"></span></h2>
+      <p class="dialog-copy">Estes fatos globais podem preencher o início da entrevista. A idade é calculada dentro do módulo, nunca pela home.</p>
+      <div class="dialog-fields">
+        <label>
+          Data de referência
+          <input id="shared-evaluation-date" type="date" required />
+        </label>
+        <label>
+          Data de nascimento <span class="optional">(opcional)</span>
+          <input id="shared-birth-date" type="date" autocomplete="bday" />
+        </label>
+      </div>
+      <p id="shared-context-error" class="dialog-error" role="alert" aria-live="polite"></p>
+      <p class="privacy-copy">Uso único nesta navegação: não vai para a URL, não é salvo em armazenamento do navegador e é apagado ao entrar no módulo.</p>
+      <div class="dialog-actions">
+        <button id="shared-context-cancel" type="button" class="secondary-button">Cancelar</button>
+        <button type="submit" class="primary-button">Continuar para o módulo</button>
+      </div>
+    </form>
+  </dialog>
+
   <script type="module" src="./main.ts"></script>
 </body>
 </html>
