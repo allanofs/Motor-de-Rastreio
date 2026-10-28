@@ -143,6 +143,38 @@ async function dispatchTab(page) {
   await sleep(80);
 }
 
+async function dispatchClick(page, selector) {
+  const point = await page.evaluate(`(() => {
+    const node = document.querySelector(${JSON.stringify(selector)});
+    if (!node) return null;
+    const rect = node.getBoundingClientRect();
+    return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+  })()`);
+  assert(point !== null, `Missing click target ${selector}`);
+  await page.send("Input.dispatchMouseEvent", {
+    type: "mousePressed",
+    x: point.x,
+    y: point.y,
+    button: "left",
+    clickCount: 1,
+  });
+  await page.send("Input.dispatchMouseEvent", {
+    type: "mouseReleased",
+    x: point.x,
+    y: point.y,
+    button: "left",
+    clickCount: 1,
+  });
+  await sleep(100);
+}
+
+async function pageTargets() {
+  const response = await fetch(`http://127.0.0.1:${DEVTOOLS_PORT}/json/list`);
+  if (!response.ok) return [];
+  const targets = await response.json();
+  return targets.filter((target) => target.type === "page");
+}
+
 async function main() {
   await mkdir(ARTIFACT_DIR, { recursive: true });
 
@@ -162,11 +194,12 @@ async function main() {
     "about:blank",
   ], { stdio: "ignore" });
 
+  let reportPage;
   try {
     await waitFor(async () => {
       const response = await fetch(`http://127.0.0.1:${DEVTOOLS_PORT}/json/version`);
       return response.ok;
-    }, "Chrome DevTools endpoint");
+    }, "Chrome DevTools endpoint", 20_000);
 
     const targetResponse = await fetch(
       `http://127.0.0.1:${DEVTOOLS_PORT}/json/new?${encodeURIComponent("about:blank")}`,
@@ -293,6 +326,11 @@ async function main() {
     await waitFor(async () => (await page.evaluate("document.querySelector('#result-title')?.textContent?.trim()")) === "Rastreamento indicado", "governed due result");
     await waitFor(async () => await page.evaluate("!document.querySelector('#availability-section').classList.contains('hidden')"), "availability disclosure");
 
+    const exportBeforeAvailability = await page.evaluate(
+      "document.querySelector('#report-export')?.classList.contains('hidden') ?? true",
+    );
+    assert(exportBeforeAvailability, "Export became available before requested availability input");
+
     const finalDesktop = await page.evaluate(`(() => ({
       title: document.querySelector('#result-title')?.textContent?.trim(),
       availabilityVisible: !document.querySelector('#availability-section').classList.contains('hidden'),
@@ -304,6 +342,77 @@ async function main() {
     assert(finalDesktop.availabilityVisible, "Due flow did not reveal operational availability", finalDesktop);
     assert(!finalDesktop.errorVisible, "Real-browser flow surfaced an error", finalDesktop);
     assert(finalDesktop.scrollWidth <= finalDesktop.width + 1, "Completed desktop flow overflowed horizontally", finalDesktop);
+
+    await page.evaluate("window.__mamaGate.choose('mammography-availability', 'available'); true");
+    const exportBeforeSubmit = await page.evaluate(
+      "document.querySelector('#report-export')?.classList.contains('hidden') ?? true",
+    );
+    assert(exportBeforeSubmit, "Export became available before explicit evaluation submit");
+
+    await dispatchClick(page, "#evaluate-button");
+    await waitFor(
+      async () =>
+        await page.evaluate(
+          "!document.querySelector('#report-export')?.classList.contains('hidden')",
+        ),
+      "Mama report export control",
+    );
+
+    const exportReady = await page.evaluate(`(() => ({
+      visible: !document.querySelector('#report-export').classList.contains('hidden'),
+      buttonText: document.querySelector('#export-report')?.textContent?.trim(),
+      status: document.querySelector('#report-export-status')?.textContent?.trim(),
+    }))()`);
+    assert(exportReady.visible, "Export control is not visible after export-eligible submit", exportReady);
+    assert(/Exportar relatório/i.test(exportReady.buttonText ?? ""), "Unexpected export button label", exportReady);
+
+    const targetsBeforeExport = await pageTargets();
+    const targetIdsBefore = new Set(targetsBeforeExport.map((item) => item.id));
+    await dispatchClick(page, "#export-report");
+
+    const reportTarget = await waitFor(async () => {
+      const targets = await pageTargets();
+      return targets.find(
+        (item) => !targetIdsBefore.has(item.id) && item.webSocketDebuggerUrl,
+      );
+    }, "local report tab");
+
+    reportPage = new CdpPage(reportTarget.webSocketDebuggerUrl);
+    await reportPage.connect();
+    await reportPage.send("Page.enable");
+    await reportPage.send("Runtime.enable");
+    await setViewport(reportPage, 1100, 900, false);
+    await waitFor(
+      async () => (await reportPage.evaluate("document.readyState")) === "complete",
+      "local report document",
+    );
+
+    const reportTab = await reportPage.evaluate(`(() => ({
+      title: document.title,
+      heading: document.querySelector('h1')?.textContent?.trim(),
+      text: document.body.textContent,
+      openerIsNull: window.opener === null,
+      printButton: document.querySelector('#print-report')?.textContent?.trim(),
+      externalLoadedResources: performance.getEntriesByType('resource')
+        .map((entry) => entry.name)
+        .filter((url) => /^https?:/i.test(url) && !/^https?:\/\/(127\.0\.0\.1|localhost)(:|\/)/i.test(url)),
+    }))()`);
+    assert(/Relatório Mama/i.test(reportTab.title ?? ""), "Unexpected report tab title", reportTab);
+    assert(/rastreamento de câncer de mama/i.test(reportTab.heading ?? ""), "Unexpected report heading", reportTab);
+    assert((reportTab.text ?? "").includes("Rastreamento indicado"), "Report tab lost governed result", reportTab);
+    assert((reportTab.text ?? "").includes("Referências utilizadas nesta conclusão"), "Report tab lost provenance section", reportTab);
+    assert((reportTab.text ?? "").includes("track_trace"), "Report tab lost provenance carrier", reportTab);
+    assert(reportTab.openerIsNull, "Report tab retained window.opener", reportTab);
+    assert(/Imprimir/i.test(reportTab.printButton ?? ""), "Report tab has no print control", reportTab);
+    assert(reportTab.externalLoadedResources.length === 0, "Report tab loaded external resources", reportTab.externalLoadedResources);
+    await screenshot(reportPage, "mama-report.png");
+
+    await page.evaluate("window.__mamaGate.setValue('#age', '56'); true");
+    const exportAfterEdit = await page.evaluate(
+      "document.querySelector('#report-export')?.classList.contains('hidden') ?? true",
+    );
+    assert(exportAfterEdit, "Editing the form did not immediately invalidate export state");
+
     await screenshot(page, "mama-desktop.png");
 
     await setViewport(page, 390, 844, true);
@@ -348,6 +457,19 @@ async function main() {
       desktop,
       keyboard: { policyTo: tab1, dateTabSequence, reachedAge },
       governedFlow: finalDesktop,
+      reportExport: {
+        exportBeforeAvailability,
+        exportBeforeSubmit,
+        exportReady,
+        reportTab: {
+          title: reportTab.title,
+          heading: reportTab.heading,
+          openerIsNull: reportTab.openerIsNull,
+          printButton: reportTab.printButton,
+          externalLoadedResources: reportTab.externalLoadedResources,
+        },
+        exportAfterEdit,
+      },
       mobile,
       networkRequestCount: networkRequests.length,
       externalRequests,
@@ -357,8 +479,11 @@ async function main() {
     };
     await writeFile(new URL("report.json", ARTIFACT_DIR), `${JSON.stringify(report, null, 2)}\n`);
     console.log(JSON.stringify(report, null, 2));
+    reportPage.close();
+    reportPage = undefined;
     page.close();
   } finally {
+    reportPage?.close();
     chrome.kill("SIGTERM");
   }
 }
