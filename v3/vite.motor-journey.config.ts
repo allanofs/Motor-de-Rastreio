@@ -3,27 +3,29 @@ import { resolve } from "node:path";
 
 const rootDir = import.meta.dirname;
 
+function appendModuleScript(html: string, src: string): string {
+  return html.replace(
+    "</body>",
+    `    <script type="module" src="${src}"></script>\n  </body>`,
+  );
+}
+
 export default defineConfig({
   root: resolve(rootDir, "pilot"),
   plugins: [
     {
       name: "motor-integrated-shared-context-bootstraps",
-      transformIndexHtml(_html, context) {
-        if (context.path.includes("/ccr/")) {
-          return [{
-            tag: "script",
-            attrs: { type: "module", src: "/ccr/sharedContextBootstrap.ts" },
-            injectTo: "body-prepend",
-          }];
-        }
-        if (context.path.includes("/mama/")) {
-          return [{
-            tag: "script",
-            attrs: { type: "module", src: "/mama/sharedContextBootstrap.ts" },
-            injectTo: "body-prepend",
-          }];
-        }
-        return [];
+      transformIndexHtml: {
+        order: "pre",
+        handler(html, context) {
+          if (context.path.includes("/ccr/")) {
+            return appendModuleScript(html, "/ccr/sharedContextBootstrap.ts");
+          }
+          if (context.path.includes("/mama/")) {
+            return appendModuleScript(html, "/mama/sharedContextBootstrap.ts");
+          }
+          return html;
+        },
       },
     },
   ],
