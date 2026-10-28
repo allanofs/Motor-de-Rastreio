@@ -16,6 +16,10 @@ const draftSource = readFileSync(
   new NodeURL("../../pilot/mama/pilotDraft.ts", import.meta.url),
   "utf8",
 );
+const reportSource = readFileSync(
+  new NodeURL("../../pilot/mama/reportUi.ts", import.meta.url),
+  "utf8",
+);
 
 function el(selector) {
   const node = document.querySelector(selector);
@@ -61,7 +65,7 @@ describe("Mama pilot accessibility structure", () => {
 
 describe("Mama pilot privacy and implementation boundary", () => {
   it("contains no persistence, analytics or network APIs in pilot code", () => {
-    const source = `${mainSource}\n${draftSource}`;
+    const source = `${mainSource}\n${draftSource}\n${reportSource}`;
     for (const forbidden of [
       "localStorage",
       "sessionStorage",
@@ -75,7 +79,7 @@ describe("Mama pilot privacy and implementation boundary", () => {
   });
 
   it("contains no clinical age cutoffs or guideline interval constants in UI code", () => {
-    const source = `${mainSource}\n${draftSource}`;
+    const source = `${mainSource}\n${draftSource}\n${reportSource}`;
     expect(source).not.toMatch(/age\s*[<>]=?\s*(40|50|74|75)/i);
     expect(source).not.toMatch(/(12|24)\s*months?/i);
     expect(source).not.toMatch(/biennial|annual mammograph/i);
