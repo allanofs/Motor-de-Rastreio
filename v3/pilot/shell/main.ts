@@ -1,7 +1,10 @@
 import {
   MOTOR_MODULES,
   consumeMotorModuleOutcomeReceipt,
-  type MotorModuleSnapshot,
+  consumeMotorTabSessionShellReturn,
+  createMotorEphemeralSessionLedger,
+  encodeMotorTabSessionModuleHandoff,
+  upsertMotorEphemeralSessionSnapshot,
 } from "../../src/product/shell";
 import {
   createMotorSharedSessionContext,
@@ -9,10 +12,7 @@ import {
   motorIsoDate,
   unknownMotorSharedFact,
 } from "../../src/product/shell/sessionContext";
-import {
-  encodeMotorNavigationHandoff,
-  type MotorModuleId,
-} from "../../src/product/shell/navigationHandoff";
+import type { MotorModuleId } from "../../src/product/shell/navigationHandoff";
 
 const routes: Record<(typeof MOTOR_MODULES)[number]["id"], string> = {
   ccr: "../ccr/index.html",
@@ -23,8 +23,12 @@ const icons: Record<(typeof MOTOR_MODULES)[number]["id"], string> = {
   mama: "MA",
 };
 
-const returnedSnapshot: MotorModuleSnapshot<MotorModuleId> | undefined =
-  consumeMotorModuleOutcomeReceipt(window);
+let sessionLedger = consumeMotorTabSessionShellReturn(window) ?? createMotorEphemeralSessionLedger();
+const legacyReturnedSnapshot = consumeMotorModuleOutcomeReceipt(window);
+if (legacyReturnedSnapshot !== undefined) {
+  sessionLedger = upsertMotorEphemeralSessionSnapshot(sessionLedger, legacyReturnedSnapshot);
+}
+
 let pendingModule: MotorModuleId | undefined;
 let pendingHref: string | undefined;
 let evaluationDateEdited = false;
@@ -98,7 +102,7 @@ function buildSharedContextDialog(): HTMLDialogElement {
 
   const privacy = document.createElement("p");
   privacy.className = "privacy-copy";
-  privacy.textContent = "Uso único nesta navegação: os fatos não entram no endereço, não são salvos no navegador e são apagados ao entrar no módulo.";
+  privacy.textContent = "Uso apenas nesta jornada da aba: nada entra no endereço ou em armazenamento durável. O canal de navegação é consumido uma única vez ao entrar no módulo.";
 
   const actions = document.createElement("div");
   actions.className = "dialog-actions";
@@ -154,9 +158,9 @@ function cardFor(module: (typeof MOTOR_MODULES)[number]): HTMLElement {
   description.textContent = module.description;
   const meta = document.createElement("div");
   meta.className = "module-meta";
-  meta.textContent = "Módulo clínico independente · apenas fatos globais podem acompanhar esta navegação";
+  meta.textContent = "Módulo clínico independente · apenas fatos globais e resumos rasos desta sessão acompanham a navegação";
 
-  const returned = returnedSnapshot?.moduleId === module.id ? returnedSnapshot : undefined;
+  const returned = sessionLedger.snapshots[module.id];
   const status = document.createElement("div");
   status.className = "module-meta";
   status.dataset.returnedModuleStatus = module.id;
@@ -219,7 +223,7 @@ element<HTMLFormElement>("shared-context-form").addEventListener("submit", event
       ? unknownMotorSharedFact("not_asked")
       : knownMotorSharedFact(motorIsoDate(birthRaw), "user_supplied" as const);
     const context = createMotorSharedSessionContext({ evaluationDate: evaluation, birthDate: birth });
-    window.name = encodeMotorNavigationHandoff(pendingModule, context);
+    window.name = encodeMotorTabSessionModuleHandoff(pendingModule, context, sessionLedger);
   } catch {
     element<HTMLElement>("shared-context-error").textContent = "Revise as datas antes de continuar.";
     return;
