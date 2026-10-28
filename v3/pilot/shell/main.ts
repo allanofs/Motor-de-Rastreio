@@ -80,7 +80,7 @@ function buildSharedContextDialog(): HTMLDialogElement {
   const birth = document.createElement("input");
   birth.id = "shared-birth-date";
   birth.type = "date";
-  birth.autocomplete = "bday";
+  birth.setAttribute("autocomplete", "bday");
   birthLabel.append(birth);
   fields.append(evaluationLabel, birthLabel);
 
