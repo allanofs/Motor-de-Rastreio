@@ -6,11 +6,16 @@ import {
 } from "../../src/product/mama";
 import {
   consumeMotorNavigationHandoff,
-  encodeMotorModuleOutcomeReceipt,
+  consumeMotorTabSessionModuleHandoff,
+  createMotorEphemeralSessionLedger,
+  encodeMotorTabSessionShellReturn,
 } from "../../src/product/shell";
 import { collectMamaPilotDraft } from "./pilotDraft";
 
-const context = consumeMotorNavigationHandoff(window, "mama");
+const tabSession = consumeMotorTabSessionModuleHandoff(window, "mama");
+const sessionLedger = tabSession?.ledger ?? createMotorEphemeralSessionLedger();
+const context = tabSession?.context ?? consumeMotorNavigationHandoff(window, "mama");
+
 if (context !== undefined) {
   const projection = projectSharedSessionContextToMama(context);
   const asOf = document.getElementById("as-of");
@@ -39,7 +44,7 @@ if (resultRegion instanceof HTMLElement) {
     const evaluated = evaluateMamaProductDraft(collectMamaPilotDraft());
     if (!evaluated.ok) return;
     const snapshot = toMamaMotorModuleSnapshot(presentMamaProduct(evaluated));
-    window.name = encodeMotorModuleOutcomeReceipt(snapshot);
+    window.name = encodeMotorTabSessionShellReturn(sessionLedger, snapshot);
     window.location.assign("../shell/index.html");
   });
   returnBox.append(button);
