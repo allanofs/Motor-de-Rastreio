@@ -1,5 +1,4 @@
 import {
-  MAMA_IDS,
   mamaCandidateRuleset,
   type MamaDecisionContext,
 } from "../../clinical/mama";
