@@ -1,6 +1,6 @@
 # A5 — Shallow module outcome receipt contract
 
-Status: **Draft / architecture gate**
+Status: **GREEN / FROZEN / Draft PR**
 
 ## Objective
 
@@ -76,22 +76,26 @@ Receiving a module snapshot does not authorize the Shell to infer:
 
 A future Shell UI may display module cards side by side, but each card must remain an independent domain projection.
 
-## Gate
+## Final gate
 
-A5 is green only if:
+The A5 implementation gate passed at HEAD `e10dcbb6dd18777b18c25266516666f7b720dc50` before this documentation-only freeze commit:
 
-- all inherited A0-A4 tests/builds remain green;
-- valid shallow snapshots round-trip through the receipt contract;
-- the carrier is single-use for MOTOR outcome envelopes;
-- unrelated `window.name` values are preserved;
-- malformed envelopes fail closed;
-- unknown module IDs and boundary codes are rejected;
-- inconsistent pending-input metadata is rejected;
-- runtime extra properties are stripped during encoding;
-- unexpected/deep fields are rejected during consumption;
-- no patient facts are introduced into URLs or durable storage;
-- V2 remains byte-for-byte preserved.
+- inherited `npm run check`: green;
+- A5 receipt tests: green as part of the full suite;
+- V2 byte-for-byte preservation: green;
+- Shell TypeScript typecheck: green;
+- Shell Vite build: green;
+- real-Chrome DOM/navigation smoke: green;
+- desktop screenshot capture: green;
+- mobile screenshot capture: green;
+- Shell evidence upload: green.
+
+The contract specifically gates shallow snapshot round-trip, single-use MOTOR carrier semantics, malformed-envelope safe failure, module/boundary validation, pending-input metadata consistency, runtime extra-field stripping, deep-field rejection, and URL/storage boundaries.
+
+## Freeze rule
+
+A5 is frozen as a transport contract only. Later phases must not broaden the returned snapshot, add raw patient facts, persistence, cross-module clinical inference or a global preventive status without a new explicit contract and gate.
 
 ## Next phase after A5
 
-Only after this contract is green may a later phase wire an explicit module -> Shell return action and render the returned snapshot on the corresponding module card. That integration must remain ephemeral and module-local in meaning; persistence, a cross-module session ledger and global preventive aggregation remain separate decisions requiring their own contracts.
+A6 may wire an explicit module -> Shell return action and render the returned snapshot on the corresponding module card. That integration must remain ephemeral and module-local in meaning. A cross-module session ledger, persistence and global preventive aggregation remain separate decisions and are not authorized by A5.
