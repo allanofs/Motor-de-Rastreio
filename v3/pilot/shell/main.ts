@@ -1,10 +1,12 @@
 import {
   MOTOR_MODULES,
   consumeMotorModuleOutcomeReceipt,
+  consumeMotorTabJourneyShellReturn,
   consumeMotorTabSessionShellReturn,
   createMotorEphemeralSessionLedger,
   encodeMotorTabSessionModuleHandoff,
   upsertMotorEphemeralSessionSnapshot,
+  type MotorSharedSessionContext,
 } from "../../src/product/shell";
 import {
   createMotorSharedSessionContext,
@@ -23,7 +25,12 @@ const icons: Record<(typeof MOTOR_MODULES)[number]["id"], string> = {
   mama: "MA",
 };
 
-let sessionLedger = consumeMotorTabSessionShellReturn(window) ?? createMotorEphemeralSessionLedger();
+const journeyReturn = consumeMotorTabJourneyShellReturn(window);
+let sessionContext: MotorSharedSessionContext | undefined = journeyReturn?.context;
+let sessionLedger =
+  journeyReturn?.ledger ??
+  consumeMotorTabSessionShellReturn(window) ??
+  createMotorEphemeralSessionLedger();
 const legacyReturnedSnapshot = consumeMotorModuleOutcomeReceipt(window);
 if (legacyReturnedSnapshot !== undefined) {
   sessionLedger = upsertMotorEphemeralSessionSnapshot(sessionLedger, legacyReturnedSnapshot);
@@ -32,6 +39,7 @@ if (legacyReturnedSnapshot !== undefined) {
 let pendingModule: MotorModuleId | undefined;
 let pendingHref: string | undefined;
 let evaluationDateEdited = false;
+let birthDateEdited = false;
 
 function localIsoDate(date = new Date()): string {
   const year = date.getFullYear();
@@ -68,6 +76,7 @@ function buildSharedContextDialog(): HTMLDialogElement {
   title.append(moduleName);
 
   const copy = document.createElement("p");
+  copy.id = "shared-context-copy";
   copy.className = "dialog-copy";
   copy.textContent = "Estes fatos globais podem preencher o início da entrevista. A idade é calculada dentro do módulo, nunca pela home.";
 
@@ -102,7 +111,7 @@ function buildSharedContextDialog(): HTMLDialogElement {
 
   const privacy = document.createElement("p");
   privacy.className = "privacy-copy";
-  privacy.textContent = "Uso apenas nesta jornada da aba: nada entra no endereço ou em armazenamento durável. O canal de navegação é consumido uma única vez ao entrar no módulo.";
+  privacy.textContent = "Uso apenas nesta jornada da aba: nada entra no endereço ou em armazenamento durável. O contexto pode ser reutilizado entre módulos e continua editável antes de cada navegação.";
 
   const actions = document.createElement("div");
   actions.className = "dialog-actions";
@@ -126,14 +135,33 @@ function buildSharedContextDialog(): HTMLDialogElement {
 function openSharedContextDialog(moduleId: MotorModuleId, href: string): void {
   pendingModule = moduleId;
   pendingHref = href;
+  evaluationDateEdited = false;
+  birthDateEdited = false;
+
   const dialog = element<HTMLDialogElement>("shared-context-dialog");
   element<HTMLElement>("shared-context-module").textContent =
     MOTOR_MODULES.find(module => module.id === moduleId)?.label ?? moduleId;
   const evaluation = element<HTMLInputElement>("shared-evaluation-date");
-  if (evaluation.value === "") evaluation.value = localIsoDate();
+  const birth = element<HTMLInputElement>("shared-birth-date");
+
+  if (sessionContext?.evaluationDate.status === "known") {
+    evaluation.value = sessionContext.evaluationDate.value;
+  } else if (sessionContext !== undefined) {
+    evaluation.value = "";
+  } else {
+    evaluation.value = localIsoDate();
+  }
+  birth.value = sessionContext?.birthDate.status === "known"
+    ? sessionContext.birthDate.value
+    : "";
+
+  element<HTMLElement>("shared-context-copy").textContent = sessionContext === undefined
+    ? "Estes fatos globais podem preencher o início da entrevista. A idade é calculada dentro do módulo, nunca pela home."
+    : "Contexto já informado nesta sessão. Revise ou corrija antes de continuar; a idade será recalculada dentro do módulo.";
+  dialog.dataset.reusedContext = String(sessionContext !== undefined);
   element<HTMLElement>("shared-context-error").textContent = "";
   dialog.showModal();
-  element<HTMLInputElement>("shared-birth-date").focus();
+  birth.focus();
 }
 
 function cardFor(module: (typeof MOTOR_MODULES)[number]): HTMLElement {
@@ -199,8 +227,9 @@ const grid = element<HTMLDivElement>("module-grid");
 grid.replaceChildren(...MOTOR_MODULES.map(cardFor));
 
 const evaluationDate = element<HTMLInputElement>("shared-evaluation-date");
-evaluationDate.value = localIsoDate();
 evaluationDate.addEventListener("input", () => { evaluationDateEdited = true; });
+const birthDate = element<HTMLInputElement>("shared-birth-date");
+birthDate.addEventListener("input", () => { birthDateEdited = true; });
 
 element<HTMLButtonElement>("shared-context-cancel").addEventListener("click", () => {
   pendingModule = undefined;
@@ -213,16 +242,29 @@ element<HTMLFormElement>("shared-context-form").addEventListener("submit", event
   if (pendingModule === undefined || pendingHref === undefined) return;
 
   const evaluationRaw = evaluationDate.value;
-  const birthRaw = element<HTMLInputElement>("shared-birth-date").value;
+  const birthRaw = birthDate.value;
   try {
-    const evaluation = knownMotorSharedFact(
-      motorIsoDate(evaluationRaw),
-      evaluationDateEdited ? "user_supplied" as const : "system_clock" as const,
-    );
+    const evaluationIso = motorIsoDate(evaluationRaw);
+    const previousEvaluation = sessionContext?.evaluationDate;
+    const evaluationSource =
+      previousEvaluation?.status === "known" && previousEvaluation.value === evaluationIso
+        ? previousEvaluation.source
+        : sessionContext === undefined && !evaluationDateEdited
+          ? "system_clock" as const
+          : "user_supplied" as const;
+    const evaluation = knownMotorSharedFact(evaluationIso, evaluationSource);
+
+    const previousBirth = sessionContext?.birthDate;
     const birth = birthRaw === ""
-      ? unknownMotorSharedFact("not_asked")
-      : knownMotorSharedFact(motorIsoDate(birthRaw), "user_supplied" as const);
+      ? !birthDateEdited && previousBirth?.status === "unknown"
+        ? previousBirth
+        : unknownMotorSharedFact(birthDateEdited ? "not_available" : "not_asked")
+      : previousBirth?.status === "known" && previousBirth.value === birthRaw
+        ? previousBirth
+        : knownMotorSharedFact(motorIsoDate(birthRaw), "user_supplied" as const);
+
     const context = createMotorSharedSessionContext({ evaluationDate: evaluation, birthDate: birth });
+    sessionContext = context;
     window.name = encodeMotorTabSessionModuleHandoff(pendingModule, context, sessionLedger);
   } catch {
     element<HTMLElement>("shared-context-error").textContent = "Revise as datas antes de continuar.";

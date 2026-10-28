@@ -8,6 +8,7 @@ import {
   consumeMotorNavigationHandoff,
   consumeMotorTabSessionModuleHandoff,
   createMotorEphemeralSessionLedger,
+  encodeMotorTabJourneyShellReturn,
   encodeMotorTabSessionShellReturn,
 } from "../../src/product/shell";
 import { collectMamaPilotDraft } from "./pilotDraft";
@@ -44,7 +45,9 @@ if (resultRegion instanceof HTMLElement) {
     const evaluated = evaluateMamaProductDraft(collectMamaPilotDraft());
     if (!evaluated.ok) return;
     const snapshot = toMamaMotorModuleSnapshot(presentMamaProduct(evaluated));
-    window.name = encodeMotorTabSessionShellReturn(sessionLedger, snapshot);
+    window.name = context === undefined
+      ? encodeMotorTabSessionShellReturn(sessionLedger, snapshot)
+      : encodeMotorTabJourneyShellReturn("mama", context, sessionLedger, snapshot);
     window.location.assign("../shell/index.html");
   });
   returnBox.append(button);
