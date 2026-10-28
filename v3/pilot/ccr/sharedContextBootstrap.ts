@@ -1,5 +1,15 @@
-import { projectSharedSessionContextToCcr } from "../../src/product/ccr";
-import { consumeMotorNavigationHandoff } from "../../src/product/shell/navigationHandoff";
+import {
+  evaluateCcrProductDraft,
+  presentCcrProduct,
+  projectSharedSessionContextToCcr,
+  toCcrMotorModuleSnapshot,
+} from "../../src/product/ccr";
+import {
+  consumeMotorNavigationHandoff,
+  encodeMotorModuleOutcomeReceipt,
+} from "../../src/product/shell";
+import { collectCcrPilotDraft } from "./pilotDraft";
+import { pilotExams } from "./pilotExamState";
 
 const context = consumeMotorNavigationHandoff(window, "ccr");
 if (context !== undefined) {
@@ -15,4 +25,24 @@ if (context !== undefined) {
     age.value = String(projection.ageYears.value);
     age.dataset.sharedSources = projection.ageYears.sources.join(",");
   }
+}
+
+const resultState = document.getElementById("result-state");
+if (resultState instanceof HTMLElement) {
+  const returnBox = document.createElement("div");
+  returnBox.className = "inline-actions";
+  returnBox.dataset.motorReturn = "ccr";
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "secondary";
+  button.textContent = "Voltar ao MOTOR";
+  button.addEventListener("click", () => {
+    const evaluated = evaluateCcrProductDraft(collectCcrPilotDraft(pilotExams));
+    if (!evaluated.ok) return;
+    const snapshot = toCcrMotorModuleSnapshot(presentCcrProduct(evaluated));
+    window.name = encodeMotorModuleOutcomeReceipt(snapshot);
+    window.location.assign("../shell/index.html");
+  });
+  returnBox.append(button);
+  resultState.append(returnBox);
 }
