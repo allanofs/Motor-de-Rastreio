@@ -1,0 +1,141 @@
+/* A13 usability pass: visual convergence with the Mama pilot.
+   Presentation only; clinical rules, collection order and DOM contracts stay unchanged. */
+
+:root {
+  --a13-surface: #ffffff;
+  --a13-surface-soft: #f8fafc;
+  --a13-border: #d7dee8;
+  --a13-border-strong: #aab7c4;
+  --a13-text: #17202a;
+  --a13-text-soft: #5b6875;
+  --a13-accent: #7b325f;
+  --a13-accent-soft: #f6eaf1;
+  --a13-success-soft: #edf8f1;
+  --a13-shadow: 0 10px 32px rgba(31, 45, 61, .08);
+}
+
+body { background: #f5f7fa; color: var(--a13-text); line-height: 1.5; }
+.release-banner {
+  background: #fff8e7;
+  color: #725a1c;
+  border-color: #eadcae;
+  font-size: 11px;
+}
+
+.app-shell { max-width: 1180px; padding: 2rem 1rem 4rem; }
+.hero { margin-bottom: 1.5rem; align-items: flex-start; }
+.hero .eyebrow { color: var(--a13-accent); }
+.hero h1 { font-size: clamp(2rem, 5vw, 3.2rem); line-height: 1; letter-spacing: -.025em; }
+.hero-copy { color: var(--a13-text-soft); max-width: 720px; margin: .5rem 0 0; }
+
+.workspace {
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
+  gap: 1.5rem;
+}
+.panel {
+  background: var(--a13-surface);
+  border-color: var(--a13-border);
+  border-radius: 18px;
+  box-shadow: var(--a13-shadow);
+}
+
+/* Mama-like step cards rather than one large undifferentiated form surface. */
+.form-panel {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.form-section,
+.step-current,
+.step-complete {
+  margin: 0 0 1rem;
+  padding: 1.25rem;
+  border: 1px solid var(--a13-border);
+  border-radius: 18px;
+  background: var(--a13-surface);
+  box-shadow: var(--a13-shadow);
+}
+.step-current { border-color: var(--a13-border-strong); }
+.step-complete { padding: 1rem 1.25rem; }
+.form-section:last-of-type { border-bottom: 1px solid var(--a13-border); }
+.requested-section { margin-inline: 0; padding-inline: 1.25rem; background: var(--a13-surface); }
+
+.section-heading { gap: .85rem; align-items: center; margin-bottom: 1rem; }
+.section-heading h2 { font-size: 1.25rem; color: var(--a13-text); }
+.section-heading p { color: var(--a13-text-soft); font-size: .86rem; }
+.step {
+  width: 2.2rem;
+  height: 2.2rem;
+  flex-basis: 2.2rem;
+  background: var(--a13-accent-soft);
+  color: var(--a13-accent);
+  font-size: .82rem;
+}
+.step-complete .step { background: var(--a13-success-soft); color: #345c46; }
+.step-summary { color: var(--a13-text-soft); margin-left: 3rem; }
+
+label { color: #35404a; font-size: .9rem; }
+input, select {
+  border-color: var(--a13-border-strong);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--a13-text);
+}
+input:focus, select:focus,
+input:focus-visible, select:focus-visible {
+  border-color: var(--a13-accent);
+  outline: 3px solid rgba(123, 50, 95, .22);
+  box-shadow: none;
+}
+.conditional-box { background: var(--a13-surface-soft); border-color: var(--a13-border); border-radius: 14px; }
+
+.choice-group legend { color: #35404a; font-size: .9rem; font-weight: 750; }
+.choice-options { gap: .65rem; }
+.choice-options label {
+  border-color: var(--a13-border);
+  border-radius: 999px;
+  padding: .55rem .75rem;
+  background: #fff;
+  font-weight: 600;
+}
+.choice-options input { accent-color: var(--a13-accent); }
+.choice-options label:has(input:checked) {
+  border: 1px solid var(--a13-accent);
+  padding: .55rem .75rem;
+  background: var(--a13-accent-soft);
+  color: var(--a13-text);
+}
+.choice-options label:focus-within { outline: 3px solid rgba(123, 50, 95, .28); outline-offset: 2px; }
+
+button.primary { background: var(--a13-accent); color: #fff; }
+button.primary:hover { background: #63254c; }
+button.secondary, .edit-step { background: #fff; color: var(--a13-accent); border: 1px solid var(--a13-border); }
+button.secondary:hover, .edit-step:hover { background: var(--a13-accent-soft); }
+button:focus-visible, summary:focus-visible { outline: 3px solid rgba(123, 50, 95, .28); outline-offset: 2px; }
+
+.result-panel {
+  top: 1rem;
+  border-color: var(--a13-border);
+  border-radius: 18px;
+  box-shadow: var(--a13-shadow);
+}
+.empty-icon { background: var(--a13-accent-soft); color: var(--a13-accent); }
+.empty-kicker { color: var(--a13-accent); }
+.journey-summary li { background: var(--a13-surface-soft); color: var(--a13-text-soft); }
+.followup-request { background: var(--a13-accent-soft); border-color: #d9b8cc; color: #63304f; }
+.followup-request strong { color: var(--a13-accent); }
+.primary-guidance { background: var(--a13-surface-soft); border-left-color: var(--a13-accent); }
+.result-meta, .action-box { background: var(--a13-surface-soft); }
+
+@media (max-width: 980px) {
+  .workspace { grid-template-columns: 1fr; }
+  .result-panel { position: static; }
+}
+
+@media (max-width: 640px) {
+  .app-shell { padding-top: 1.25rem; }
+  .hero h1 { font-size: 2rem; }
+  .form-section, .step-current, .step-complete { padding: 1rem; }
+  .choice-options label { border-radius: 10px; }
+}
