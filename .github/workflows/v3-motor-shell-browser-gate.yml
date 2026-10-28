@@ -1,0 +1,63 @@
+name: V3 MOTOR Shell browser gate
+on:
+  pull_request:
+    paths:
+      - 'v3/pilot/shell/**'
+      - 'v3/src/product/shell/**'
+      - 'v3/src/product/ccr/shellAdapter.ts'
+      - 'v3/src/product/mama/shellAdapter.ts'
+      - 'v3/vite.shell-pilot.config.ts'
+      - 'v3/tsconfig.shell-pilot.json'
+      - 'v3/tests/shell/**'
+      - '.github/workflows/v3-motor-shell-browser-gate.yml'
+permissions:
+  contents: read
+jobs:
+  chromium:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: v3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: v3/package-lock.json
+      - run: npm ci
+      - name: Typecheck Shell pilot
+        run: npx tsc --noEmit -p tsconfig.shell-pilot.json
+      - name: Build Shell pilot
+        run: npx vite build --config vite.shell-pilot.config.ts
+      - name: Confirm Chrome
+        run: google-chrome --version
+      - name: Start local Shell preview
+        run: |
+          nohup npx vite preview --config vite.shell-pilot.config.ts --host 127.0.0.1 --port 4175 > /tmp/motor-shell-preview.log 2>&1 &
+          for attempt in $(seq 1 40); do
+            if curl --fail --silent http://127.0.0.1:4175/ >/dev/null; then exit 0; fi
+            sleep 0.25
+          done
+          cat /tmp/motor-shell-preview.log
+          exit 1
+      - name: Real Chrome DOM/navigation smoke
+        run: |
+          mkdir -p shell-browser-artifacts
+          google-chrome --headless=new --no-sandbox --disable-dev-shm-usage --disable-background-networking --dump-dom http://127.0.0.1:4175/ > shell-browser-artifacts/dom.html
+          grep -q 'Câncer colorretal' shell-browser-artifacts/dom.html
+          grep -q 'Câncer de mama' shell-browser-artifacts/dom.html
+          grep -q '../ccr/index.html' shell-browser-artifacts/dom.html
+          grep -q '../mama/index.html' shell-browser-artifacts/dom.html
+      - name: Capture desktop screenshot
+        run: google-chrome --headless=new --no-sandbox --disable-dev-shm-usage --disable-background-networking --window-size=1440,1000 --hide-scrollbars --screenshot=shell-browser-artifacts/motor-shell-desktop.png http://127.0.0.1:4175/
+      - name: Capture mobile screenshot
+        run: google-chrome --headless=new --no-sandbox --disable-dev-shm-usage --disable-background-networking --window-size=390,844 --hide-scrollbars --screenshot=shell-browser-artifacts/motor-shell-mobile.png http://127.0.0.1:4175/
+      - name: Upload Shell evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: motor-shell-a1-evidence
+          path: v3/shell-browser-artifacts/
+          if-no-files-found: warn
+          retention-days: 14
