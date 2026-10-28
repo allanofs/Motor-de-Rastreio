@@ -92,7 +92,12 @@ export function motorIsoDate(value: string): MotorIsoDate {
     31,
   ] as const;
 
-  if (month < 1 || month > 12 || day < 1 || day > daysInMonth[month - 1]) {
+  if (month < 1 || month > 12) {
+    throw new Error("Expected a valid calendar date");
+  }
+
+  const maximumDay = daysInMonth[month - 1];
+  if (maximumDay === undefined || day < 1 || day > maximumDay) {
     throw new Error("Expected a valid calendar date");
   }
 
